@@ -1,0 +1,14 @@
+import { describe, expect, it } from 'vitest'
+import handler, { selectRelease } from '../api/release'
+const release = (date: string, assets: unknown[], extra = {}) => ({ tag_name: 'v1', published_at: date, html_url: 'https://github.com/jensen-org/jensen-release/releases/v1', assets, ...extra })
+const asset = (name: string, extra = {}) => ({ name, size: 100, browser_download_url: `https://github.com/jensen-org/jensen-release/releases/download/${name}`, ...extra })
+describe('release selection', () => {
+  it('chooses newest published non-draft and prefers arm64', () => { const result = selectRelease([release('2020-01-01', [asset('old-aarch64.dmg')]), release('2024-01-01', [asset('new-aarch64.dmg'), asset('new-arm64.dmg', { digest: 'sha256:x' })]), release('2025-01-01', [asset('draft-arm64.dmg')], { draft: true })]); expect(result).toMatchObject({ status: 'available', assetName: 'new-arm64.dmg', digest: 'sha256:x' }) })
+  it('excludes wrong, missing, and malformed assets', () => { expect(selectRelease([release('2024-01-01', [asset('x86_64.dmg')])]).status).toBe('unavailable'); expect(selectRelease([]).status).toBe('unavailable'); expect(selectRelease({}).status).toBe('error') })
+  it('rejects upstream fields that are not normalized', () => { expect(selectRelease([release('bad', [asset('x-arm64.dmg')])]).status).toBe('unavailable'); expect(selectRelease([release('2024-01-01', [asset('x-arm64.dmg', { size: 0 })])]).status).toBe('unavailable') })
+})
+describe('release handler', () => {
+  const response = () => { const result: Record<string, unknown> = {}; const out = { status: (code: number) => { result.code = code; return out }, json: (body: unknown) => { result.body = body; return out }, setHeader: (name: string, value: string) => { result[name] = value; return out } }; return { result, out } }
+  it('handles method and upstream failures with cache headers', async () => { const method = response(); await handler({ method: 'POST' }, method.out); expect(method.result.code).toBe(405); const upstream = response(); globalThis.fetch = (async () => ({ ok: false, status: 429 })) as unknown as typeof fetch; await handler({ method: 'GET' }, upstream.out); expect(upstream.result['Cache-Control']).toContain('stale-while-revalidate'); expect((upstream.result.body as { code: string }).code).toBe('RATE_LIMITED') })
+  it('handles malformed JSON and rejected fetch', async () => { const malformed = response(); globalThis.fetch = (async () => ({ ok: true, json: async () => ({ nope: true }) })) as unknown as typeof fetch; await handler({ method: 'GET' }, malformed.out); expect((malformed.result.body as { code: string }).code).toBe('MALFORMED_RESPONSE'); const rejected = response(); globalThis.fetch = (async () => { throw new Error('network') }) as unknown as typeof fetch; await handler({ method: 'GET' }, rejected.out); expect((rejected.result.body as { code: string }).code).toBe('UPSTREAM_UNAVAILABLE') })
+})
