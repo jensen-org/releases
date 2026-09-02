@@ -119,6 +119,13 @@ h1, p { margin: 0; }
   white-space: nowrap;
 }
 
+.shelf-card .p-button:disabled {
+  background: transparent;
+  border-color: var(--edge);
+  color: var(--haze);
+  opacity: 1;
+}
+
 .shelf-card .p-button .glyph { width: 12px; height: 16px; fill: currentColor; flex: none; }
 
 .shelf-facts {
