@@ -45,13 +45,15 @@ describe('filament mesh', () => {
       const phase = mesh.vertices[offset + 3]
       const reach = mesh.vertices[offset + 4]
       const sway = mesh.vertices[offset + 5]
+      const curve = mesh.vertices[offset + 6]
       phases.add(phase)
       expect(phase).toBeGreaterThanOrEqual(0)
       expect(phase).toBeLessThan(1)
-      expect(reach).toBeGreaterThan(0.6)
-      expect(reach).toBeLessThan(1.3)
+      expect(reach).toBeGreaterThan(0.89)
+      expect(reach).toBeLessThan(1.61)
       expect(sway).toBeGreaterThan(0.5)
       expect(sway).toBeLessThan(1.51)
+      expect(Math.abs(curve)).toBeLessThan(0.91)
     }
     expect(phases.size).toBe(FILAMENTS)
   })

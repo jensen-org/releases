@@ -12,16 +12,16 @@ const props = defineProps<{
 }>()
 
 const OUTER_RATIO = 0.99
-const REVEAL_RATIO = 0.34
-const INK_PEAK = 0.42
-const SWAY = 46
+const REVEAL_RATIO = 0.46
+const INK_PEAK = 0.48
+const SWAY = 55
 const RENDER_SCALE = 1
 
 const VERTEX_SOURCE = `#version 300 es
 precision highp float;
 
 in vec4 a_seed;
-in vec2 a_shape;
+in vec3 a_shape;
 
 uniform vec2 uResolution;
 uniform vec2 uCore;
@@ -39,16 +39,16 @@ ${FLOW_GLSL}
 const float FLOW_SCALE = 2.4;
 const float FLOW_PERIOD = 7.0;
 
-vec2 filamentPoint(float angle, float t, float reach, float sway, float phase) {
-  float splay = (phase - 0.5) * 0.62;
+vec2 filamentPoint(float angle, float t, float reach, float sway, float phase, float curve) {
   vec2 anchorDir = vec2(cos(angle), sin(angle));
-  vec2 travelDir = vec2(cos(angle + splay), sin(angle + splay));
+  vec2 tangentDir = vec2(-anchorDir.y, anchorDir.x);
   float eased = t * t * (3.0 - 2.0 * t);
-  vec2 base = uCore + anchorDir * uCoreRadius + travelDir * (uSpan * reach * eased);
+  float span = uSpan * reach;
+  vec2 base = uCore + anchorDir * (uCoreRadius + span * eased) + tangentDir * (curve * span * eased * eased);
   vec2 field = (base - uCore) / max(uSpan, 1.0);
   vec2 shared = curl2(vec3(field * FLOW_SCALE, uTime / FLOW_PERIOD));
   vec2 own = curl2(vec3(field * 2.2 + vec2(phase * 137.0, phase * 211.0), uTime / 9.0));
-  vec2 drift = shared * 0.35 + own * 0.65;
+  vec2 drift = shared * 0.28 + own * 0.72;
   return base + drift * uSway * sway * pow(t, 1.8);
 }
 
@@ -58,15 +58,16 @@ void main() {
   float side = a_seed.z;
   float reach = a_shape.x;
   float sway = a_shape.y;
+  float curve = a_shape.z;
 
   float phase = a_seed.w;
-  vec2 here = filamentPoint(angle, t, reach, sway, phase);
-  vec2 ahead = filamentPoint(angle, min(t + 0.015, 1.0), reach, sway, phase);
-  vec2 behind = filamentPoint(angle, max(t - 0.015, 0.0), reach, sway, phase);
+  vec2 here = filamentPoint(angle, t, reach, sway, phase, curve);
+  vec2 ahead = filamentPoint(angle, min(t + 0.015, 1.0), reach, sway, phase, curve);
+  vec2 behind = filamentPoint(angle, max(t - 0.015, 0.0), reach, sway, phase, curve);
   vec2 tangent = normalize(ahead - behind + vec2(1e-5));
   vec2 normal = vec2(-tangent.y, tangent.x);
 
-  float wanted = mix(1.5, 0.7, t);
+  float wanted = mix(0.85, 0.3, t);
   float drawn = wanted + 2.0;
   vec2 pos = here + normal * side * drawn * 0.5;
 
@@ -130,16 +131,16 @@ void main() {
 
   float row = floor(v_pos.y / 3.0);
   float tear = fract(sin(row * 12.9898 + floor(uTime * 11.0) * 3.7) * 43758.5453);
-  vec2 torn = vec2(v_pos.x + (tear - 0.5) * 2.6, v_pos.y);
+  vec2 torn = vec2(v_pos.x + (tear - 0.5) * 1.2, v_pos.y);
   float reveal = smoothstep(uReveal, 0.0, distance(torn, uPointer)) * uStrength;
 
-  float head = smoothstep(0.0, 0.05, v_t);
-  float tip = 1.0 - smoothstep(0.62, 1.0, v_t);
-  float travel = 1.0 - fract(uTime * 0.22 + v_phase);
-  float offset = (v_t - travel) / 0.055;
+  float head = smoothstep(0.0, 0.12, v_t);
+  float tip = 1.0 - smoothstep(0.55, 1.0, v_t);
+  float travel = 1.0 - fract(uTime * 0.16 + v_phase);
+  float offset = (v_t - travel) / 0.09;
   float pulse = exp(-offset * offset);
 
-  float alpha = coverage * head * tip * reveal * uInk * (1.0 + pulse * 1.8);
+  float alpha = coverage * head * tip * reveal * uInk * (1.0 + pulse * 1.5);
   alpha *= clearOf(v_pos, uMasthead) * clearOf(v_pos, uShelf);
   alpha *= 1.0 + (bayer8(gl_FragCoord.xy) - 0.5) * 0.55;
   alpha = clamp(alpha, 0.0, 1.0);
@@ -154,6 +155,7 @@ let tracker: PointerTracker | null = null
 let uniforms: Record<string, WebGLUniformLocation | null> = {}
 let observer: ResizeObserver | undefined
 let onResize: (() => void) | undefined
+let onSettled: (() => void) | undefined
 let indexCount = 0
 let frame = 0
 let running = false
@@ -204,7 +206,7 @@ function setup(element: HTMLCanvasElement): WebGL2RenderingContext | null {
   context.enableVertexAttribArray(seed)
   context.vertexAttribPointer(seed, 4, context.FLOAT, false, stride, 0)
   context.enableVertexAttribArray(shape)
-  context.vertexAttribPointer(shape, 2, context.FLOAT, false, stride, 16)
+  context.vertexAttribPointer(shape, 3, context.FLOAT, false, stride, 16)
   context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, context.createBuffer())
   context.bufferData(context.ELEMENT_ARRAY_BUFFER, mesh.indices, context.STATIC_DRAW)
 
@@ -292,15 +294,24 @@ onMounted(() => {
   resize()
   tracker = createPointerTracker(wake)
   onResize = () => resize()
+  onSettled = () => resize()
   window.addEventListener('resize', onResize)
   observer = new ResizeObserver(() => resize())
-  for (const target of [props.core, props.masthead, props.shelf]) if (target) observer.observe(target)
+  for (const target of [props.core, props.masthead, props.shelf]) {
+    if (!target) continue
+    observer.observe(target)
+    target.addEventListener('animationend', onSettled)
+  }
 })
 
 watch(() => [props.core, props.masthead, props.shelf], () => {
   if (!gl) return
   resize()
-  for (const target of [props.core, props.masthead, props.shelf]) if (target) observer?.observe(target)
+  for (const target of [props.core, props.masthead, props.shelf]) {
+    if (!target) continue
+    observer?.observe(target)
+    if (onSettled) target.addEventListener('animationend', onSettled)
+  }
 })
 
 onUnmounted(() => {
@@ -308,6 +319,7 @@ onUnmounted(() => {
   if (frame) cancelAnimationFrame(frame)
   observer?.disconnect()
   tracker?.dispose()
+  if (onSettled) for (const target of [props.core, props.masthead, props.shelf]) target?.removeEventListener('animationend', onSettled)
   if (onResize) window.removeEventListener('resize', onResize)
 })
 </script>

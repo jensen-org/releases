@@ -1,8 +1,8 @@
 import { SPOKES } from './ring'
 
-export const FILAMENTS = 96
-export const SEGMENTS = 48
-export const FLOATS_PER_VERTEX = 6
+export const FILAMENTS = 74
+export const SEGMENTS = 52
+export const FLOATS_PER_VERTEX = 7
 
 export type FilamentMesh = {
   readonly vertices: Float32Array
@@ -35,8 +35,9 @@ export function buildFilamentMesh(): FilamentMesh {
   for (let filament = 0; filament < FILAMENTS; filament += 1) {
     const angle = anchorAngle(filament)
     const phase = unit(filament, 17)
-    const reach = 0.68 + unit(filament, 41) * 0.6
+    const reach = 0.9 + unit(filament, 41) * 0.7
     const sway = 0.55 + unit(filament, 73) * 0.95
+    const curve = (unit(filament, 137) - 0.5) * 1.8
     for (let segment = 0; segment < SEGMENTS; segment += 1) {
       const t = segment / (SEGMENTS - 1)
       for (const side of [-1, 1]) {
@@ -47,6 +48,7 @@ export function buildFilamentMesh(): FilamentMesh {
         vertices[offset + 3] = phase
         vertices[offset + 4] = reach
         vertices[offset + 5] = sway
+        vertices[offset + 6] = curve
         vertex += 1
       }
       if (segment === SEGMENTS - 1) continue
