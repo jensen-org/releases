@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { dotRadius, encodeMessage, generateGeometry, revealFactor, scanState, visibleDots, type Dot } from '../lib/ring'
+import { dotRadius, driftOffset, encodeMessage, generateGeometry, revealFactor, scanState, shimmer, visibleDots, type Dot } from '../lib/ring'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 let observer: IntersectionObserver | undefined
@@ -16,7 +16,7 @@ function draw(time = 0) {
   const context = element?.getContext('2d')
   if (!element || !context) return
   if (!startedAt) startedAt = time
-  const elapsed = time - startedAt
+  const elapsed = Math.max(0, time - startedAt)
   const width = element.clientWidth
   const height = element.clientHeight
   const ratio = window.devicePixelRatio || 1
@@ -32,9 +32,10 @@ function draw(time = 0) {
   context.fillStyle = '#0E0E0D'
   for (const dot of visibleDots(dots.value)) {
     const state = scanState(dot, elapsed, reduced)
-    context.globalAlpha = state.opacity * revealFactor(dot, elapsed, reduced)
+    const drift = driftOffset(dot, elapsed, side, reduced)
+    context.globalAlpha = state.opacity * revealFactor(dot, elapsed, reduced) * shimmer(dot, elapsed, reduced)
     context.beginPath()
-    context.arc(dot.x, dot.y, radius, 0, Math.PI * 2)
+    context.arc(dot.x + drift.dx, dot.y + drift.dy, radius, 0, Math.PI * 2)
     context.fill()
   }
   context.globalAlpha = 1

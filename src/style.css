@@ -1,3 +1,27 @@
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/poppins-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/poppins-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/poppins-600.woff2') format('woff2');
+}
+
 :root {
   --paper: #fbfbf9;
   --ink: #0e0e0d;
@@ -5,8 +29,8 @@
   --graphite: #56564f;
   --haze: #a8a8a0;
   --edge: #e4e4de;
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  font-family: var(--mono);
+  --sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--sans);
   color: var(--ink);
   background: var(--paper);
   color-scheme: light;
@@ -18,31 +42,43 @@
 
 body { margin: 0; min-width: 320px; background: var(--paper); }
 
-h1, p { margin: 0; }
+h1, h2, p { margin: 0; }
 
 .page {
   min-height: 100svh;
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: clamp(14px, 3vh, 30px);
-  padding: clamp(24px, 4vh, 40px) clamp(20px, 5vw, 60px) clamp(28px, 5vh, 48px);
+  padding: clamp(16px, 2.5vh, 24px) clamp(16px, 3vw, 32px) clamp(20px, 3.5vh, 32px);
 }
 
-.brand { display: flex; align-items: center; gap: 14px; justify-self: start; }
+.masthead { display: grid; gap: 14px; justify-self: start; }
+
+.brand { display: flex; align-items: center; gap: 11px; }
+
+.masthead-headline {
+  font-size: clamp(12px, 1.05vw, 15px);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.7;
+  color: var(--ink-lift);
+}
 
 .brand-tile {
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   background: var(--ink);
-  border-radius: 12px;
+  border-radius: 9px;
 }
 
 .brand-tile img { width: 68%; height: auto; display: block; filter: invert(1); }
 
 .brand-name {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.42em;
   text-transform: uppercase;
@@ -50,9 +86,9 @@ h1, p { margin: 0; }
   color: var(--ink);
 }
 
-.stage { display: flex; align-items: center; justify-content: center; width: 100%; }
+.stage { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; }
 
-.ring { width: min(58vmin, 600px); aspect-ratio: 1; }
+.ring { width: min(58vmin, 600px); aspect-ratio: 1; max-height: 100%; }
 
 .signal-ring { display: block; width: 100%; height: 100%; }
 
@@ -107,7 +143,7 @@ h1, p { margin: 0; }
 }
 
 .shelf-card .p-button {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.14em;

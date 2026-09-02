@@ -38,11 +38,14 @@ onMounted(async () => {
 
 <template>
   <div class="page">
-    <header class="brand">
-      <span class="brand-tile">
-        <img src="/jensen.png" alt="" width="295" height="295">
-      </span>
-      <span class="brand-name">Jensen</span>
+    <header class="masthead">
+      <div class="brand">
+        <span class="brand-tile">
+          <img src="/jensen.png" alt="" width="295" height="295">
+        </span>
+        <span class="brand-name">Jensen</span>
+      </div>
+      <h1 class="masthead-headline">The engineering ecosystem for humans and agents</h1>
     </header>
 
     <main class="stage">
@@ -55,7 +58,7 @@ onMounted(async () => {
       <Card class="shelf-card">
         <template #title>
           <div class="shelf-head">
-            <h1 class="shelf-title">Jensen for macOS</h1>
+            <h2 class="shelf-title">Jensen for macOS</h2>
             <span class="shelf-arch">Apple Silicon</span>
           </div>
         </template>

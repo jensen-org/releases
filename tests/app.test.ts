@@ -61,8 +61,12 @@ describe('release card', () => {
     expect(wrapper.find('.releases-link').attributes('href')).toContain('jensen-org/jensen-release/releases')
   })
 
-  it('keeps the page heading', () => {
+  it('leads with the product headline and keeps the card title beneath it', () => {
     globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
-    expect(mountApp().find('h1').text()).toBe('Jensen for macOS')
+    const wrapper = mountApp()
+    expect(wrapper.find('h1').text()).toBe('The engineering ecosystem for humans and agents')
+    expect(wrapper.find('.masthead-headline').element.tagName).toBe('H1')
+    expect(wrapper.find('.shelf-title').text()).toBe('Jensen for macOS')
+    expect(wrapper.find('.shelf-title').element.tagName).toBe('H2')
   })
 })

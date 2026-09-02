@@ -57,3 +57,39 @@ export function revealFactor(dot: Dot, elapsed: number, reducedMotion: boolean):
   const start = (dot.position / POSITIONS) * REVEAL_STAGGER
   return Math.min(1, Math.max(0, (elapsed / REVEAL_SPAN - start) / (1 - REVEAL_STAGGER)))
 }
+
+const DRIFT_AMPLITUDE = 0.8
+const DRIFT_TANGENT = 0.4
+const DRIFT_PRIMARY = 6500
+const DRIFT_SECONDARY = 10300
+const RADIAL_HARMONIC = 3
+const SWELL_HARMONIC = 5
+const TANGENT_HARMONIC = 2
+export type Drift = { dx: number; dy: number }
+
+export function driftOffset(dot: Dot, elapsed: number, side: number, reducedMotion: boolean): Drift {
+  if (reducedMotion) return { dx: 0, dy: 0 }
+  const angle = (dot.spoke / SPOKES) * Math.PI * 2 - Math.PI / 2
+  const primary = (elapsed / DRIFT_PRIMARY) * Math.PI * 2
+  const secondary = (elapsed / DRIFT_SECONDARY) * Math.PI * 2
+  const radial =
+    Math.sin(primary + angle * RADIAL_HARMONIC + dot.position * 0.35) * 0.6 +
+    Math.sin(secondary + angle * SWELL_HARMONIC + dot.position * 0.61) * 0.4
+  const tangential = Math.sin(secondary + angle * TANGENT_HARMONIC + dot.position * 0.23) * DRIFT_TANGENT
+  const amplitude = dotRadius(side) * DRIFT_AMPLITUDE
+  return {
+    dx: (Math.cos(angle) * radial - Math.sin(angle) * tangential) * amplitude,
+    dy: (Math.sin(angle) * radial + Math.cos(angle) * tangential) * amplitude,
+  }
+}
+
+const SHIMMER_PERIOD = 4300
+const SHIMMER_HARMONIC = 7
+const SHIMMER_DEPTH = 0.34
+
+export function shimmer(dot: Dot, elapsed: number, reducedMotion: boolean): number {
+  if (reducedMotion) return 1
+  const angle = (dot.spoke / SPOKES) * Math.PI * 2 - Math.PI / 2
+  const phase = angle * SHIMMER_HARMONIC + dot.position * 0.9
+  return 1 - SHIMMER_DEPTH * (0.5 + 0.5 * Math.sin((elapsed / SHIMMER_PERIOD) * Math.PI * 2 + phase))
+}
