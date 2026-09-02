@@ -23,11 +23,39 @@ exactly with nothing left over.
   group the bits into bytes. The first byte is `01010011`, a capital S.
 - `MESSAGE` must stay exactly `SPOKES * POSITIONS / 8` bytes long. Reword it freely, but keep that
   byte count or pick a new pair of lattice dimensions to match.
-- `dotRadius` sizes a dot against the lattice so neighbours never touch at any ring size, which
-  `tests/ring.test.ts` asserts as a minimum clearance.
+- `dotRadius` sizes a dot against the lattice so slots never touch at any ring size, which
+  `tests/ring.test.ts` asserts as a minimum clearance on the static geometry.
 
 `decodeMessage` in `src/lib/ring.ts` does this in code, and `tests/ring.test.ts` asserts the
 rendered geometry still decodes to the original sentence.
+
+## The motion
+
+The lattice is where each dot lives, not where it sits. `createRingSim` runs a particle
+simulation and the canvas only draws it, so the entrance and the idle loop are one continuous
+system rather than an animation that hands off to another.
+
+- The ring opens with a fade, staggered from the inner band outward over about a second, and
+  every dot is `#0E0E0D` at full opacity and full radius from then on. Nothing modulates a dot's
+  ink once the reveal is done, because at a two pixel radius a change in opacity or size is
+  indistinguishable from a change in colour. All of the steady state life comes from position.
+- Each particle is a spring anchored to its lattice slot, damped a little under critical so it
+  overshoots once. `OMEGA` sets the rate and `ZETA` the damping.
+- The anchor itself moves. Rings twist against each other by `SHEAR` and the whole lattice
+  breathes by `BREATH`, both driven by the same noise, so particles chase a target that is
+  already alive. Twist is a rigid rotation per ring and breath is a uniform scale, so neither
+  can bring two dots closer than the radial gap no matter how far they are pushed.
+- Ambient wander comes from the curl of a 3D gradient noise field, sampled at the particle's
+  home so the equation stays linear and the spring cannot amplify how far neighbours separate.
+  Curl is divergence free, which is why the flow swirls instead of collecting dots into sinks.
+- The whole lattice also turns slowly by `SPIN`, so the mark is never twice in the same place.
+- `noise3` is a hashed lattice, so the simulation is deterministic with no seeding. Vitest and
+  the browser produce identical frames at a fixed timestep.
+- Motion amplitude scales with `budget`, the air left between slots, not with the ring size.
+  `dotRadius` bottoms out at one pixel below a 300 pixel ring while the gaps keep shrinking, so
+  anything scaled to the ring would close them.
+- `tests/ring.test.ts` runs the simulation and measures the true closest pair through a spatial
+  hash. It also asserts the particles keep moving, so damping the ring to death fails the suite.
 
 ## Deployment
 

@@ -1,67 +1,117 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { dotRadius, driftOffset, encodeMessage, generateGeometry, revealFactor, scanState, shimmer, visibleDots, type Dot } from '../lib/ring'
+import { createRingSim, dotRadius, generateGeometry, visibleDots, type RingSim } from '../lib/ring'
+
+const INK = '#0E0E0D'
+const STEP = 1 / 60
+const MAX_STEPS = 4
 
 const canvas = ref<HTMLCanvasElement | null>(null)
+let sim: RingSim | null = null
+let still: Float64Array = new Float64Array(0)
 let observer: IntersectionObserver | undefined
-let resize: (() => void) | undefined
+let onResize: (() => void) | undefined
 let frame = 0
-let active = false
+let running = false
 let reduced = false
-let startedAt = 0
-const dots = ref<Dot[]>([])
+let last = 0
+let carry = 0
+let side = 0
 
-function draw(time = 0) {
+function build(next: number) {
+  if (reduced) {
+    const dots = visibleDots(generateGeometry(next, next))
+    still = new Float64Array(dots.length * 2)
+    dots.forEach((dot, i) => { still[i * 2] = dot.x; still[i * 2 + 1] = dot.y })
+    return
+  }
+  if (sim) sim.resize(next)
+  else sim = createRingSim(next, visibleDots(generateGeometry(next, next)))
+}
+
+function render() {
   const element = canvas.value
   const context = element?.getContext('2d')
   if (!element || !context) return
-  if (!startedAt) startedAt = time
-  const elapsed = Math.max(0, time - startedAt)
   const width = element.clientWidth
   const height = element.clientHeight
+  if (width === 0 || height === 0) return
   const ratio = window.devicePixelRatio || 1
-  if (element.width !== Math.round(width * ratio) || element.height !== Math.round(height * ratio)) {
-    element.width = Math.round(width * ratio)
-    element.height = Math.round(height * ratio)
-    dots.value = generateGeometry(width, height, encodeMessage())
+  const next = Math.min(width, height)
+  if (next !== side) {
+    side = next
+    build(side)
   }
-  const side = Math.min(width, height)
+  const pixelWidth = Math.round(width * ratio)
+  const pixelHeight = Math.round(height * ratio)
+  if (element.width !== pixelWidth || element.height !== pixelHeight) {
+    element.width = pixelWidth
+    element.height = pixelHeight
+  }
+  const points = sim ? sim.positions : still
+  const total = points.length / 2
   const radius = dotRadius(side)
+  const offsetX = (width - side) / 2
+  const offsetY = (height - side) / 2
+  const fading = Boolean(sim) && !sim!.revealed
   context.setTransform(ratio, 0, 0, ratio, 0, 0)
   context.clearRect(0, 0, width, height)
-  context.fillStyle = '#0E0E0D'
-  for (const dot of visibleDots(dots.value)) {
-    const state = scanState(dot, elapsed, reduced)
-    const drift = driftOffset(dot, elapsed, side, reduced)
-    context.globalAlpha = state.opacity * revealFactor(dot, elapsed, reduced) * shimmer(dot, elapsed, reduced)
+  context.globalAlpha = 1
+  context.fillStyle = INK
+  for (let i = 0; i < total; i += 1) {
+    if (fading) {
+      const reveal = sim!.alpha[i]
+      if (reveal === 0) continue
+      context.globalAlpha = reveal
+    }
     context.beginPath()
-    context.arc(dot.x + drift.dx, dot.y + drift.dy, radius, 0, Math.PI * 2)
+    context.arc(offsetX + points[i * 2], offsetY + points[i * 2 + 1], radius, 0, Math.PI * 2)
     context.fill()
   }
   context.globalAlpha = 1
-  if (active && !reduced) frame = requestAnimationFrame(draw)
 }
 
-function setActive(value: boolean) {
-  if (active === value) return
-  active = value
-  cancelAnimationFrame(frame)
-  if (active) frame = requestAnimationFrame(draw)
+function tick(now: number) {
+  frame = 0
+  if (!running) return
+  carry += Math.min(0.25, (now - last) / 1000)
+  last = now
+  let steps = 0
+  while (carry >= STEP && steps < MAX_STEPS) {
+    sim?.step(STEP)
+    carry -= STEP
+    steps += 1
+  }
+  if (carry > STEP) carry = 0
+  render()
+  frame = requestAnimationFrame(tick)
+}
+
+function setRunning(value: boolean) {
+  if (reduced || running === value) return
+  running = value
+  if (frame) cancelAnimationFrame(frame)
+  frame = 0
+  if (!running) return
+  last = performance.now()
+  carry = 0
+  frame = requestAnimationFrame(tick)
 }
 
 onMounted(() => {
   reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  observer = new IntersectionObserver((entries) => setActive(Boolean(entries[0]?.isIntersecting)))
+  render()
+  observer = new IntersectionObserver((entries) => setRunning(Boolean(entries[0]?.isIntersecting)))
   if (canvas.value) observer.observe(canvas.value)
-  resize = () => draw()
-  window.addEventListener('resize', resize)
-  draw()
+  onResize = () => render()
+  window.addEventListener('resize', onResize)
 })
 
 onUnmounted(() => {
   observer?.disconnect()
-  cancelAnimationFrame(frame)
-  if (resize) window.removeEventListener('resize', resize)
+  running = false
+  if (frame) cancelAnimationFrame(frame)
+  if (onResize) window.removeEventListener('resize', onResize)
 })
 </script>
 

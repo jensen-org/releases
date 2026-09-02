@@ -1,5 +1,49 @@
 import { describe, expect, it } from 'vitest'
-import { INNER_RATIO, MESSAGE, OUTER_RATIO, POSITIONS, SPOKES, decodeMessage, dotRadius, driftOffset, encodeMessage, generateGeometry, revealFactor, scanState, shimmer, visibleDots } from '../src/lib/ring'
+import { INNER_RATIO, MESSAGE, OUTER_RATIO, POSITIONS, SPOKES, createRingSim, curl2, decodeMessage, dotRadius, encodeMessage, generateGeometry, noise3, visibleDots, type Dot, type RingSim } from '../src/lib/ring'
+
+const STEP = 1 / 60
+
+function advance(sim: RingSim, seconds: number) {
+  const steps = Math.round(seconds / STEP)
+  for (let i = 0; i < steps; i += 1) sim.step(STEP)
+}
+
+function radialSpread(sim: RingSim, centre: number) {
+  let low = Infinity
+  let high = 0
+  for (let i = 0; i < sim.count; i += 1) {
+    const distance = Math.hypot(sim.positions[i * 2] - centre, sim.positions[i * 2 + 1] - centre)
+    low = Math.min(low, distance)
+    high = Math.max(high, distance)
+  }
+  return { low, high }
+}
+
+function closestPair(sim: RingSim, cell: number) {
+  const grid = new Map<number, number[]>()
+  for (let i = 0; i < sim.count; i += 1) {
+    const key = ((Math.floor(sim.positions[i * 2] / cell) + 2048) << 16) | (Math.floor(sim.positions[i * 2 + 1] / cell) + 2048)
+    const bucket = grid.get(key)
+    if (bucket) bucket.push(i)
+    else grid.set(key, [i])
+  }
+  let closest = Infinity
+  for (const [key, bucket] of grid) {
+    const gx = key >> 16
+    const gy = key & 0xffff
+    for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1], [1, -1]]) {
+      const other = grid.get(((gx + dx) << 16) | (gy + dy))
+      if (!other) continue
+      for (const a of bucket) {
+        for (const b of other) {
+          if (dx === 0 && dy === 0 && b <= a) continue
+          closest = Math.min(closest, Math.hypot(sim.positions[a * 2] - sim.positions[b * 2], sim.positions[a * 2 + 1] - sim.positions[b * 2 + 1]))
+        }
+      }
+    }
+  }
+  return closest
+}
 
 describe('signal ring data', () => {
   it('encodes exact message', () => {
@@ -28,6 +72,14 @@ describe('signal ring data', () => {
     expect(geometry[POSITIONS].x).toBeGreaterThan(310)
   })
 
+  it('carries the polar angle and radius of every slot', () => {
+    const geometry = generateGeometry(620, 620)
+    for (const dot of geometry.slice(0, 200)) {
+      expect(310 + Math.cos(dot.angle) * dot.radius).toBeCloseTo(dot.x, 9)
+      expect(310 + Math.sin(dot.angle) * dot.radius).toBeCloseTo(dot.y, 9)
+    }
+  })
+
   it('spreads the message evenly across every ring', () => {
     const geometry = generateGeometry(620, 620)
     for (let position = 0; position < POSITIONS; position += 1) {
@@ -36,7 +88,7 @@ describe('signal ring data', () => {
     }
   })
 
-  it('leaves clear air between every neighbouring dot at any size', () => {
+  it('leaves clear air between every neighbouring slot at any size', () => {
     for (const side of [600, 480, 380, 320]) {
       const geometry = generateGeometry(side, side)
       const diameter = dotRadius(side) * 2
@@ -54,71 +106,140 @@ describe('signal ring data', () => {
     expect(decodeMessage(generateGeometry(620, 620))).toBe(MESSAGE)
   })
 
-  it('only renders one bits and modulates without hiding them', () => {
+  it('draws only the one bits', () => {
     const dots = generateGeometry(400, 200, [1, 0, ...Array(SPOKES * POSITIONS - 2).fill(0)])
     expect(visibleDots(dots)).toHaveLength(1)
-    expect(scanState(dots[0], 100, false).visible).toBe(true)
-    expect(scanState(dots[1], 100, false).visible).toBe(false)
+    expect(visibleDots(dots)[0]).toMatchObject({ spoke: 0, position: 0 })
   })
+})
 
-  it('reveals from the inner ring outward and settles fully lit', () => {
-    const geometry = generateGeometry(620, 620)
-    const inner = geometry.find((dot) => dot.position === 0)!
-    const outer = geometry.find((dot) => dot.position === POSITIONS - 1)!
-    expect(revealFactor(inner, 220, false)).toBeGreaterThan(revealFactor(outer, 220, false))
-    expect(revealFactor(outer, 4000, false)).toBe(1)
-    expect(revealFactor(outer, 0, true)).toBe(1)
-  })
-
-  it('drifts every dot without ever closing the air between neighbours', () => {
-    const side = 620
-    const geometry = generateGeometry(side, side)
-    const radius = dotRadius(side)
-    let peak = 0
-    for (let elapsed = 0; elapsed <= 40000; elapsed += 250) {
-      for (const dot of geometry) peak = Math.max(peak, Math.hypot(...Object.values(driftOffset(dot, elapsed, side, false))))
-    }
-    expect(peak).toBeGreaterThan(radius * 0.3)
-    const gap = (side / 2) * (OUTER_RATIO - INNER_RATIO) / (POSITIONS - 1)
-    expect(gap - peak * 2).toBeGreaterThan(radius * 2)
-  })
-
-  it('closes the drift wave seamlessly across twelve o clock', () => {
-    const side = 620
-    const first = generateGeometry(side, side).find((dot) => dot.spoke === 0 && dot.position === 4)!
-    for (const elapsed of [0, 1500, 7000, 13000, 29000]) {
-      const here = driftOffset(first, elapsed, side, false)
-      const lapped = driftOffset({ ...first, spoke: SPOKES }, elapsed, side, false)
-      expect(lapped.dx).toBeCloseTo(here.dx, 9)
-      expect(lapped.dy).toBeCloseTo(here.dy, 9)
-    }
-  })
-
-  it('holds the lattice still under reduced motion', () => {
-    const geometry = generateGeometry(620, 620)
-    for (const dot of geometry.slice(0, 64)) expect(driftOffset(dot, 5000, 620, true)).toEqual({ dx: 0, dy: 0 })
-  })
-
-  it('shimmers every dot without ever putting one out', () => {
-    const geometry = generateGeometry(620, 620)
+describe('signal ring noise', () => {
+  it('stays smooth, bounded and finite everywhere', () => {
     let low = Infinity
-    let high = 0
-    for (let elapsed = 0; elapsed <= 20000; elapsed += 120) {
-      for (const dot of geometry) {
-        const value = shimmer(dot, elapsed, false)
+    let high = -Infinity
+    const walk = (spacing: number) => {
+      let jump = 0
+      let previous = noise3(-4, 1.5, 0)
+      for (let i = 1; i <= 4000; i += 1) {
+        const value = noise3(-4 + i * spacing, 1.5 + i * spacing * 0.7, i * spacing * 0.3)
+        expect(Number.isFinite(value)).toBe(true)
+        jump = Math.max(jump, Math.abs(value - previous))
+        previous = value
         low = Math.min(low, value)
         high = Math.max(high, value)
       }
+      return jump
     }
-    expect(low).toBeGreaterThan(0.5)
-    expect(high - low).toBeGreaterThan(0.2)
-    expect(shimmer(geometry[0], 5000, true)).toBe(1)
+    const coarse = walk(0.02)
+    const fine = walk(0.005)
+    expect(fine).toBeLessThan(coarse * 0.4)
+    expect(low).toBeLessThan(-0.4)
+    expect(high).toBeGreaterThan(0.4)
+    expect(Math.max(-low, high)).toBeLessThanOrEqual(1)
   })
 
-  it('closes the shimmer wave seamlessly across twelve o clock', () => {
-    const first = generateGeometry(620, 620).find((dot) => dot.spoke === 0 && dot.position === 4)!
-    for (const elapsed of [0, 900, 6100, 15000]) {
-      expect(shimmer({ ...first, spoke: SPOKES }, elapsed, false)).toBeCloseTo(shimmer(first, elapsed, false), 9)
+  it('survives negative lattice coordinates that a signed hash would poison', () => {
+    for (const point of [[-1.5, -2.5, -3.5], [-1e5, -1e5, -1e5], [-0.0001, -0.0001, -0.0001]]) {
+      expect(Number.isFinite(noise3(point[0], point[1], point[2]))).toBe(true)
+      expect(curl2(point[0], point[1], point[2]).every(Number.isFinite)).toBe(true)
     }
+  })
+
+  it('swirls rather than pointing downhill, so the flow has no sinks', () => {
+    let strongest = 0
+    let alignment = 0
+    for (let i = 0; i < 240; i += 1) {
+      const x = Math.sin(i) * 3
+      const y = Math.cos(i * 1.7) * 3
+      const [fx, fy] = curl2(x, y, 0.4)
+      const gx = (noise3(x + 0.2, y, 0.4) - noise3(x - 0.2, y, 0.4)) / 0.4
+      const gy = (noise3(x, y + 0.2, 0.4) - noise3(x, y - 0.2, 0.4)) / 0.4
+      const flow = Math.hypot(fx, fy)
+      const slope = Math.hypot(gx, gy)
+      strongest = Math.max(strongest, flow)
+      if (flow > 0.1 && slope > 0.1) alignment = Math.max(alignment, Math.abs(fx * gx + fy * gy) / (flow * slope))
+    }
+    expect(strongest).toBeGreaterThan(0.4)
+    expect(alignment).toBeLessThan(1e-12)
+  })
+})
+
+describe('signal ring simulation', () => {
+  it('opens on the lattice and fades in from the inner ring outward', () => {
+    const side = 620
+    const dots = visibleDots(generateGeometry(side, side))
+    const sim = createRingSim(side, dots)
+    const inner = dots.findIndex((dot) => dot.position === 0)
+    const outer = dots.findIndex((dot) => dot.position === POSITIONS - 1)
+
+    advance(sim, 0.1)
+    const opening = radialSpread(sim, side / 2)
+    expect(opening.low).toBeGreaterThan((side / 2) * INNER_RATIO * 0.94)
+    expect(opening.high).toBeLessThan((side / 2) * OUTER_RATIO * 1.06)
+
+    advance(sim, 0.25)
+    expect(sim.revealed).toBe(false)
+    expect(sim.alpha[inner]).toBeGreaterThan(sim.alpha[outer])
+
+    advance(sim, 1.6)
+    expect(sim.revealed).toBe(true)
+    for (let i = 0; i < sim.count; i += 1) expect(sim.alpha[i]).toBe(1)
+
+    advance(sim, 10)
+    expect(sim.revealed).toBe(true)
+    expect(Math.min(...sim.alpha)).toBe(1)
+  })
+
+  it('keeps every particle alive without ever letting the lattice touch', { timeout: 30000 }, () => {
+    for (const side of [620, 288]) {
+      const sim = createRingSim(side)
+      const radius = dotRadius(side)
+      advance(sim, 4)
+      let closest = Infinity
+      let peak = 0
+      for (let step = 0; step < 60 * 45; step += 1) {
+        sim.step(STEP)
+        peak = Math.max(peak, sim.maxExcursion())
+        if (step % 5 === 0) closest = Math.min(closest, closestPair(sim, (26 * side) / 620))
+      }
+      expect(closest).toBeGreaterThan(radius * 2.85)
+      expect(peak).toBeGreaterThan(radius * 1.2)
+      expect(peak).toBeLessThan(radius * 3.01)
+    }
+  })
+
+  it('closes the ring seamlessly across twelve o clock', () => {
+    const seam = (spoke: number): Dot => ({ ...generateGeometry(620, 620)[0], spoke, angle: (spoke / SPOKES) * Math.PI * 2 - Math.PI / 2 })
+    const first = createRingSim(620, [seam(0)])
+    const lapped = createRingSim(620, [seam(SPOKES)])
+    for (let step = 0; step < 60 * 12; step += 1) {
+      first.step(STEP)
+      lapped.step(STEP)
+    }
+    expect(lapped.positions[0]).toBeCloseTo(first.positions[0], 5)
+    expect(lapped.positions[1]).toBeCloseTo(first.positions[1], 5)
+  })
+
+  it('replays identically, so vitest and the browser agree', () => {
+    const run = () => {
+      const sim = createRingSim(440)
+      advance(sim, 3)
+      return Array.from(sim.positions.slice(0, 40))
+    }
+    expect(run()).toEqual(run())
+  })
+
+  it('rescales in place instead of replaying the entrance', () => {
+    const sim = createRingSim(620)
+    advance(sim, 6)
+    const before = radialSpread(sim, 310)
+    const elapsed = sim.elapsed
+    sim.resize(310)
+    const after = radialSpread(sim, 155)
+    expect(sim.elapsed).toBe(elapsed)
+    expect(after.low).toBeCloseTo(before.low / 2, 6)
+    expect(after.high).toBeCloseTo(before.high / 2, 6)
+    advance(sim, 2)
+    expect(radialSpread(sim, 155).low).toBeGreaterThan(155 * INNER_RATIO * 0.9)
   })
 })
