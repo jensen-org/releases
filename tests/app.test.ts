@@ -8,6 +8,7 @@ import App from '../src/App.vue'
 import { preset } from '../src/theme'
 
 vi.mock('../src/components/SignalRing.vue', () => ({ default: { render: () => h('canvas', { 'aria-label': 'Jensen signal ring' }) } }))
+vi.mock('../src/components/Filaments.vue', () => ({ default: { render: () => h('canvas', { class: 'filaments' }) } }))
 
 const response = (body: unknown) => Promise.resolve({ json: () => Promise.resolve(body) })
 const build = (version: string, byteSize: number) => ({ version, publishedAt: '2026-08-14T00:00:00Z', byteSize, downloadUrl: `https://github.com/jensen-org/jensen-release/releases/download/${version}/Jensen-arm64.dmg`, releaseUrl: 'https://github.com/r' })

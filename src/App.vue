@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import SignalRing from './components/SignalRing.vue'
+import Filaments from './components/Filaments.vue'
+import { attachMagnet } from './lib/magnetic'
 
 interface Build { version: string; publishedAt: string; byteSize: number; downloadUrl: string }
 interface Release { status: 'available' | 'unavailable' | 'error'; builds?: Build[] }
@@ -10,6 +12,10 @@ const APPLE_GLYPH = 'M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7
 
 const release = ref<Release | null>(null)
 const loading = ref(true)
+const mastheadEl = ref<HTMLElement | null>(null)
+const ringEl = ref<HTMLElement | null>(null)
+const shelfEl = ref<HTMLElement | null>(null)
+const downloadEl = ref<HTMLElement | null>(null)
 
 const latest = computed(() => release.value?.builds?.[0] ?? null)
 
@@ -24,6 +30,13 @@ const summary = computed(() => {
   return 'macOS build coming soon'
 })
 
+let releaseMagnet: (() => void) | undefined
+
+watch(downloadEl, (element) => {
+  releaseMagnet?.()
+  releaseMagnet = element ? attachMagnet(element) : undefined
+})
+
 onMounted(async () => {
   try {
     const response = await fetch('/api/release')
@@ -34,11 +47,15 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+onUnmounted(() => releaseMagnet?.())
 </script>
 
 <template>
   <div class="page">
-    <header class="masthead">
+    <Filaments :core="ringEl" :masthead="mastheadEl" :shelf="shelfEl" />
+
+    <header ref="mastheadEl" class="masthead">
       <div class="brand">
         <span class="brand-tile">
           <img src="/jensen.png" alt="" width="295" height="295">
@@ -49,12 +66,12 @@ onMounted(async () => {
     </header>
 
     <main class="stage">
-      <div class="ring">
+      <div ref="ringEl" class="ring">
         <SignalRing />
       </div>
     </main>
 
-    <footer class="shelf">
+    <footer ref="shelfEl" class="shelf">
       <Card class="shelf-card">
         <template #title>
           <div class="shelf-head">
@@ -67,6 +84,7 @@ onMounted(async () => {
           <div class="shelf-body">
             <Button v-if="latest" v-slot="slotProps" as-child>
               <a
+                ref="downloadEl"
                 :class="slotProps.class"
                 :href="latest.downloadUrl"
                 :aria-label="`Download Jensen for macOS ${latest.version}`"
