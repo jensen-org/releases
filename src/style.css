@@ -5,7 +5,6 @@
   --graphite: #56564f;
   --haze: #a8a8a0;
   --edge: #e4e4de;
-  --wash: #f2f2ee;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-family: var(--mono);
   color: var(--ink);
@@ -177,5 +176,5 @@ h1, p { margin: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .releases-link { transition: none; }
+  .releases-link, .shelf-card .p-button { transition: none; }
 }

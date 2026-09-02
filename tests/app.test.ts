@@ -29,6 +29,7 @@ describe('release card', () => {
     expect(wrapper.text()).toContain('v1.4.0')
     expect(wrapper.text()).toContain('24.8 MB')
     expect(wrapper.text()).toContain('2026-08-14')
+    expect(wrapper.find('.releases-link').attributes('href')).toBe('https://github.com/jensen-org/jensen-release/releases')
   })
 
   it('keeps a disabled download button while the release is loading', () => {
