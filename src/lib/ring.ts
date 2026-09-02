@@ -1,7 +1,7 @@
 export const MESSAGE = "Sometimes, you just have to let go... and embrace what you've become. The world has changed. The old rules no longer apply."
 export const SPOKES = 82
 export const POSITIONS = 12
-export const INNER_RATIO = 0.34
+export const INNER_RATIO = 0.48
 export const OUTER_RATIO = 0.97
 export type Dot = { x: number; y: number; bit: 0 | 1; index: number; bitIndex: number; spoke: number; position: number }
 export type ScanState = { opacity: number; visible: boolean }

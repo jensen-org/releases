@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MESSAGE, POSITIONS, SPOKES, decodeMessage, encodeMessage, generateGeometry, revealFactor, scanState, visibleDots } from '../src/lib/ring'
+import { INNER_RATIO, MESSAGE, OUTER_RATIO, POSITIONS, SPOKES, decodeMessage, encodeMessage, generateGeometry, revealFactor, scanState, visibleDots } from '../src/lib/ring'
 
 describe('signal ring data', () => {
   it('encodes exact message', () => {
@@ -21,8 +21,8 @@ describe('signal ring data', () => {
   it('lays every dot on one circle with spoke zero at twelve o clock', () => {
     const geometry = generateGeometry(620, 620)
     const radii = geometry.map((dot) => Math.hypot(dot.x - 310, dot.y - 310))
-    expect(Math.min(...radii)).toBeCloseTo(310 * 0.34, 6)
-    expect(Math.max(...radii)).toBeCloseTo(310 * 0.97, 6)
+    expect(Math.min(...radii)).toBeCloseTo(310 * INNER_RATIO, 6)
+    expect(Math.max(...radii)).toBeCloseTo(310 * OUTER_RATIO, 6)
     expect(geometry[0]).toMatchObject({ x: 310 })
     expect(geometry[0].y).toBeLessThan(310)
     expect(geometry[POSITIONS].x).toBeGreaterThan(310)
