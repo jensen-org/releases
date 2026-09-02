@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import SignalRing from './components/SignalRing.vue'
-import Filaments from './components/Filaments.vue'
 import { attachMagnet } from './lib/magnetic'
 
 interface Build { version: string; publishedAt: string; byteSize: number; downloadUrl: string }
@@ -53,8 +52,6 @@ onUnmounted(() => releaseMagnet?.())
 
 <template>
   <div class="page">
-    <Filaments :core="ringEl" :masthead="mastheadEl" :shelf="shelfEl" />
-
     <header ref="mastheadEl" class="masthead">
       <div class="brand">
         <span class="brand-tile">
