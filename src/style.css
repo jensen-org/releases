@@ -93,7 +93,7 @@ h1, h2, p { margin: 0; }
   left: 50%;
   bottom: 0;
   transform: translateX(-50%);
-  block-size: max(300px, min(88vmin, 940px, calc(100svh - 205px)));
+  block-size: max(300px, min(72vmin, 760px, calc(100svh - 300px)));
   inline-size: auto;
   aspect-ratio: 1;
   pointer-events: none;
@@ -209,7 +209,7 @@ h1, h2, p { margin: 0; }
 .releases-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
 @media (max-width: 760px) {
-  .ring { block-size: max(260px, min(104vw, calc(100svh - 250px))); }
+  .ring { block-size: max(260px, min(88vw, calc(100svh - 300px))); }
   .shelf .shelf-card { max-width: none; }
   .shelf-head { padding: 13px 16px; }
   .shelf-body { flex-direction: column; align-items: stretch; gap: 16px; padding: 16px; }
