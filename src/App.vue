@@ -1,8 +1,102 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import ScanningEye from './components/ScanningEye.vue'
-interface Release { status:'available'|'unavailable'|'error'; version?:string; byteSize?:number; downloadUrl?:string; releaseUrl:string }
-const release=ref<Release|null>(null),loading=ref(true);const formatSize=(bytes?:number)=>bytes==null?'':`${(bytes/1024/1024).toFixed(1)} MB`
-onMounted(async()=>{try{const response=await fetch('/api/release');release.value=await response.json()}catch{release.value={status:'error',releaseUrl:'https://github.com/jensen-org/jensen-release/releases'}}finally{loading.value=false}})
+import { computed, onMounted, ref } from 'vue'
+import SignalRing from './components/SignalRing.vue'
+
+interface Build { version: string; publishedAt: string; byteSize: number; downloadUrl: string }
+interface Release { status: 'available' | 'unavailable' | 'error'; builds?: Build[]; releaseUrl: string }
+
+const RELEASES_URL = 'https://github.com/jensen-org/jensen-release/releases'
+
+const release = ref<Release | null>(null)
+const loading = ref(true)
+
+const builds = computed(() => release.value?.builds ?? [])
+const releasesUrl = computed(() => release.value?.releaseUrl ?? RELEASES_URL)
+
+const notice = computed(() => {
+  if (loading.value) return 'Checking latest release'
+  if (release.value?.status === 'error') return 'Release information unavailable'
+  return 'macOS build coming soon'
+})
+
+const formatSize = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`
+const formatDate = (value: string) => new Date(value).toISOString().slice(0, 10)
+
+onMounted(async () => {
+  try {
+    const response = await fetch('/api/release')
+    release.value = await response.json()
+  } catch {
+    release.value = { status: 'error', releaseUrl: RELEASES_URL }
+  } finally {
+    loading.value = false
+  }
+})
 </script>
-<template><main class="page-shell"><header class="masthead"><span>JENSEN</span><span class="masthead-mark">/ RELEASE</span></header><section class="hero" aria-labelledby="page-title"><h1 id="page-title" class="sr-only">Jensen for macOS</h1><ScanningEye /></section><section class="download-region" aria-label="Download Jensen for macOS"><Card class="download-card"><template #content><div class="card-heading"><div><p class="eyebrow">Jensen for macOS</p><p class="platform">Apple Silicon</p></div><span class="platform-badge">ARM64</span></div><div v-if="loading" class="release-meta loading-meta">Checking latest release<span class="loading-rule" /></div><div v-else-if="release?.status==='available'" class="release-meta"><span>v{{release.version}}</span><span>{{formatSize(release.byteSize)}}</span></div><div v-else-if="release?.status==='error'" class="release-meta release-error">Release information unavailable</div><div v-else class="release-meta">macOS build coming soon</div><Button v-if="loading" label="Checking release" loading class="download-button" /><a v-else-if="release?.status==='available'" :href="release.downloadUrl" class="p-button p-component download-button" download>Download for macOS <span aria-hidden="true">↗</span></a><Button v-else label="macOS build coming soon" disabled class="download-button" /><a v-if="release?.status==='error'" :href="release.releaseUrl" class="releases-link">View GitHub Releases <span aria-hidden="true">↗</span></a></template></Card></section><footer><span>JENSEN.ORG</span><span>MACOS · APPLE SILICON</span></footer></main></template>
+
+<template>
+  <div class="page">
+    <header class="brand">
+      <img class="brand-mark" src="/jensen.png" alt="" width="54" height="54">
+      <span class="brand-name">Jensen</span>
+    </header>
+
+    <main class="stage">
+      <SignalRing />
+    </main>
+
+    <footer class="shelf">
+      <Card class="shelf-card" :class="{ 'shelf-bare': !builds.length }">
+        <template #title>
+          <div class="shelf-head">
+            <h1 class="shelf-title">Jensen for macOS</h1>
+            <span class="shelf-arch">Apple Silicon</span>
+          </div>
+        </template>
+
+        <template #content>
+          <DataTable :value="builds" :loading="loading" data-key="version">
+            <Column field="version" header="Version">
+              <template #body="{ data, index }">
+                <span class="cell-version">{{ data.version }}</span>
+                <Tag v-if="index === 0" class="cell-tag" value="Latest" />
+              </template>
+            </Column>
+
+            <Column field="byteSize" header="Size" class="cell-num">
+              <template #body="{ data }">
+                <span class="cell-fact">{{ formatSize(data.byteSize) }}</span>
+              </template>
+            </Column>
+
+            <Column field="publishedAt" header="Published" class="cell-num">
+              <template #body="{ data }">
+                <span class="cell-fact">{{ formatDate(data.publishedAt) }}</span>
+              </template>
+            </Column>
+
+            <Column class="cell-action">
+              <template #body="{ data, index }">
+                <Button v-slot="slotProps" as-child :outlined="index !== 0" size="small">
+                  <a
+                    :class="slotProps.class"
+                    :href="data.downloadUrl"
+                    :aria-label="`Download Jensen for macOS ${data.version}`"
+                    download
+                  >Download</a>
+                </Button>
+              </template>
+            </Column>
+
+            <template #empty>
+              <div class="shelf-empty">
+                <Message severity="secondary" variant="simple">{{ notice }}</Message>
+                <a v-if="!loading" class="releases-link" :href="releasesUrl">View GitHub Releases</a>
+              </div>
+            </template>
+          </DataTable>
+        </template>
+      </Card>
+    </footer>
+  </div>
+</template>

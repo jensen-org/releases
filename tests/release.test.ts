@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import handler, { selectRelease } from '../api/release'
-const release = (date: string, assets: unknown[], extra = {}) => ({ tag_name: 'v1', published_at: date, html_url: 'https://github.com/jensen-org/jensen-release/releases/v1', assets, ...extra })
+import handler, { MAX_BUILDS, selectReleases } from '../api/release'
+const release = (date: string, assets: unknown[], extra = {}) => ({ tag_name: `v${date.slice(0, 4)}`, published_at: date, html_url: 'https://github.com/jensen-org/jensen-release/releases/v1', assets, ...extra })
 const asset = (name: string, extra = {}) => ({ name, size: 100, browser_download_url: `https://github.com/jensen-org/jensen-release/releases/download/${name}`, ...extra })
 describe('release selection', () => {
-  it('chooses newest published non-draft and prefers arm64', () => { const result = selectRelease([release('2020-01-01', [asset('old-aarch64.dmg')]), release('2024-01-01', [asset('new-aarch64.dmg'), asset('new-arm64.dmg', { digest: 'sha256:x' })]), release('2025-01-01', [asset('draft-arm64.dmg')], { draft: true })]); expect(result).toMatchObject({ status: 'available', assetName: 'new-arm64.dmg', digest: 'sha256:x' }) })
-  it('excludes wrong, missing, and malformed assets', () => { expect(selectRelease([release('2024-01-01', [asset('x86_64.dmg')])]).status).toBe('unavailable'); expect(selectRelease([]).status).toBe('unavailable'); expect(selectRelease({}).status).toBe('error') })
-  it('rejects upstream fields that are not normalized', () => { expect(selectRelease([release('bad', [asset('x-arm64.dmg')])]).status).toBe('unavailable'); expect(selectRelease([release('2024-01-01', [asset('x-arm64.dmg', { size: 0 })])]).status).toBe('unavailable') })
+  it('lists newest first, drops drafts and prefers arm64', () => { const result = selectReleases([release('2020-01-01', [asset('old-aarch64.dmg')]), release('2024-01-01', [asset('new-aarch64.dmg'), asset('new-arm64.dmg', { digest: 'sha256:x' })]), release('2025-01-01', [asset('draft-arm64.dmg')], { draft: true })]) as { status: string; builds: { version: string; assetName: string; digest?: string }[] }; expect(result.status).toBe('available'); expect(result.builds.map((build) => build.version)).toEqual(['v2024', 'v2020']); expect(result.builds[0]).toMatchObject({ assetName: 'new-arm64.dmg', digest: 'sha256:x' }) })
+  it('caps the list so the card stays short', () => { const many = Array.from({ length: MAX_BUILDS + 3 }, (_, year) => release(`20${10 + year}-01-01`, [asset('x-arm64.dmg')])); expect((selectReleases(many) as { builds: unknown[] }).builds).toHaveLength(MAX_BUILDS) })
+  it('excludes wrong, missing, and malformed assets', () => { expect(selectReleases([release('2024-01-01', [asset('x86_64.dmg')])]).status).toBe('unavailable'); expect(selectReleases([]).status).toBe('unavailable'); expect(selectReleases({}).status).toBe('error') })
+  it('rejects upstream fields that are not normalized', () => { expect(selectReleases([release('bad', [asset('x-arm64.dmg')])]).status).toBe('unavailable'); expect(selectReleases([release('2024-01-01', [asset('x-arm64.dmg', { size: 0 })])]).status).toBe('unavailable') })
 })
 describe('release handler', () => {
   const response = () => { const result: Record<string, unknown> = {}; const out = { status: (code: number) => { result.code = code; return out }, json: (body: unknown) => { result.body = body; return out }, setHeader: (name: string, value: string) => { result[name] = value; return out } }; return { result, out } }
