@@ -48,7 +48,6 @@ onMounted(async () => {
     <main class="stage">
       <div class="ring">
         <SignalRing />
-        <img class="ring-mark" src="/jensen.png" alt="" width="295" height="295">
       </div>
     </main>
 

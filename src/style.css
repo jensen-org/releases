@@ -52,27 +52,17 @@ h1, p { margin: 0; }
 
 .stage { display: flex; align-items: center; justify-content: center; width: 100%; }
 
-.ring { position: relative; width: min(48vmin, 400px); aspect-ratio: 1; }
+.ring { width: min(58vmin, 600px); aspect-ratio: 1; }
 
 .signal-ring { display: block; width: 100%; height: 100%; }
 
-.ring-mark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 28%;
-  height: auto;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
 .shelf { display: flex; justify-content: center; }
 
-.shelf-card {
+.shelf .shelf-card {
   width: 100%;
   max-width: 560px;
   border: 1px solid var(--edge);
-  border-radius: 14px;
+  border-radius: 18px;
   overflow: hidden;
   box-shadow: none;
 }
@@ -167,8 +157,8 @@ h1, p { margin: 0; }
 .releases-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
 @media (max-width: 760px) {
-  .ring { width: min(74vw, 320px); }
-  .shelf-card { max-width: none; }
+  .ring { width: min(86vw, 380px); }
+  .shelf .shelf-card { max-width: none; }
   .shelf-head { padding: 13px 16px; }
   .shelf-body { flex-direction: column; align-items: stretch; gap: 16px; padding: 16px; }
   .shelf-card .p-button { justify-content: center; }

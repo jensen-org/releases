@@ -12,15 +12,19 @@ The endpoint reads published GitHub releases, including prereleases, and returns
 
 ## The ring
 
-The mark on the page is not decoration. It carries a 123 byte message as a polar lattice of
-82 spokes by 12 rings, one bit per slot, and the geometry is sized so the message fills it
+The mark on the page is not decoration. It carries a 262 byte message as a polar lattice of
+131 spokes by 16 rings, one bit per slot, and the geometry is sized so the message fills it
 exactly with nothing left over.
 
 - A drawn dot is a one. An empty slot is a zero.
-- Bit *n* sits on ring `n / 82` counting outward, and spoke `n % 82` counting clockwise from
+- Bit *n* sits on ring `n / 131` counting outward, and spoke `n % 131` counting clockwise from
   twelve o'clock.
 - Read the innermost ring clockwise from twelve o'clock, then each ring outward in turn, and
   group the bits into bytes. The first byte is `01010011`, a capital S.
+- `MESSAGE` must stay exactly `SPOKES * POSITIONS / 8` bytes long. Reword it freely, but keep that
+  byte count or pick a new pair of lattice dimensions to match.
+- `dotRadius` sizes a dot against the lattice so neighbours never touch at any ring size, which
+  `tests/ring.test.ts` asserts as a minimum clearance.
 
 `decodeMessage` in `src/lib/ring.ts` does this in code, and `tests/ring.test.ts` asserts the
 rendered geometry still decodes to the original sentence.

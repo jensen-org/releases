@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { encodeMessage, generateGeometry, revealFactor, scanState, visibleDots, type Dot } from '../lib/ring'
+import { dotRadius, encodeMessage, generateGeometry, revealFactor, scanState, visibleDots, type Dot } from '../lib/ring'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 let observer: IntersectionObserver | undefined
@@ -26,7 +26,7 @@ function draw(time = 0) {
     dots.value = generateGeometry(width, height, encodeMessage())
   }
   const side = Math.min(width, height)
-  const radius = Math.max(1.4, side / 200)
+  const radius = dotRadius(side)
   context.setTransform(ratio, 0, 0, ratio, 0, 0)
   context.clearRect(0, 0, width, height)
   context.fillStyle = '#0E0E0D'
