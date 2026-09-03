@@ -19,9 +19,10 @@ test('headline leads the page on more than one line', async ({ page }, info) => 
   const shape = await headline.evaluate((node) => {
     const range = document.createRange()
     range.selectNodeContents(node)
-    return { lines: range.getClientRects().length, size: Number.parseFloat(getComputedStyle(node).fontSize) }
+    const tops = new Set([...range.getClientRects()].map((rect) => Math.round(rect.top)))
+    return { lines: tops.size, size: Number.parseFloat(getComputedStyle(node).fontSize) }
   })
-  expect(shape.lines).toBe(info.project.name === 'mobile' ? 2 : 3)
+  expect(shape.lines).toBe(2)
   expect(shape.size).toBeGreaterThan(18)
   if (info.project.name !== 'mobile') expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
 })
@@ -35,9 +36,9 @@ test('the hero puts the copy beside the ring on a wide viewport', async ({ page 
   expect(ring).not.toBeNull()
   expect(ring!.x).toBeGreaterThan(copy!.x + copy!.width - 1)
   const learn = await page.locator('.hero-learn').boundingBox()
-  const headline = await page.locator('.hero-headline').boundingBox()
+  const sub = await page.locator('.hero-sub').boundingBox()
   expect(Math.abs(learn!.x + learn!.width - (copy!.x + copy!.width))).toBeLessThanOrEqual(1)
-  expect(Math.abs(learn!.y + learn!.height - (headline!.y + headline!.height))).toBeLessThanOrEqual(1)
+  expect(learn!.y).toBeGreaterThanOrEqual(sub!.y + sub!.height)
   await expect(page.locator('.baseline-legal')).toBeVisible()
 })
 

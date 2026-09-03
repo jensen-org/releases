@@ -54,7 +54,7 @@
 
   --control-pad: 11px 18px;
   --control-radius: 2px;
-  --panel-radius: 12px;
+  --panel-radius: 16px;
   --ease: var(--ease);
 
   font-family: var(--sans);
@@ -95,21 +95,13 @@ h1, h2, p { margin: 0; }
 
 .brand { display: flex; align-items: center; gap: 11px; }
 
-.hero-title-row {
-  width: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: clamp(20px, 3vw, 40px);
-}
+.hero-headline span { white-space: nowrap; }
 
 .hero-headline {
-  min-width: 0;
   font-size: var(--type-display);
   font-weight: 600;
   letter-spacing: var(--track-display);
   line-height: 1.06;
-  max-width: 24ch;
   text-wrap: balance;
   color: var(--ink);
 }
@@ -127,7 +119,8 @@ h1, h2, p { margin: 0; }
 }
 
 .hero-learn {
-  flex: none;
+  justify-self: end;
+  margin-block-start: 22px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -239,7 +232,7 @@ h1, h2, p { margin: 0; }
 
 .baseline-legal:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
-.shelf-card {
+.shelf-card.p-card {
   margin-block-start: 26px;
   width: 100%;
   border: 1px solid var(--edge);
@@ -349,8 +342,9 @@ h1, h2, p { margin: 0; }
 @media (max-width: 860px) {
   .hero { grid-template-columns: minmax(0, 1fr); gap: clamp(16px, 2.4vh, 26px); }
   .hero-copy { justify-self: stretch; max-width: none; }
-  .hero-title-row { flex-direction: column; align-items: flex-start; gap: 18px; }
-  .hero-headline { font-size: clamp(24px, 7vw, 34px); max-width: 22ch; }
+  .hero-learn { justify-self: start; margin-block-start: 18px; }
+  .hero-headline { font-size: clamp(24px, 7vw, 34px); }
+  .hero-headline span { white-space: normal; }
   .hero-sub { margin-block-start: 12px; line-height: 1.8; max-width: none; }
   .hero-rule { margin-block-start: 22px; }
   .shelf-card { margin-block-start: 20px; }
@@ -435,10 +429,6 @@ h1, h2, p { margin: 0; }
 .releases-link:hover::after,
 .releases-link:focus-visible::after { transform: scaleX(1); }
 
-.shelf-card { transition: border-color 420ms var(--ease); }
-
-.shelf-card:hover { border-color: var(--haze); }
-
 .brand-tile { transition: transform 520ms var(--ease); }
 
 .brand-tile img { transition: transform 520ms var(--ease); }
@@ -449,7 +439,7 @@ h1, h2, p { margin: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   .releases-link, .shelf-card .p-button, .baseline-legal, .hero-learn { transition: none; }
-  .releases-link::after, .shelf-card, .brand-tile, .brand-tile img { transition: none; }
+  .releases-link::after, .brand-tile, .brand-tile img { transition: none; }
   .page::after { animation: none; }
   .masthead, .brand, .hero-headline, .hero-sub, .hero-learn, .hero-rule, .shelf-card, .baseline { animation: none; }
   .diffusion-veil { display: none; }
