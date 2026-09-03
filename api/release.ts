@@ -6,7 +6,8 @@ export type ReleaseResponse = AvailableRelease | UnavailableRelease | ErrorRelea
 export const MAX_BUILDS = 4
 type Asset = { name?: unknown; size?: unknown; browser_download_url?: unknown; digest?: unknown }
 type GitRelease = { draft?: unknown; tag_name?: unknown; published_at?: unknown; html_url?: unknown; assets?: unknown }
-export const releasesUrl = 'https://github.com/jensen-org/jensen-release/releases'
+const repo = 'jensen-org/release'
+export const releasesUrl = `https://github.com/${repo}/releases`
 function isPublicGithubUrl(value: unknown): value is string { try { const url = new URL(String(value)); return url.protocol === 'https:' && (url.hostname === 'github.com' || url.hostname === 'objects.githubusercontent.com') } catch { return false } }
 export function selectReleases(payload: unknown): ReleaseResponse {
   if (!Array.isArray(payload)) return { status: 'error', code: 'MALFORMED_RESPONSE', releaseUrl: releasesUrl }
@@ -30,7 +31,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
   response.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=300')
   if (request.method !== 'GET') return response.status(405).json({ status: 'error', code: 'METHOD_NOT_ALLOWED', releaseUrl: releasesUrl })
   try {
-    const upstream = await fetch('https://api.github.com/repos/jensen-org/jensen-release/releases?per_page=100', { headers: { Accept: 'application/vnd.github+json', ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}) } })
+    const upstream = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=100`, { headers: { Accept: 'application/vnd.github+json', ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}) } })
     if (!upstream.ok) return response.status(200).json({ status: 'error', code: upstream.status === 403 || upstream.status === 429 ? 'RATE_LIMITED' : 'UPSTREAM_UNAVAILABLE', releaseUrl: releasesUrl })
     return response.status(200).json(selectReleases(await upstream.json()))
   } catch { return response.status(200).json({ status: 'error', code: 'UPSTREAM_UNAVAILABLE', releaseUrl: releasesUrl }) }
