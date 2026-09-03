@@ -25,6 +25,11 @@ exactly with nothing left over.
   byte count or pick a new pair of lattice dimensions to match.
 - `dotRadius` sizes a dot against the lattice so slots never touch at any ring size, which
   `tests/ring.test.ts` asserts as a minimum clearance on the static geometry.
+- `FRAME` insets the whole mark inside its canvas. The simulation breathes and shears the lattice
+  to about six percent past the outer band, and at the old inset of none that overshoot was clipped
+  flat against the canvas edge. Every size in this file is inset with it, so the CSS box is divided
+  by `FRAME` in turn and the drawn mark, its dots and its motion are all unchanged; the canvas
+  simply carries the room the overshoot needs.
 
 `decodeMessage` in `src/lib/ring.ts` does this in code, and `tests/ring.test.ts` asserts the
 rendered geometry still decodes to the original sentence.
@@ -52,7 +57,7 @@ system rather than an animation that hands off to another.
 - `noise3` is a hashed lattice, so the simulation is deterministic with no seeding. Vitest and
   the browser produce identical frames at a fixed timestep.
 - Motion amplitude scales with `budget`, the air left between slots, not with the ring size.
-  `dotRadius` bottoms out at one pixel below a 300 pixel ring while the gaps keep shrinking, so
+  `dotRadius` bottoms out at one pixel below a 323 pixel canvas while the gaps keep shrinking, so
   anything scaled to the ring would close them.
 - `tests/ring.test.ts` runs the simulation and measures the true closest pair through a spatial
   hash. It also asserts the particles keep moving, so damping the ring to death fails the suite.

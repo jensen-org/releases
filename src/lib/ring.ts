@@ -1,8 +1,13 @@
 export const MESSAGE = "Sometimes, you just have to let go... and embrace what you've become. The world has changed. The old rules no longer apply. Read the code, keep the context close, and let the agents carry the tedium. Ship something worth keeping. And thank you for trying Jensen."
 export const SPOKES = 131
 export const POSITIONS = 16
-export const INNER_RATIO = 0.57
-export const OUTER_RATIO = 0.97
+// The mark is inset in its canvas by this much. The simulation breathes and shears the lattice
+// to about six percent past the outer band, which used to be clipped at the canvas edge; the
+// inset is the room that overshoot needs. Every other size below is inset with it, so dividing
+// the canvas box by FRAME in CSS leaves the drawn mark, its dots and its motion unchanged.
+export const FRAME = 0.928
+export const INNER_RATIO = 0.57 * FRAME
+export const OUTER_RATIO = 0.97 * FRAME
 export type Dot = { x: number; y: number; bit: 0 | 1; index: number; bitIndex: number; spoke: number; position: number; angle: number; radius: number }
 
 export function encodeMessage(message = MESSAGE): number[] { return Array.from(new TextEncoder().encode(message)).flatMap((byte) => Array.from({ length: 8 }, (_, bit) => (byte >> (7 - bit)) & 1)) }
@@ -25,7 +30,7 @@ export function generateGeometry(width: number, height: number, bits = encodeMes
   return dots
 }
 
-export function dotRadius(side: number): number { return Math.max(1, side / 300) }
+export function dotRadius(side: number): number { return Math.max(1, (side * FRAME) / 300) }
 
 export function visibleDots(dots: Dot[]): Dot[] { return dots.filter((dot) => dot.bit === 1) }
 
@@ -147,7 +152,7 @@ const REVEAL_JITTER = 0.14
 const REVEAL_FADE = 0.55
 const CAGE_REST = 3
 
-export function budget(side: number): number { return side / 75 - 3 * dotRadius(side) }
+export function budget(side: number): number { return (side * FRAME) / 75 - 3 * dotRadius(side) }
 
 export type RingSim = {
   readonly count: number

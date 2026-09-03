@@ -192,7 +192,7 @@ h1, h2, p { margin: 0; }
 
 .ring {
   justify-self: end;
-  block-size: max(300px, min(70vmin, 600px, 42vw, calc(100svh - 240px)));
+  block-size: max(323px, min(75vmin, 647px, 45vw, calc(100svh - 224px)));
   inline-size: auto;
   aspect-ratio: 1;
   pointer-events: none;
@@ -345,7 +345,7 @@ h1, h2, p { margin: 0; }
   .hero-learn { margin-block-start: 18px; }
   .hero-rule { margin-block-start: 22px; }
   .shelf-card { margin-block-start: 20px; }
-  .ring { justify-self: center; block-size: max(280px, min(78vw, 340px)); }
+  .ring { justify-self: center; block-size: max(302px, min(84vw, 366px)); }
   .shelf-card { max-width: none; }
   .shelf-head { padding: 13px 16px; }
   .shelf-body { flex-direction: column; align-items: stretch; gap: 16px; padding: 16px; }
