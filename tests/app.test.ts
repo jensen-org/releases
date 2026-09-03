@@ -78,6 +78,8 @@ describe('release card', () => {
     const sub = wrapper.find('.hero-sub')
     expect(sub.text()).toContain('An AI-first IDE for large, complex codebases')
     expect(sub.text()).toContain('hands that map to your AI assistant')
+    expect(wrapper.find('.hero-learn').attributes('href')).toBe('https://github.com/jensen-org/jensen')
+    expect(wrapper.find('.hero-learn').text()).toContain('Learn more')
   })
 
   it('closes the page with the build status and the licence', () => {
