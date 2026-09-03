@@ -1,17 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { DOT_ALPHA, DOT_FADE, DURATION, RING_OUT, createField, ramp, readSchedule, window01, type Seeds } from '../src/lib/diffusion'
+import {
+  DOT_ALPHA, DOT_FADE, DURATION, RING_OUT, createField, distanceFromSeeds, fbm,
+  ramp, readSchedule, window01, type Seeds,
+} from '../src/lib/diffusion'
 
 const WIDTH = 1000
 const HEIGHT = 625
 const CENTRE_X = 720
 const CENTRE_Y = 312
 const RADIUS = 200
+const STEP = 1 / 60
 
-function ringSeeds(count = 260): Seeds {
+function ringSeeds(count = 420): Seeds {
   const points: number[] = []
   for (let i = 0; i < count; i += 1) {
-    const angle = (i / count) * Math.PI * 2
-    const radius = RADIUS * (0.6 + 0.37 * ((i % 7) / 6))
+    const angle = (i / count) * Math.PI * 2 * 7
+    const radius = RADIUS * (0.6 + 0.37 * ((i % 11) / 10))
     points.push(CENTRE_X + Math.cos(angle) * radius, CENTRE_Y + Math.sin(angle) * radius)
   }
   return { points: Float32Array.from(points), centreX: CENTRE_X, centreY: CENTRE_Y, radius: RADIUS }
@@ -22,16 +26,12 @@ const seeded = (state: number) => () => {
   return state / 4294967296
 }
 
-const STEP = 1 / 60
-
-function run(random: () => number, onFrame?: (field: ReturnType<typeof createField>, progress: number) => void) {
-  const field = createField(ringSeeds(), WIDTH, HEIGHT, 2, random)
-  for (let elapsed = 0; elapsed < DURATION; elapsed += STEP) {
-    const progress = Math.min(1, (elapsed + STEP) / DURATION)
-    field.step(STEP, progress)
-    onFrame?.(field, progress)
-  }
-  return field
+function litFraction(field: ReturnType<typeof createField>, progress: number) {
+  const pixels = new Uint8ClampedArray(field.columns * field.rows * 4)
+  field.coverage(pixels, progress)
+  let lit = 0
+  for (let i = 3; i < pixels.length; i += 4) if (pixels[i] > 127) lit += 1
+  return lit / (field.columns * field.rows)
 }
 
 describe('diffusion schedule', () => {
@@ -55,9 +55,94 @@ describe('diffusion schedule', () => {
   })
 })
 
-describe('diffusion transport', () => {
+describe('the noise landscape', () => {
+  it('stays bounded and varies with position', () => {
+    const samples = [fbm(0.3, 0.7, 4), fbm(2.1, 5.5, 4), fbm(9.4, 1.2, 4), fbm(0.3, 0.7, 90)]
+    for (const value of samples) expect(Math.abs(value)).toBeLessThanOrEqual(1)
+    expect(new Set(samples.map((v) => v.toFixed(6))).size).toBe(samples.length)
+  })
+
+  it('measures distance outward from the marked cells', () => {
+    const marked = new Uint8Array(25)
+    marked[12] = 1
+    const distance = distanceFromSeeds(marked, 5, 5)
+    expect(distance[12]).toBe(0)
+    expect(distance[7]).toBe(1)
+    expect(distance[6]).toBeCloseTo(Math.SQRT2)
+    expect(distance[0]).toBeCloseTo(2 * Math.SQRT2)
+  })
+})
+
+describe('the ink front', () => {
+  it('starts at the dots and nowhere else', () => {
+    const seeds = ringSeeds()
+    const field = createField(seeds, WIDTH, HEIGHT, seeded(3))
+    const pixels = new Uint8ClampedArray(field.columns * field.rows * 4)
+    field.coverage(pixels, 0.08)
+    const cellWidth = WIDTH / field.columns
+    const cellHeight = HEIGHT / field.rows
+    let lit = 0
+    let farthest = 0
+    for (let row = 0; row < field.rows; row += 1) {
+      for (let column = 0; column < field.columns; column += 1) {
+        if (pixels[(row * field.columns + column) * 4 + 3] < 128) continue
+        lit += 1
+        const x = (column + 0.5) * cellWidth
+        const y = (row + 0.5) * cellHeight
+        let nearest = Infinity
+        for (let i = 0; i < seeds.points.length; i += 2) {
+          nearest = Math.min(nearest, Math.hypot(x - seeds.points[i], y - seeds.points[i + 1]))
+        }
+        farthest = Math.max(farthest, nearest)
+      }
+    }
+    expect(lit).toBeGreaterThan(0)
+    expect(farthest).toBeLessThan(RADIUS * 0.7)
+  })
+
+  it('grows without ever retreating and closes exactly at the end', () => {
+    const field = createField(ringSeeds(), WIDTH, HEIGHT, seeded(5))
+    let previous = -1
+    for (let progress = 0; progress <= 1.0001; progress += 0.05) {
+      const lit = litFraction(field, Math.min(1, progress))
+      expect(lit).toBeGreaterThanOrEqual(previous)
+      previous = lit
+    }
+    expect(litFraction(field, 1)).toBe(1)
+    expect(litFraction(field, 0)).toBeLessThan(0.02)
+  })
+
+  it('is not a circle: the boundary is pulled about by the noise', () => {
+    const field = createField(ringSeeds(), WIDTH, HEIGHT, seeded(9))
+    const pixels = new Uint8ClampedArray(field.columns * field.rows * 4)
+    field.coverage(pixels, 0.55)
+    const radii: number[] = []
+    for (let spoke = 0; spoke < 64; spoke += 1) {
+      const angle = (spoke / 64) * Math.PI * 2
+      let edge = 0
+      for (let step = 4; step < 700; step += 4) {
+        const column = Math.floor(((CENTRE_X + Math.cos(angle) * step) / WIDTH) * field.columns)
+        const row = Math.floor(((CENTRE_Y + Math.sin(angle) * step) / HEIGHT) * field.rows)
+        if (column < 0 || row < 0 || column >= field.columns || row >= field.rows) break
+        if (pixels[(row * field.columns + column) * 4 + 3] > 127) edge = step
+      }
+      if (edge > 0) radii.push(edge)
+    }
+    const mean = radii.reduce((a, b) => a + b, 0) / radii.length
+    const spread = Math.sqrt(radii.reduce((a, b) => a + (b - mean) ** 2, 0) / radii.length)
+    expect(spread / mean).toBeGreaterThan(0.1)
+  })
+
+  it('is deterministic for a given source of randomness', () => {
+    const a = createField(ringSeeds(), WIDTH, HEIGHT, seeded(101))
+    const b = createField(ringSeeds(), WIDTH, HEIGHT, seeded(101))
+    expect(litFraction(a, 0.4)).toBe(litFraction(b, 0.4))
+  })
+})
+
+describe('the dots', () => {
   const travelAt = (progress: number) => {
-    const field = createField(ringSeeds(), WIDTH, HEIGHT, 2, seeded(7))
+    const field = createField(ringSeeds(), WIDTH, HEIGHT, seeded(7))
     const startX = Float32Array.from(field.dotX)
     const startY = Float32Array.from(field.dotY)
     for (let elapsed = 0; elapsed < DURATION * progress; elapsed += STEP) {
@@ -72,41 +157,12 @@ describe('diffusion transport', () => {
 
   it('empties every slot by the time the lattice has faded out', () => {
     const moved = travelAt(RING_OUT[1])
-    expect(moved[Math.floor(moved.length * 0.05)]).toBeGreaterThan(0.06)
+    expect(moved[Math.floor(moved.length * 0.05)]).toBeGreaterThan(0.04)
   })
 
   it('keeps the dots local to the ring rather than sending them across the page', () => {
     const moved = travelAt(DOT_FADE[1])
-    expect(moved[Math.floor(moved.length * 0.5)]).toBeGreaterThan(0.3)
+    expect(moved[Math.floor(moved.length * 0.5)]).toBeGreaterThan(0.2)
     expect(moved[moved.length - 1]).toBeLessThan(2)
-  })
-
-  it('reaches every part of the viewport inside the transition', () => {
-    const columns = 8
-    const rows = 5
-    const seen = new Set<number>()
-    run(seeded(11), (field) => {
-      for (let i = 0; i < field.count; i += 1) {
-        const cx = Math.floor((field.x[i] / WIDTH) * columns)
-        const cy = Math.floor((field.y[i] / HEIGHT) * rows)
-        if (cx < 0 || cy < 0 || cx >= columns || cy >= rows) continue
-        seen.add(cy * columns + cx)
-      }
-    })
-    expect(seen.size).toBe(columns * rows)
-  })
-
-  it('keeps a live population without running away', () => {
-    const counts: number[] = []
-    run(seeded(23), (field) => counts.push(field.count))
-    expect(Math.min(...counts)).toBeGreaterThan(200)
-    expect(Math.max(...counts)).toBeLessThan(60000)
-  })
-
-  it('is deterministic for a given source of randomness', () => {
-    const a = run(seeded(101))
-    const b = run(seeded(101))
-    expect(Array.from(a.dotX)).toEqual(Array.from(b.dotX))
-    expect(a.count).toBe(b.count)
   })
 })

@@ -2,16 +2,14 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { prefersReducedMotion } from '../lib/motion'
 import {
-  DOT_ALPHA, DOT_FADE, DURATION, GAIN_POW, GAIN_RATE, MARK_ALPHA,
-  MARK_ALPHA_POW, MARK_RADIUS, MARK_RADIUS_POW, RING_BACK, RING_OUT, SIDE_WEIGHT,
-  SPREAD, SPREAD_POW, VEIL_CAP, createField, ramp, readSchedule, sampleSeeds, window01,
+  DOT_ALPHA, DOT_FADE, DURATION, RING_BACK, RING_OUT, VEIL_CAP,
+  createField, readSchedule, sampleSeeds, window01,
   type Field,
 } from '../lib/diffusion'
 
-const REF_REACH = 900
 const IGNITION_FLOOR = 2000
-const FIRST_DELAY = [30000, 50000]
-const INTERVAL = [25000, 45000]
+const FIRST_DELAY = [5000, 10000]
+const INTERVAL = [15000, 40000]
 const DEFER = 6000
 const STEP = 1 / 60
 const MAX_STEPS = 4
@@ -20,12 +18,13 @@ const active = ref(false)
 const canvas = ref<HTMLCanvasElement | null>(null)
 const dots = ref<HTMLCanvasElement | null>(null)
 
-const scratch = document.createElement('canvas')
+const level = document.createElement('canvas')
 let field: Field | null = null
 let context: CanvasRenderingContext2D | null = null
 let dotContext: CanvasRenderingContext2D | null = null
-let scratchContext: CanvasRenderingContext2D | null = null
-let sprites = new Map<number, HTMLCanvasElement>()
+let levelContext: CanvasRenderingContext2D | null = null
+let coverage: ImageData | null = null
+let discs = new Map<number, HTMLCanvasElement>()
 let timer = 0
 let frame = 0
 let last = 0
@@ -45,32 +44,6 @@ const held = () => {
   return Boolean(document.querySelector('.shelf-card:hover, .hero-learn:hover'))
 }
 
-// A soft round mark, cached per radius. Used for both the filament marks and the dots,
-// because per-particle arc() and fill() will not hold sixty frames at these counts.
-function sprite(radius: number): HTMLCanvasElement {
-  const key = Math.round(radius * 2)
-  const cached = sprites.get(key)
-  if (cached) return cached
-  const size = Math.max(2, Math.ceil(key / 2) * 2 + 2)
-  const mark = document.createElement('canvas')
-  mark.width = mark.height = size
-  const ink = mark.getContext('2d')!
-  const gradient = ink.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  gradient.addColorStop(0, 'rgba(255,255,255,1)')
-  gradient.addColorStop(0.5, 'rgba(255,255,255,0.45)')
-  gradient.addColorStop(1, 'rgba(255,255,255,0)')
-  ink.fillStyle = gradient
-  ink.fillRect(0, 0, size, size)
-  sprites.set(key, mark)
-  return mark
-}
-
-// Bleed the ink one step outward, then amplify it. A normalised cross rather than
-// ctx.filter blur, which this project cannot rely on: Chrome under mobile emulation
-// does not expose it at all, and the transition silently never started there.
-// The dots keep the ring's own hard edge; only the filament marks are soft.
-const discs = new Map<number, HTMLCanvasElement>()
-
 function disc(radius: number): HTMLCanvasElement {
   const key = Math.round(radius * 2)
   const cached = discs.get(key)
@@ -87,52 +60,21 @@ function disc(radius: number): HTMLCanvasElement {
   return mark
 }
 
-function grow(progress: number, dt: number) {
-  if (!context || !scratchContext || !field) return
-  const veil = canvas.value!
-  const spread = Math.max(1, Math.round(ramp(SPREAD, progress, SPREAD_POW) * (field.reach / REF_REACH)))
-  const gain = ramp(GAIN_RATE, progress, GAIN_POW) * dt
-  scratchContext.globalCompositeOperation = 'copy'
-  scratchContext.globalAlpha = 1 - 4 * SIDE_WEIGHT
-  scratchContext.drawImage(veil, 0, 0)
-  scratchContext.globalCompositeOperation = 'lighter'
-  scratchContext.globalAlpha = SIDE_WEIGHT
-  scratchContext.drawImage(veil, -spread, 0)
-  scratchContext.drawImage(veil, spread, 0)
-  scratchContext.drawImage(veil, 0, -spread)
-  scratchContext.drawImage(veil, 0, spread)
-  context.globalCompositeOperation = 'copy'
-  context.globalAlpha = 1
-  context.drawImage(scratch, 0, 0)
-  if (gain <= 0) return
-  context.globalCompositeOperation = 'lighter'
-  context.globalAlpha = gain
-  context.drawImage(scratch, 0, 0)
-  context.globalAlpha = 1
-}
-
-function paint(progress: number) {
-  if (!context || !field) return
-  const unit = field.reach / REF_REACH
-  const radius = ramp(MARK_RADIUS, progress, MARK_RADIUS_POW) * unit
-  context.globalCompositeOperation = 'lighter'
-  context.globalAlpha = ramp(MARK_ALPHA, progress, MARK_ALPHA_POW)
-  context.fillStyle = '#fff'
-  const { x, y, count } = field
-  if (radius < 1.5) {
-    for (let i = 0; i < count; i += 1) context.fillRect(x[i] | 0, y[i] | 0, 1, 1)
-  } else {
-    const mark = sprite(radius)
-    const half = mark.width / 2
-    for (let i = 0; i < count; i += 1) context.drawImage(mark, (x[i] - half) | 0, (y[i] - half) | 0)
-  }
-  context.globalAlpha = 1
-}
-
 // The ring keeps drawing exactly as it always has; only the element's ink level moves,
 // so the dots empty out of the lattice and return without the ring knowing.
-function ringInk(level: number) {
-  document.documentElement.style.setProperty('--ring-ink', level.toFixed(3))
+function ringInk(value: number) {
+  document.documentElement.style.setProperty('--ring-ink', value.toFixed(3))
+}
+
+function paintInk(progress: number) {
+  if (!context || !levelContext || !coverage || !field) return
+  field.coverage(coverage.data, progress)
+  levelContext.putImageData(coverage, 0, 0)
+  context.globalCompositeOperation = 'copy'
+  context.globalAlpha = 1
+  context.imageSmoothingEnabled = true
+  context.imageSmoothingQuality = 'high'
+  context.drawImage(level, 0, 0, width, height)
 }
 
 function paintDots(progress: number) {
@@ -144,9 +86,7 @@ function paintDots(progress: number) {
   const mark = disc(dotRadius)
   const half = mark.width / 2
   const { dotX, dotY, dotCount } = field
-  for (let i = 0; i < dotCount; i += 1) {
-    dotContext.drawImage(mark, (dotX[i] - half) | 0, (dotY[i] - half) | 0)
-  }
+  for (let i = 0; i < dotCount; i += 1) dotContext.drawImage(mark, dotX[i] - half, dotY[i] - half)
   dotContext.globalAlpha = 1
 }
 
@@ -158,7 +98,6 @@ function commit() {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#fbfbf9' : '#040406')
   ringInk(1)
   dotContext?.clearRect(0, 0, width, height)
-  context?.setTransform(1, 0, 0, 1, 0, 0)
   context!.globalCompositeOperation = 'source-over'
   context!.globalAlpha = 1
   context!.clearRect(0, 0, width, height)
@@ -174,9 +113,8 @@ function tick(now: number) {
   while (carry >= STEP && steps < MAX_STEPS) {
     elapsed += STEP
     const progress = Math.min(1, elapsed / DURATION)
-    grow(progress, STEP)
     field?.step(STEP, progress)
-    paint(progress)
+    paintInk(progress)
     paintDots(progress)
     ringInk(1 - window01(RING_OUT, progress) * (1 - window01(RING_BACK, progress)))
     carry -= STEP
@@ -204,9 +142,10 @@ function stop() {
   field = null
   context = null
   dotContext = null
-  scratchContext = null
+  levelContext = null
+  coverage = null
   document.documentElement.style.removeProperty('--ring-ink')
-  sprites = new Map()
+  discs = new Map()
   active.value = false
 }
 
@@ -230,16 +169,19 @@ async function ignite() {
   element.height = height
   dotElement.width = width
   dotElement.height = height
-  scratch.width = width
-  scratch.height = height
   context = element.getContext('2d')
   dotContext = dotElement.getContext('2d')
-  scratchContext = scratch.getContext('2d')
-  if (!context || !dotContext || !scratchContext) return stop()
+  if (!context || !dotContext) return stop()
   context.clearRect(0, 0, width, height)
   dotRadius = Math.max(1, (Math.min(rect.width, rect.height) / 300) * scale)
 
   field = createField(seeds, width, height)
+  level.width = field.columns
+  level.height = field.rows
+  levelContext = level.getContext('2d')
+  if (!levelContext) return stop()
+  coverage = levelContext.createImageData(field.columns, field.rows)
+
   elapsed = 0
   carry = 0
   closing = false

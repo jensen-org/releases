@@ -73,10 +73,9 @@ Fonts link or `@import` is blocked in production; a new face has to be a file an
 ## The flip
 
 The page has two themes and it moves between them by diffusion, not by a fade or a sweep. The
-ring's dots liquefy, stream off the lattice as filaments, branch, and flood the viewport until
-the ink has eaten the page. The dots then settle back into the lattice in the theme that arrived.
-It runs the first time between thirty and fifty seconds in, then every twenty-five to forty-five,
-and takes 3.2 seconds.
+ring's dots liquefy, ink spreads out of the lattice and floods the viewport until it has eaten the
+page, and the dots then settle back into the lattice in the theme that arrived. It runs the first
+time five to ten seconds in, then every fifteen to forty, and takes 3.2 seconds.
 
 - The dark palette is the **exact difference-inverse** of the light one, `255 - v` per channel, in
   both `style.css` and the PrimeVue preset. That is not an aesthetic choice, it is what makes the
@@ -84,24 +83,25 @@ and takes 3.2 seconds.
 - `DiffusionVeil.vue` paints white into a fixed full-viewport canvas composited with
   `mix-blend-mode: difference`. On a monochrome page that is exact inversion: white flips what is
   under it, transparent changes nothing. Light to dark reads as black ink flooding paper; dark to
-  light is the same code and shows white filaments on black.
+  light is the same code and shows the ink as white on black.
 - Seeds come from **the ring's own pixels**. The canvas is drawn into a 150 pixel scratch canvas
-  once at ignition and every lit pixel becomes a particle, so the field starts exactly where the
-  dots are, including whatever spin and shear the simulation had reached.
+  once at ignition and every lit pixel becomes a seed, so the front starts exactly where the dots
+  are, including whatever spin and shear the simulation had reached.
+- The ink is a **level set through a fixed Perlin landscape**, not a cloud of particles. Height is
+  the chamfer distance from those seeds, raised to a power so it climbs steeply at the dots, minus
+  four octaves of fractal noise. A threshold sweeps from the lowest cell to the highest, so the
+  front always begins at the mark, grows in organic lobes rather than as a circle, and closes
+  exactly as the level tops out. Particles gave a furry, stippled edge; a level set is smooth at
+  any scale because the boundary is an interpolated contour rather than a spray of marks.
+- The field is 420 cells on its long side and is drawn upscaled with smoothing, so boundary detail
+  and per-frame cost are traded against each other, never against sharpness. The noise itself is
+  evaluated on a half-scale grid and interpolated, which keeps the one-time build inside a frame.
 - `SignalRing.vue` and `ring.ts` are not touched by any of this. Dark mode reaches the mark through
   `filter: invert(1)` on the element, which leaves the backing store writing `#0E0E0D` in both
   themes, and the dots empty out of the lattice through a `--ring-ink` custom property the veil
   drives. The simulation never learns that a flip happened.
-- The front is a direct function of progress, shaped per angle by a slow noise lobe so it grows in
-  tendrils rather than as a disc, and every lobe converges on the full reach over the last third so
-  the far corners arrive with everything else. **Recruitment behind the front is what advances it**;
-  advection alone cannot cross a viewport in three seconds, because diffusion spreads as the square
-  root of time.
-- The dots leave on their own layer, drawn every frame rather than accumulated, with the ring's
-  own hard edge. They stay local to the ring; the long reach is the filament field's job.
-- Ink bleeds with a normalised cross dilate, one veil pixel at a time, then a gain pass amplifies
-  it. Not `ctx.filter` blur: Chrome under mobile emulation does not expose `filter` on a 2D context
-  at all, and the whole transition silently never started there.
+- The dots leave on their own layer, drawn fresh every frame rather than accumulated, with the
+  ring's own hard edge. They stay local to the mark; spreading across the page is the ink's job.
 - The last frame hard-fills the veil to solid white, and the next one swaps `data-theme`, updates
   `theme-color` and clears the canvas together. `difference(14, 255)` and `invert(14)` are both 241,
   so nothing moves on the seam.
