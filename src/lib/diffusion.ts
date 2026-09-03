@@ -1,18 +1,28 @@
 import { curl2, noise3 } from './ring'
 
 export const DURATION = 3.2
-export const VEIL_CAP = 1000
+export const VEIL_CAP = 1400
 
-/** Cells on the long side of the coverage field. It is drawn upscaled and smoothed,
- *  so this trades boundary detail against per-frame cost, not against sharpness. */
-export const FIELD_LONG = 420
+/** Cells on the long side of the coverage field. Drawn upscaled and smoothed, so this
+ *  trades boundary crispness against per-frame cost. */
+export const FIELD_LONG = 640
+
+/** Rows built per slice. The whole build runs to tens of milliseconds, which is more than a
+ *  frame, so callers drain it a slice at a time while the ring keeps turning. */
+const SLICE_ROWS = 24
 
 const OCTAVES = 4
-const DISTANCE_POW = 0.6
 const NOISE_CELL = 0.13
-const NOISE_AMP = 0.30
-const SOFT = 0.025
+const NOISE_AMP = 0.34
+const DISTANCE_POW = 0.6
+const SOFT = 0.01
 const GROWTH_POW = 1.8
+const WOBBLE = 0.04
+
+/** The landscape is sampled at several depths of the noise and interpolated between them as
+ *  the front advances, so the boundary keeps reshaping instead of revealing a fixed outline. */
+const DEPTHS = 4
+const DEPTH_STEP = 0.22
 
 export const DOT_ALPHA = 241 / 255
 export const DOT_FADE = [0.4, 0.72]
@@ -144,17 +154,6 @@ export type Field = {
   coverage(pixels: Uint8ClampedArray, progress: number): void
 }
 
-/**
- * The ink is a level set through a fixed Perlin landscape rather than a cloud of particles,
- * which is what keeps the boundary smooth at any scale. Height is the distance from the ring's
- * own dots, pulled about by fractal noise, so the front always begins at the mark and grows
- * outward in organic lobes, and the highest cell is covered exactly as the level tops out.
- */
-/** Rows of the noise grid built per slice. The whole build is about twenty milliseconds,
- *  which is more than a frame, so the caller drains this a slice at a time while the ring
- *  keeps turning. Nothing is drawn until it finishes. */
-const SLICE_ROWS = 26
-
 export function createField(seeds: Seeds, width: number, height: number, random: () => number = Math.random): Field {
   const build = buildField(seeds, width, height, random)
   let step = build.next()
@@ -162,17 +161,26 @@ export function createField(seeds: Seeds, width: number, height: number, random:
   return step.value
 }
 
+/**
+ * The ink is a level set through a Perlin landscape rather than a cloud of particles, which is
+ * what keeps the boundary smooth at any scale. Height is the distance from the ring's own dots,
+ * raised to a power so it climbs steeply at the mark, minus fractal noise, so the front always
+ * begins at the dots and grows in organic lobes. The noise is sampled at several depths and
+ * interpolated as the front advances, so the boundary keeps reshaping while it moves; wetted
+ * cells are held at their high-water mark, so the front writhes but the ink never retreats.
+ */
 export function* buildField(seeds: Seeds, width: number, height: number, random: () => number = Math.random): Generator<void, Field> {
   const long = Math.max(width, height)
   const columns = Math.max(8, Math.round((width / long) * FIELD_LONG))
   const rows = Math.max(8, Math.round((height / long) * FIELD_LONG))
+  const cells = columns * rows
 
   const originX = seeds.centreX
   const originY = seeds.centreY
   let reach = 0
   for (const [cx, cy] of [[0, 0], [width, 0], [0, height], [width, height]]) reach = Math.max(reach, Math.hypot(cx - originX, cy - originY))
 
-  const marked = new Uint8Array(columns * rows)
+  const marked = new Uint8Array(cells)
   for (let i = 0; i < seeds.points.length; i += 2) {
     const column = Math.floor((seeds.points[i] / width) * columns)
     const row = Math.floor((seeds.points[i + 1] / height) * rows)
@@ -182,55 +190,65 @@ export function* buildField(seeds: Seeds, width: number, height: number, random:
 
   const distance = yield* distancePasses(marked, columns, rows, SLICE_ROWS)
   let span = 1
-  for (let i = 0; i < distance.length; i += 1) if (distance[i] > span) span = distance[i]
+  for (let i = 0; i < cells; i += 1) if (distance[i] > span) span = distance[i]
+
+  // Steep near the dots and shallow far out, so noise gives the front its shape without
+  // letting the whole dot band cross the level at once.
+  yield
+  const base = new Float32Array(cells)
+  for (let i = 0; i < cells; i += 1) base[i] = Math.pow(distance[i] / span, DISTANCE_POW)
 
   const cell = Math.max(1, reach * NOISE_CELL)
   const phase = random() * 512
-
-  // The noise is smooth, so it is evaluated on a half-scale grid and interpolated. That is
-  // a quarter of the work for an identical picture, and the build happens in one frame.
   const noiseColumns = Math.ceil(columns / 2) + 1
   const noiseRows = Math.ceil(rows / 2) + 1
-  const grid = new Float32Array(noiseColumns * noiseRows)
-  for (let first = 0; first < noiseRows; first += SLICE_ROWS) {
-    yield
-    const past = Math.min(noiseRows, first + SLICE_ROWS)
-    for (let row = first; row < past; row += 1) {
-      for (let column = 0; column < noiseColumns; column += 1) {
-        const x = ((column * 2 + 0.5) * width) / columns
-        const y = ((row * 2 + 0.5) * height) / rows
-        grid[row * noiseColumns + column] = fbm(x / cell, y / cell, phase)
+  const layers: Float32Array[] = []
+  let low = Infinity
+  let high = -Infinity
+
+  for (let depth = 0; depth < DEPTHS; depth += 1) {
+    // The noise is smooth, so each depth is evaluated on a half-scale grid and interpolated.
+    const grid = new Float32Array(noiseColumns * noiseRows)
+    const z = phase + depth * DEPTH_STEP
+    for (let first = 0; first < noiseRows; first += SLICE_ROWS) {
+      yield
+      const past = Math.min(noiseRows, first + SLICE_ROWS)
+      for (let row = first; row < past; row += 1) {
+        for (let column = 0; column < noiseColumns; column += 1) {
+          const x = ((column * 2 + 0.5) * width) / columns
+          const y = ((row * 2 + 0.5) * height) / rows
+          grid[row * noiseColumns + column] = fbm(x / cell, y / cell, z)
+        }
       }
     }
-  }
-  const sampleNoise = (column: number, row: number) => {
-    const fx = column / 2
-    const fy = row / 2
-    const x0 = Math.min(noiseColumns - 2, Math.floor(fx))
-    const y0 = Math.min(noiseRows - 2, Math.floor(fy))
-    const tx = fx - x0
-    const ty = fy - y0
-    const top = grid[y0 * noiseColumns + x0] * (1 - tx) + grid[y0 * noiseColumns + x0 + 1] * tx
-    const bottom = grid[(y0 + 1) * noiseColumns + x0] * (1 - tx) + grid[(y0 + 1) * noiseColumns + x0 + 1] * tx
-    return top * (1 - ty) + bottom * ty
+
+    const layer = new Float32Array(cells)
+    for (let first = 0; first < rows; first += SLICE_ROWS) {
+      yield
+      const past = Math.min(rows, first + SLICE_ROWS)
+      for (let row = first; row < past; row += 1) {
+        const fy = row / 2
+        const y0 = Math.min(noiseRows - 2, Math.floor(fy))
+        const ty = fy - y0
+        for (let column = 0; column < columns; column += 1) {
+          const fx = column / 2
+          const x0 = Math.min(noiseColumns - 2, Math.floor(fx))
+          const tx = fx - x0
+          const top = grid[y0 * noiseColumns + x0] * (1 - tx) + grid[y0 * noiseColumns + x0 + 1] * tx
+          const bottom = grid[(y0 + 1) * noiseColumns + x0] * (1 - tx) + grid[(y0 + 1) * noiseColumns + x0 + 1] * tx
+          const at = row * columns + column
+          const value = base[at] - NOISE_AMP * (top * (1 - ty) + bottom * ty)
+          layer[at] = value
+          if (value < low) low = value
+          if (value > high) high = value
+        }
+      }
+    }
+    layers.push(layer)
   }
 
   yield
-  const heights = new Float32Array(columns * rows)
-  let low = Infinity
-  let high = -Infinity
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      const at = row * columns + column
-      // Steep near the dots and shallow far out, so noise gives the front its shape
-      // without letting the whole dot band cross the level at once.
-      const value = Math.pow(distance[at] / span, DISTANCE_POW) - NOISE_AMP * sampleNoise(column, row)
-      heights[at] = value
-      if (value < low) low = value
-      if (value > high) high = value
-    }
-  }
-
+  const wetted = new Float32Array(cells)
   const dotCount = seeds.points.length / 2
   const dotX = new Float32Array(dotCount)
   const dotY = new Float32Array(dotCount)
@@ -269,14 +287,23 @@ export function* buildField(seeds: Seeds, width: number, height: number, random:
   }
 
   function coverage(pixels: Uint8ClampedArray, progress: number) {
-    const threshold = low + (high - low + SOFT) * Math.pow(progress, GROWTH_POW)
-    for (let i = 0; i < heights.length; i += 1) {
-      const value = (threshold - heights[i]) / SOFT
+    const shaped = Math.pow(progress, GROWTH_POW)
+    // A gentle surge and ease in the rate, kept safe by the high-water mark below.
+    const level = low + (high - low + SOFT) * (shaped + WOBBLE * Math.sin(shaped * Math.PI * 3))
+    const depth = progress * (DEPTHS - 1)
+    const first = Math.min(DEPTHS - 2, Math.floor(depth))
+    const blend = depth - first
+    const near = layers[first]
+    const far = layers[first + 1]
+    for (let i = 0; i < cells; i += 1) {
+      const value = (level - (near[i] + (far[i] - near[i]) * blend)) / SOFT
+      const alpha = value <= 0 ? 0 : value >= 1 ? 1 : value
+      if (alpha > wetted[i]) wetted[i] = alpha
       const at = i * 4
       pixels[at] = 255
       pixels[at + 1] = 255
       pixels[at + 2] = 255
-      pixels[at + 3] = value <= 0 ? 0 : value >= 1 ? 255 : Math.round(value * 255)
+      pixels[at + 3] = Math.round(wetted[i] * 255)
     }
   }
 

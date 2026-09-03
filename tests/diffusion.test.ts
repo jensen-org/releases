@@ -106,7 +106,7 @@ describe('the ink front', () => {
     const seeds = ringSeeds()
     const field = createField(seeds, WIDTH, HEIGHT, seeded(3))
     const pixels = new Uint8ClampedArray(field.columns * field.rows * 4)
-    field.coverage(pixels, 0.08)
+    field.coverage(pixels, 0.22)
     const cellWidth = WIDTH / field.columns
     const cellHeight = HEIGHT / field.rows
     let lit = 0
@@ -128,16 +128,34 @@ describe('the ink front', () => {
     expect(farthest).toBeLessThan(RADIUS * 0.7)
   })
 
-  it('grows without ever retreating and closes exactly at the end', () => {
+  it('starts dry and closes exactly at the end', () => {
+    expect(litFraction(createField(ringSeeds(), WIDTH, HEIGHT, seeded(5)), 0)).toBeLessThan(0.02)
+    expect(litFraction(createField(ringSeeds(), WIDTH, HEIGHT, seeded(5)), 1)).toBe(1)
+  })
+
+  it('never retreats, even though the landscape keeps reshaping under it', () => {
     const field = createField(ringSeeds(), WIDTH, HEIGHT, seeded(5))
-    let previous = -1
+    const pixels = new Uint8ClampedArray(field.columns * field.rows * 4)
+    const previous = new Uint8ClampedArray(field.columns * field.rows)
+    let retreats = 0
+    let previousLit = -1
+    const litCounts: number[] = []
     for (let progress = 0; progress <= 1.0001; progress += 0.05) {
-      const lit = litFraction(field, Math.min(1, progress))
-      expect(lit).toBeGreaterThanOrEqual(previous)
-      previous = lit
+      field.coverage(pixels, Math.min(1, progress))
+      let lit = 0
+      for (let i = 0; i < previous.length; i += 1) {
+        const alpha = pixels[i * 4 + 3]
+        // The high-water mark is what lets the front writhe without un-inking the page.
+        if (alpha < previous[i]) retreats += 1
+        previous[i] = alpha
+        if (alpha > 127) lit += 1
+      }
+      litCounts.push(lit)
+      previousLit = lit
     }
-    expect(litFraction(field, 1)).toBe(1)
-    expect(litFraction(field, 0)).toBeLessThan(0.02)
+    expect(retreats).toBe(0)
+    expect(previousLit).toBe(field.columns * field.rows)
+    expect(litCounts).toEqual([...litCounts].sort((a, b) => a - b))
   })
 
   it('is not a circle: the boundary is pulled about by the noise', () => {

@@ -87,12 +87,19 @@ time five to ten seconds in, then every fifteen to forty, and takes 3.2 seconds.
 - Seeds come from **the ring's own pixels**. The canvas is drawn into a 150 pixel scratch canvas
   once at ignition and every lit pixel becomes a seed, so the front starts exactly where the dots
   are, including whatever spin and shear the simulation had reached.
-- The ink is a **level set through a fixed Perlin landscape**, not a cloud of particles. Height is
-  the chamfer distance from those seeds, raised to a power so it climbs steeply at the dots, minus
-  four octaves of fractal noise. A threshold sweeps from the lowest cell to the highest, so the
-  front always begins at the mark, grows in organic lobes rather than as a circle, and closes
-  exactly as the level tops out. Particles gave a furry, stippled edge; a level set is smooth at
-  any scale because the boundary is an interpolated contour rather than a spray of marks.
+- The ink is a **level set through a Perlin landscape**, not a cloud of particles. Height is the
+  chamfer distance from those seeds, raised to a power so it climbs steeply at the dots, minus four
+  octaves of fractal noise. A threshold sweeps from the lowest cell to the highest, so the front
+  always begins at the mark, grows in organic lobes rather than as a circle, and closes exactly as
+  the level tops out. Particles gave a furry, stippled edge; a level set is smooth at any scale
+  because the boundary is an interpolated contour rather than a spray of marks.
+- **The landscape moves under the front.** The noise is built at four depths and interpolated as
+  progress advances, so the boundary keeps reshaping while it travels instead of revealing a fixed
+  outline. Depths sit close together in the noise: spacing them further apart decorrelates them,
+  and averaging two decorrelated fields flattens the amplitude that gives the front its shape.
+- **Wetted cells are held at their high-water mark.** Without that, a morphing landscape would lift
+  a cell back above the level and the ink would visibly recede. With it the front writhes and the
+  page only ever gets wetter, which is both what ink does and what the tests assert.
 - The field is 420 cells on its long side and is drawn upscaled with smoothing, so boundary detail
   and per-frame cost are traded against each other, never against sharpness. The noise itself is
   evaluated on a half-scale grid and interpolated, a quarter of the work for the same picture.
@@ -109,8 +116,15 @@ time five to ten seconds in, then every fifteen to forty, and takes 3.2 seconds.
   `filter: invert(1)` on the element, which leaves the backing store writing `#0E0E0D` in both
   themes, and the dots empty out of the lattice through an opacity the veil sets on the element
   from outside. The simulation never learns that a flip happened.
-- The dots leave on their own layer, drawn fresh every frame rather than accumulated, with the
-  ring's own hard edge. They stay local to the mark; spreading across the page is the ink's job.
+- The dots ride on the same canvas, composited with `difference` there, which gives the same
+  picture as stacking a second difference layer over the page for half the blended area. They are
+  drawn fresh every frame with the ring's own hard edge, and stay local to the mark; spreading
+  across the page is the ink's job.
+- Three things cost this transition its frame rate before they were found, and all three are worth
+  keeping in mind before changing the drawing: `imageSmoothingQuality: 'high'` is a CPU resample in
+  Chrome and made the upscale eight times slower than bilinear; a second full-viewport blended
+  layer roughly doubled the compositing; and a live CSS `filter` on the animated grain made dark
+  mode permanently more expensive than light, so that inversion is baked into the image instead.
 - The last frame hard-fills the veil to solid white, and the next one swaps `data-theme`, updates
   `theme-color` and clears the canvas together. `difference(14, 255)` and `invert(14)` are both 241,
   so nothing moves on the seam.

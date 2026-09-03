@@ -17,12 +17,10 @@ const BUILD_BUDGET = 6
 
 const active = ref(false)
 const canvas = ref<HTMLCanvasElement | null>(null)
-const dots = ref<HTMLCanvasElement | null>(null)
 
 const level = document.createElement('canvas')
 let field: Field | null = null
 let context: CanvasRenderingContext2D | null = null
-let dotContext: CanvasRenderingContext2D | null = null
 let levelContext: CanvasRenderingContext2D | null = null
 let coverage: ImageData | null = null
 let discs = new Map<number, HTMLCanvasElement>()
@@ -76,28 +74,29 @@ function releaseRing() {
   ringElement = null
 }
 
-function paintInk(progress: number) {
+function paint(progress: number) {
   if (!context || !levelContext || !coverage || !field) return
   field.coverage(coverage.data, progress)
   levelContext.putImageData(coverage, 0, 0)
   context.globalCompositeOperation = 'copy'
   context.globalAlpha = 1
+  // Bilinear, not 'high': the high-quality resample is a CPU path in Chrome and it cost
+  // the transition its frame rate at this upscale.
   context.imageSmoothingEnabled = true
-  context.imageSmoothingQuality = 'high'
+  context.imageSmoothingQuality = 'low'
   context.drawImage(level, 0, 0, width, height)
-}
 
-function paintDots(progress: number) {
-  if (!dotContext || !field) return
-  dotContext.clearRect(0, 0, width, height)
+  // The dots ride on the same layer. Compositing them with 'difference' here gives the
+  // same picture as a second difference layer over the page, at half the blended area.
   const alpha = DOT_ALPHA * (1 - window01(DOT_FADE, progress))
   if (alpha <= 0.002) return
-  dotContext.globalAlpha = alpha
+  context.globalCompositeOperation = 'difference'
+  context.globalAlpha = alpha
   const mark = disc(dotRadius)
   const half = mark.width / 2
   const { dotX, dotY, dotCount } = field
-  for (let i = 0; i < dotCount; i += 1) dotContext.drawImage(mark, dotX[i] - half, dotY[i] - half)
-  dotContext.globalAlpha = 1
+  for (let i = 0; i < dotCount; i += 1) context.drawImage(mark, dotX[i] - half, dotY[i] - half)
+  context.globalAlpha = 1
 }
 
 function commit() {
@@ -107,7 +106,6 @@ function commit() {
   else root.dataset.theme = 'dark'
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#fbfbf9' : '#040406')
   ringInk(1)
-  dotContext?.clearRect(0, 0, width, height)
   context!.globalCompositeOperation = 'source-over'
   context!.globalAlpha = 1
   context!.clearRect(0, 0, width, height)
@@ -124,8 +122,7 @@ function tick(now: number) {
     elapsed += STEP
     const progress = Math.min(1, elapsed / DURATION)
     field?.step(STEP, progress)
-    paintInk(progress)
-    paintDots(progress)
+    paint(progress)
     ringInk(1 - window01(RING_OUT, progress) * (1 - window01(RING_BACK, progress)))
     carry -= STEP
     steps += 1
@@ -152,7 +149,6 @@ function stop() {
   building = false
   field = null
   context = null
-  dotContext = null
   levelContext = null
   coverage = null
   releaseRing()
@@ -173,9 +169,24 @@ async function ignite() {
   const seeds = sampleSeeds(ring, rect, scale)
   if (seeds.points.length === 0) return
 
-  // Build the noise landscape a slice per frame before anything is mounted or drawn.
-  // Doing it in one go costs about twenty milliseconds, which the ring loses as a stall.
+  // Mount the canvases empty first. Two full-viewport blended layers cost the compositor a
+  // frame to set up, and a transparent difference layer changes nothing on screen, so that
+  // cost is paid here rather than on the frame the diffusion becomes visible.
   building = true
+  active.value = true
+  await nextFrame()
+  if (!building) return
+  const element = canvas.value
+  if (!element) return stop()
+  element.width = width
+  element.height = height
+  context = element.getContext('2d')
+  if (!context) return stop()
+  context.clearRect(0, 0, width, height)
+  dotRadius = Math.max(1, (Math.min(rect.width, rect.height) / 300) * scale)
+
+  // Then build the noise landscape against a per-frame budget. In one go it costs about
+  // twenty milliseconds, which the ring loses as a stall.
   const build = buildField(seeds, width, height)
   let step = build.next()
   while (!step.done) {
@@ -185,24 +196,8 @@ async function ignite() {
     while (!step.done && performance.now() < until) step = build.next()
   }
   building = false
-  const ready = step.value
 
-  active.value = true
-  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  const element = canvas.value
-  const dotElement = dots.value
-  if (!element || !dotElement) return stop()
-  element.width = width
-  element.height = height
-  dotElement.width = width
-  dotElement.height = height
-  context = element.getContext('2d')
-  dotContext = dotElement.getContext('2d')
-  if (!context || !dotContext) return stop()
-  context.clearRect(0, 0, width, height)
-  dotRadius = Math.max(1, (Math.min(rect.width, rect.height) / 300) * scale)
-
-  field = ready
+  field = step.value
   ringElement = ring
   level.width = field.columns
   level.height = field.rows
@@ -255,8 +250,5 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <template v-if="active">
-    <canvas ref="canvas" class="diffusion-veil" aria-hidden="true" />
-    <canvas ref="dots" class="diffusion-veil diffusion-dots" aria-hidden="true" />
-  </template>
+  <canvas v-if="active" ref="canvas" class="diffusion-veil" aria-hidden="true" />
 </template>
