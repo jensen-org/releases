@@ -7,7 +7,7 @@ import { preset } from './theme'
 import './style.css'
 
 createApp(App)
-  .use(PrimeVue, { ripple: false, theme: { preset, options: { darkModeSelector: false } } })
+  .use(PrimeVue, { ripple: false, theme: { preset, options: { darkModeSelector: '[data-theme="dark"]' } } })
   .component('Card', Card)
   .component('Button', Button)
   .mount('#app')

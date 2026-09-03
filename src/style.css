@@ -22,6 +22,14 @@
   src: url('/fonts/poppins-600.woff2') format('woff2');
 }
 
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-400.woff2') format('woff2');
+}
+
 :root {
   --paper: #fbfbf9;
   --ink: #0e0e0d;
@@ -29,13 +37,44 @@
   --graphite: #56564f;
   --haze: #a8a8a0;
   --edge: #e4e4de;
+
   --sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --type-display: clamp(28px, 3.4vw, 46px);
+  --type-lede: clamp(10px, 0.8vw, 11px);
+  --type-label: 10px;
+  --type-micro: 9px;
+
+  --track-display: -0.02em;
+  --track-label: 0.14em;
+  --track-wide: 0.2em;
+  --track-wider: 0.42em;
+  --track-mono: 0.12em;
+
+  --control-pad: 11px 18px;
+  --control-radius: 2px;
+  --panel-radius: 12px;
+  --ease: var(--ease);
+
   font-family: var(--sans);
   color: var(--ink);
   background: var(--paper);
   color-scheme: light;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
+}
+
+/* The dark palette is the exact difference-inverse of the light one, which is what
+   lets the diffusion veil hand off to it without a visible step. */
+:root[data-theme='dark'] {
+  --paper: #040406;
+  --ink: #f1f1f2;
+  --ink-lift: #d1d1d6;
+  --graphite: #a9a9b0;
+  --haze: #57575f;
+  --edge: #1b1b21;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -57,41 +96,46 @@ h1, h2, p { margin: 0; }
 .brand { display: flex; align-items: center; gap: 11px; }
 
 .hero-headline {
-  font-size: clamp(26px, 3.1vw, 44px);
+  font-size: var(--type-display);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--track-display);
   line-height: 1.06;
-  max-width: 15ch;
+  max-width: 24ch;
   text-wrap: balance;
   color: var(--ink);
 }
 
 .hero-sub {
-  font-size: clamp(9px, 0.78vw, 11px);
+  margin-block-start: 14px;
+  font-size: var(--type-lede);
   font-weight: 400;
-  letter-spacing: 0.2em;
+  letter-spacing: var(--track-wide);
   line-height: 2;
   text-transform: uppercase;
-  text-indent: 0.2em;
-  max-width: 54ch;
+  text-indent: var(--track-wide);
+  max-width: 560px;
   color: var(--graphite);
 }
 
 .hero-learn {
+  margin-block-start: 22px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 9px;
-  font-size: 10px;
+  font-family: var(--sans);
+  font-size: var(--type-label);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
-  text-indent: 0.14em;
+  text-indent: var(--track-label);
   color: var(--ink);
   text-decoration: none;
-  padding: 11px 18px;
+  white-space: nowrap;
+  padding: var(--control-pad);
   border: 1px solid var(--edge);
-  border-radius: 2px;
-  transition: border-color 420ms cubic-bezier(0.16, 1, 0.3, 1), background 420ms cubic-bezier(0.16, 1, 0.3, 1), color 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: var(--control-radius);
+  transition: border-color 420ms var(--ease), background 420ms var(--ease), color 420ms var(--ease);
 }
 
 .hero-learn svg { width: 14px; height: 14px; flex: none; }
@@ -101,6 +145,7 @@ h1, h2, p { margin: 0; }
 .hero-learn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
 .hero-rule {
+  margin-block-start: 28px;
   width: 100%;
   height: 1px;
   background-image: radial-gradient(circle, var(--haze) 0.5px, transparent 0.5px);
@@ -120,11 +165,11 @@ h1, h2, p { margin: 0; }
 .brand-tile img { width: 68%; height: auto; display: block; filter: invert(1); }
 
 .brand-name {
-  font-size: 10px;
+  font-size: var(--type-label);
   font-weight: 500;
-  letter-spacing: 0.42em;
+  letter-spacing: var(--track-wider);
   text-transform: uppercase;
-  text-indent: 0.42em;
+  text-indent: var(--track-wider);
   color: var(--ink);
 }
 
@@ -139,8 +184,8 @@ h1, h2, p { margin: 0; }
 .hero-copy {
   display: grid;
   justify-items: start;
-  gap: clamp(13px, 2.1vh, 26px);
-  max-width: 600px;
+  gap: 0;
+  max-width: 660px;
   position: relative;
   z-index: 1;
 }
@@ -153,7 +198,7 @@ h1, h2, p { margin: 0; }
   pointer-events: none;
 }
 
-.signal-ring { display: block; width: 100%; height: 100%; }
+.signal-ring { display: block; width: 100%; height: 100%; opacity: var(--ring-ink, 1); }
 
 .baseline {
   display: flex;
@@ -166,11 +211,12 @@ h1, h2, p { margin: 0; }
 
 .baseline-status,
 .baseline-legal {
-  font-size: 9px;
+  font-family: var(--mono);
+  font-size: var(--type-micro);
   font-weight: 400;
-  letter-spacing: 0.2em;
+  letter-spacing: var(--track-mono);
   text-transform: uppercase;
-  text-indent: 0.2em;
+  text-indent: var(--track-mono);
   color: var(--graphite);
 }
 
@@ -178,19 +224,20 @@ h1, h2, p { margin: 0; }
 
 .baseline-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); flex: none; }
 
-.baseline-legal { text-decoration: none; transition: color 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+.baseline-legal { text-decoration: none; transition: color 420ms var(--ease); }
 
 .baseline-legal:hover { color: var(--ink); }
 
 .baseline-legal:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
 .shelf-card {
+  margin-block-start: 26px;
   width: 100%;
-  max-width: 560px;
   border: 1px solid var(--edge);
-  border-radius: 18px;
+  border-radius: var(--panel-radius);
   overflow: hidden;
   box-shadow: none;
+  background: var(--paper);
 }
 
 .shelf-card .p-card-body { padding: 0; gap: 0; }
@@ -209,7 +256,7 @@ h1, h2, p { margin: 0; }
 }
 
 .shelf-title {
-  font-size: 10px;
+  font-size: var(--type-label);
   font-weight: 500;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -217,9 +264,10 @@ h1, h2, p { margin: 0; }
 }
 
 .shelf-arch {
-  font-size: 9px;
+  font-family: var(--mono);
+  font-size: var(--type-micro);
   font-weight: 400;
-  letter-spacing: 0.24em;
+  letter-spacing: var(--track-mono);
   text-transform: uppercase;
   color: var(--haze);
 }
@@ -234,13 +282,14 @@ h1, h2, p { margin: 0; }
 
 .shelf-card .p-button {
   font-family: var(--sans);
-  font-size: 10px;
+  font-size: var(--type-label);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   gap: 9px;
-  padding: 11px 18px;
-  border-radius: 2px;
+  padding: var(--control-pad);
+  border: 1px solid transparent;
+  border-radius: var(--control-radius);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -263,26 +312,26 @@ h1, h2, p { margin: 0; }
 }
 
 .shelf-summary {
-  font-size: 9px;
+  font-family: var(--mono);
+  font-size: var(--type-micro);
   font-weight: 400;
-  letter-spacing: 0.2em;
+  letter-spacing: var(--track-mono);
   text-transform: uppercase;
-  text-indent: 0.2em;
+  text-indent: var(--track-mono);
   color: var(--graphite);
   font-variant-numeric: tabular-nums;
 }
 
 .releases-link {
-  font-size: 9px;
+  font-size: var(--type-micro);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
-  text-indent: 0.14em;
+  text-indent: var(--track-label);
   color: var(--ink);
   text-decoration: none;
   border-bottom: 1px solid var(--edge);
   padding-bottom: 3px;
-  transition: border-color 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 
@@ -291,8 +340,11 @@ h1, h2, p { margin: 0; }
 @media (max-width: 860px) {
   .hero { grid-template-columns: minmax(0, 1fr); gap: clamp(16px, 2.4vh, 26px); }
   .hero-copy { justify-self: stretch; max-width: none; }
-  .hero-headline { font-size: clamp(24px, 7vw, 34px); }
-  .hero-sub { line-height: 1.8; max-width: none; }
+  .hero-headline { font-size: clamp(24px, 7vw, 34px); max-width: 22ch; }
+  .hero-sub { margin-block-start: 12px; line-height: 1.8; max-width: none; }
+  .hero-learn { margin-block-start: 18px; }
+  .hero-rule { margin-block-start: 22px; }
+  .shelf-card { margin-block-start: 20px; }
   .ring { justify-self: center; block-size: max(280px, min(78vw, 340px)); }
   .shelf-card { max-width: none; }
   .shelf-head { padding: 13px 16px; }
@@ -301,21 +353,21 @@ h1, h2, p { margin: 0; }
   .shelf-facts { align-items: flex-start; text-align: left; }
 }
 
-.masthead { animation: settle 1000ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both; }
+.masthead { animation: settle 1000ms var(--ease) 80ms both; }
 
-.brand { animation: surface 700ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both; }
+.brand { animation: surface 700ms var(--ease) 80ms both; }
 
-.hero-headline { animation: surface 900ms cubic-bezier(0.16, 1, 0.3, 1) 240ms both; }
+.hero-headline { animation: surface 900ms var(--ease) 240ms both; }
 
-.hero-sub { animation: surface 900ms cubic-bezier(0.16, 1, 0.3, 1) 360ms both; }
+.hero-sub { animation: surface 900ms var(--ease) 360ms both; }
 
-.hero-learn { animation: surface 900ms cubic-bezier(0.16, 1, 0.3, 1) 440ms both; }
+.hero-learn { animation: surface 900ms var(--ease) 440ms both; }
 
-.hero-rule { animation: surface 900ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both; }
+.hero-rule { animation: surface 900ms var(--ease) 520ms both; }
 
-.shelf-card { animation: settle 1000ms cubic-bezier(0.16, 1, 0.3, 1) 600ms both, surface 900ms cubic-bezier(0.16, 1, 0.3, 1) 600ms both; }
+.shelf-card { animation: settle 1000ms var(--ease) 600ms both, surface 900ms var(--ease) 600ms both; }
 
-.baseline { animation: surface 900ms cubic-bezier(0.16, 1, 0.3, 1) 720ms both; }
+.baseline { animation: surface 900ms var(--ease) 720ms both; }
 
 @keyframes settle {
   from { transform: translateY(-10px); }
@@ -368,19 +420,19 @@ h1, h2, p { margin: 0; }
   background: var(--ink);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 420ms var(--ease);
 }
 
 .releases-link:hover::after,
 .releases-link:focus-visible::after { transform: scaleX(1); }
 
-.shelf-card { transition: border-color 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+.shelf-card { transition: border-color 420ms var(--ease); }
 
 .shelf-card:hover { border-color: var(--haze); }
 
-.brand-tile { transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1); }
+.brand-tile { transition: transform 520ms var(--ease); }
 
-.brand-tile img { transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1); }
+.brand-tile img { transition: transform 520ms var(--ease); }
 
 .brand:hover .brand-tile { transform: translateY(-2px); }
 
@@ -391,4 +443,25 @@ h1, h2, p { margin: 0; }
   .releases-link::after, .shelf-card, .brand-tile, .brand-tile img { transition: none; }
   .page::after { animation: none; }
   .masthead, .brand, .hero-headline, .hero-sub, .hero-learn, .hero-rule, .shelf-card, .baseline { animation: none; }
+  .diffusion-veil { display: none; }
 }
+
+.diffusion-dots { z-index: 5; }
+
+.diffusion-veil {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+/* The ring writes #0E0E0D into its own canvas in either theme. Inverting the element
+   rather than the backing store keeps the mark identical to what the veil hands over. */
+:root[data-theme='dark'] .signal-ring { filter: invert(1); }
+
+:root[data-theme='dark'] .page::after { filter: invert(1); opacity: 0.05; }
+
+:root[data-theme='dark'] .brand-tile img { filter: none; }

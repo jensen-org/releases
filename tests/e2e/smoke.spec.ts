@@ -3,7 +3,7 @@ const build = { version: 'v1.4.0', publishedAt: '2026-08-14T00:00:00Z', byteSize
 test.beforeEach(async ({ page }) => { await page.route('**/api/release', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ status: 'available', releaseUrl: build.releaseUrl, builds: [build] }) })) })
 
 test('release card is usable', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/?diffusion=off')
   await expect(page.getByRole('heading', { name: 'Jensen for macOS' })).toBeAttached()
   const link = page.getByRole('link', { name: 'Download Jensen for macOS v1.4.0' })
   await expect(link).toHaveAttribute('href', /github\.com/)
@@ -13,7 +13,7 @@ test('release card is usable', async ({ page }) => {
 })
 
 test('headline leads the page on more than one line', async ({ page }, info) => {
-  await page.goto('/')
+  await page.goto('/?diffusion=off')
   const headline = page.locator('.hero-headline')
   await expect(headline).toHaveText('The engineering ecosystem for humans and agents')
   const shape = await headline.evaluate((node) => {
@@ -21,14 +21,14 @@ test('headline leads the page on more than one line', async ({ page }, info) => 
     range.selectNodeContents(node)
     return { lines: range.getClientRects().length, size: Number.parseFloat(getComputedStyle(node).fontSize) }
   })
-  expect(shape.lines).toBeGreaterThan(1)
+  expect(shape.lines).toBe(info.project.name === 'mobile' ? 3 : 2)
   expect(shape.size).toBeGreaterThan(18)
   if (info.project.name !== 'mobile') expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
 })
 
 test('the hero puts the copy beside the ring on a wide viewport', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'the narrow projects stack the hero')
-  await page.goto('/')
+  await page.goto('/?diffusion=off')
   const copy = await page.locator('.hero-copy').boundingBox()
   const ring = await page.locator('.ring').boundingBox()
   expect(copy).not.toBeNull()
@@ -40,7 +40,7 @@ test('the hero puts the copy beside the ring on a wide viewport', async ({ page 
 test('the ring settles into solid black dots and only holds still under reduced motion', async ({ page }, info) => {
   const still = info.project.name === 'reduced-motion'
   await page.emulateMedia({ reducedMotion: still ? 'reduce' : 'no-preference' })
-  await page.goto('/')
+  await page.goto('/?diffusion=off')
   const ring = page.getByLabel('Jensen signal ring')
   await expect(ring).toBeVisible()
   await page.waitForTimeout(4200)
@@ -70,4 +70,37 @@ test('the ring settles into solid black dots and only holds still under reduced 
   expect(Math.abs(second.ink - first.ink) / first.ink).toBeLessThan(0.06)
   if (still) expect(second.shape).toBe(first.shape)
   else expect(second.shape).not.toBe(first.shape)
+})
+
+test('the diffusion flips the whole page and hands the ring back', async ({ page }, info) => {
+  test.skip(info.project.name === 'reduced-motion', 'the veil never mounts when motion is reduced')
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.goto('/?diffusion=now')
+  await expect(page.getByLabel('Jensen signal ring')).toBeVisible()
+  await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark', undefined, { timeout: 20000 })
+  await expect(page.locator('.diffusion-veil')).toHaveCount(0)
+  const state = await page.evaluate(() => ({
+    paper: getComputedStyle(document.body).backgroundColor,
+    ink: getComputedStyle(document.querySelector('.hero-headline')!).color,
+    card: getComputedStyle(document.querySelector('.shelf-card')!).backgroundColor,
+    ring: getComputedStyle(document.querySelector('.signal-ring')!).filter,
+    ringInk: getComputedStyle(document.querySelector('.signal-ring')!).opacity,
+    themeColour: document.querySelector('meta[name="theme-color"]')!.getAttribute('content'),
+  }))
+  // The dark palette is the exact difference-inverse the veil hands over, so these are literals.
+  expect(state.paper).toBe('rgb(4, 4, 6)')
+  expect(state.ink).toBe('rgb(241, 241, 242)')
+  expect(state.card).toBe('rgb(4, 4, 6)')
+  expect(state.ring).toBe('invert(1)')
+  expect(state.ringInk).toBe('1')
+  expect(state.themeColour).toBe('#040406')
+})
+
+test('reduced motion never flips the page', async ({ page }, info) => {
+  test.skip(info.project.name !== 'reduced-motion', 'only the reduced-motion project asserts this')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/?diffusion=now')
+  await page.waitForTimeout(6000)
+  expect(await page.evaluate(() => document.documentElement.dataset.theme ?? 'light')).toBe('light')
+  await expect(page.locator('.diffusion-veil')).toHaveCount(0)
 })

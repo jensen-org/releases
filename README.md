@@ -57,6 +57,59 @@ system rather than an animation that hands off to another.
 - `tests/ring.test.ts` runs the simulation and measures the true closest pair through a spatial
   hash. It also asserts the particles keep moving, so damping the ring to death fails the suite.
 
+## The type
+
+Two faces, and the split is a rule rather than a judgement call each time: Poppins sets display
+and human language, JetBrains Mono sets machine-readable values. The version, the byte size, the
+date, "Apple Silicon", the beta number and the licence are mono. The headline, the lede, the card
+title and both button labels are Poppins. Mono already has uniform advance widths, so wherever it
+is used the tracking drops to `--track-mono`, roughly half what the sans labels carry, or it
+sprawls at nine pixels.
+
+Both faces are self-hosted from `public/fonts`. `vercel.json` sets `font-src 'self'`, so a Google
+Fonts link or `@import` is blocked in production; a new face has to be a file and a fourth
+`@font-face`, never a stylesheet from someone else's origin.
+
+## The flip
+
+The page has two themes and it moves between them by diffusion, not by a fade or a sweep. The
+ring's dots liquefy, stream off the lattice as filaments, branch, and flood the viewport until
+the ink has eaten the page. The dots then settle back into the lattice in the theme that arrived.
+It runs the first time between thirty and fifty seconds in, then every twenty-five to forty-five,
+and takes 3.2 seconds.
+
+- The dark palette is the **exact difference-inverse** of the light one, `255 - v` per channel, in
+  both `style.css` and the PrimeVue preset. That is not an aesthetic choice, it is what makes the
+  hand-off seamless, and the cool cast that falls out of inverting warm paper is the point.
+- `DiffusionVeil.vue` paints white into a fixed full-viewport canvas composited with
+  `mix-blend-mode: difference`. On a monochrome page that is exact inversion: white flips what is
+  under it, transparent changes nothing. Light to dark reads as black ink flooding paper; dark to
+  light is the same code and shows white filaments on black.
+- Seeds come from **the ring's own pixels**. The canvas is drawn into a 150 pixel scratch canvas
+  once at ignition and every lit pixel becomes a particle, so the field starts exactly where the
+  dots are, including whatever spin and shear the simulation had reached.
+- `SignalRing.vue` and `ring.ts` are not touched by any of this. Dark mode reaches the mark through
+  `filter: invert(1)` on the element, which leaves the backing store writing `#0E0E0D` in both
+  themes, and the dots empty out of the lattice through a `--ring-ink` custom property the veil
+  drives. The simulation never learns that a flip happened.
+- The front is a direct function of progress, shaped per angle by a slow noise lobe so it grows in
+  tendrils rather than as a disc, and every lobe converges on the full reach over the last third so
+  the far corners arrive with everything else. **Recruitment behind the front is what advances it**;
+  advection alone cannot cross a viewport in three seconds, because diffusion spreads as the square
+  root of time.
+- The dots leave on their own layer, drawn every frame rather than accumulated, with the ring's
+  own hard edge. They stay local to the ring; the long reach is the filament field's job.
+- Ink bleeds with a normalised cross dilate, one veil pixel at a time, then a gain pass amplifies
+  it. Not `ctx.filter` blur: Chrome under mobile emulation does not expose `filter` on a 2D context
+  at all, and the whole transition silently never started there.
+- The last frame hard-fills the veil to solid white, and the next one swaps `data-theme`, updates
+  `theme-color` and clears the canvas together. `difference(14, 255)` and `invert(14)` are both 241,
+  so nothing moves on the seam.
+- The schedule stands down while the tab is hidden, defers six seconds while the pointer is over
+  the download card or a control holds focus, and never starts at all under
+  `prefers-reduced-motion`. `?diffusion=off` disables it and `?diffusion=now` runs one immediately,
+  which is how the end-to-end tests stay deterministic.
+
 ## Deployment
 
 Import the repository into Vercel. Vercel detects Vite and `api/release.ts` automatically. Add `GITHUB_TOKEN` only as a server environment variable if required. Security headers are defined in `vercel.json`.

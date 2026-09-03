@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import DiffusionVeil from './components/DiffusionVeil.vue'
 import SignalRing from './components/SignalRing.vue'
 import { attachMagnet } from './lib/magnetic'
 
@@ -125,5 +126,7 @@ onUnmounted(() => releaseMagnet?.())
       </span>
       <a class="baseline-legal" :href="LICENSE_URL">PolyForm Noncommercial 1.0.0</a>
     </footer>
+
+    <DiffusionVeil />
   </div>
 </template>
