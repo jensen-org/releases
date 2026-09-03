@@ -445,6 +445,10 @@ h1, h2, p { margin: 0; }
   .diffusion-veil { display: none; }
 }
 
+[data-flip] *,
+[data-flip] *::before,
+[data-flip] *::after { transition: none !important; }
+
 .diffusion-veil {
   position: fixed;
   inset: 0;

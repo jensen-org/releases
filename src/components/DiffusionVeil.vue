@@ -102,9 +102,14 @@ function paint(progress: number) {
 function commit() {
   const root = document.documentElement
   const dark = root.dataset.theme === 'dark'
+  root.dataset.flip = 'on'
   if (dark) delete root.dataset.theme
   else root.dataset.theme = 'dark'
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#fbfbf9' : '#040406')
+  // The veil hands over on one frame, so the new palette has to be computed before any
+  // transition can start on it. This read flushes that recalculation while they are still off.
+  void root.offsetHeight
+  delete root.dataset.flip
   ringInk(1)
   context!.globalCompositeOperation = 'source-over'
   context!.globalAlpha = 1

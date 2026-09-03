@@ -105,6 +105,25 @@ test('the diffusion flips the whole page and hands the ring back', async ({ page
   expect(state.themeColour).toBe('#040406')
 })
 
+test('the palette lands on the download button in the same frame as the page', async ({ page }, info) => {
+  test.skip(info.project.name === 'reduced-motion', 'the veil never mounts when motion is reduced')
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.goto('/?diffusion=now')
+  await expect(page.getByLabel('Jensen signal ring')).toBeVisible()
+  const caught = page.evaluate(() => new Promise<{ background: string, color: string }>((resolve) => {
+    const observer = new MutationObserver(() => {
+      if (document.documentElement.dataset.theme !== 'dark') return
+      observer.disconnect()
+      const style = getComputedStyle(document.querySelector('.shelf-card .p-button')!)
+      resolve({ background: style.backgroundColor, color: style.color })
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+  }))
+  const swap = await caught
+  expect(swap.background).toBe('rgb(241, 241, 242)')
+  expect(swap.color).toBe('rgb(4, 4, 6)')
+})
+
 test('reduced motion never flips the page', async ({ page }, info) => {
   test.skip(info.project.name !== 'reduced-motion', 'only the reduced-motion project asserts this')
   await page.emulateMedia({ reducedMotion: 'reduce' })
