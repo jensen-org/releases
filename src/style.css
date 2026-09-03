@@ -55,7 +55,7 @@
   --control-pad: 11px 18px;
   --control-radius: 2px;
   --panel-radius: 16px;
-  --ease: var(--ease);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
   font-family: var(--sans);
   color: var(--ink);

@@ -31,6 +31,22 @@ test('headline leads the page on more than one line', async ({ page }, info) => 
   if (info.project.name !== 'mobile') expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
 })
 
+test('the entrance motion resolves to a real curve', async ({ page }, info) => {
+  test.skip(info.project.name === 'reduced-motion', 'the reduced-motion project asserts the opposite')
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.goto('/?diffusion=off')
+  const motion = await page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement)
+    const masthead = getComputedStyle(document.querySelector('.masthead')!)
+    const learn = getComputedStyle(document.querySelector('.hero-learn')!)
+    return { ease: root.getPropertyValue('--ease').trim(), animation: masthead.animationName, curve: masthead.animationTimingFunction, hover: learn.transitionDuration }
+  })
+  expect(motion.ease).toMatch(/^cubic-bezier/)
+  expect(motion.animation).toBe('settle')
+  expect(motion.curve).toMatch(/^cubic-bezier/)
+  expect(motion.hover).toBe('0.42s, 0.42s, 0.42s')
+})
+
 test('the hero puts the copy beside the ring on a wide viewport', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'the narrow projects stack the hero')
   await page.goto('/?diffusion=off')
