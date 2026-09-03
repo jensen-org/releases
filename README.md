@@ -140,7 +140,7 @@ time five to ten seconds in, then every fifteen to forty, and takes 3.2 seconds.
 
 ## Deployment
 
-Import `jensen-org/release` into Vercel. Vercel detects Vite from `bun.lock`, builds to `dist`, and turns
+Import `jensen-org/releases` into Vercel. Vercel detects Vite from `bun.lock`, builds to `dist`, and turns
 `api/release.ts` into a Node function at `/api/release`. Production deploys from `main`. Security headers live
 in `vercel.json`; do not add a catch-all rewrite, it would shadow the API route.
 

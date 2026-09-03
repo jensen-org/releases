@@ -10,7 +10,7 @@ import { preset } from '../src/theme'
 vi.mock('../src/components/SignalRing.vue', () => ({ default: { render: () => h('canvas', { 'aria-label': 'Jensen signal ring' }) } }))
 
 const response = (body: unknown) => Promise.resolve({ json: () => Promise.resolve(body) })
-const build = (version: string, byteSize: number) => ({ version, publishedAt: '2026-08-14T00:00:00Z', byteSize, downloadUrl: `https://github.com/jensen-org/release/releases/download/${version}/Jensen-arm64.dmg`, releaseUrl: 'https://github.com/r' })
+const build = (version: string, byteSize: number) => ({ version, publishedAt: '2026-08-14T00:00:00Z', byteSize, downloadUrl: `https://github.com/jensen-org/releases/releases/download/${version}/Jensen-arm64.dmg`, releaseUrl: 'https://github.com/r' })
 
 globalThis.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} } as unknown as typeof ResizeObserver
 
@@ -31,7 +31,7 @@ describe('release card', () => {
     expect(wrapper.text()).toContain('v1.4.0')
     expect(wrapper.text()).toContain('24.8 MB')
     expect(wrapper.text()).toContain('2026-08-14')
-    expect(wrapper.find('.releases-link').attributes('href')).toBe('https://github.com/jensen-org/release/releases')
+    expect(wrapper.find('.releases-link').attributes('href')).toBe('https://github.com/jensen-org/releases/releases')
   })
 
   it('keeps a disabled download button while the release is loading', () => {
@@ -50,7 +50,7 @@ describe('release card', () => {
   })
 
   it('shows error and releases link', async () => {
-    globalThis.fetch = vi.fn(() => response({ status: 'error', releaseUrl: 'https://github.com/jensen-org/release/releases' })) as unknown as typeof fetch
+    globalThis.fetch = vi.fn(() => response({ status: 'error', releaseUrl: 'https://github.com/jensen-org/releases/releases' })) as unknown as typeof fetch
     const wrapper = mountApp()
     await vi.waitFor(() => expect(wrapper.text()).toContain('Release information unavailable'))
     expect(wrapper.find('.releases-link').attributes('href')).toContain('github.com')
@@ -60,7 +60,7 @@ describe('release card', () => {
     globalThis.fetch = vi.fn(() => Promise.reject(new Error('offline'))) as unknown as typeof fetch
     const wrapper = mountApp()
     await vi.waitFor(() => expect(wrapper.text()).toContain('Release information unavailable'))
-    expect(wrapper.find('.releases-link').attributes('href')).toContain('jensen-org/release/releases')
+    expect(wrapper.find('.releases-link').attributes('href')).toContain('jensen-org/releases/releases')
   })
 
   it('leads with the product headline and keeps the card title beneath it', () => {

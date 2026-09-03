@@ -6,7 +6,7 @@ export type ReleaseResponse = AvailableRelease | UnavailableRelease | ErrorRelea
 export const MAX_BUILDS = 4
 type Asset = { name?: unknown; size?: unknown; browser_download_url?: unknown; digest?: unknown }
 type GitRelease = { draft?: unknown; tag_name?: unknown; published_at?: unknown; html_url?: unknown; assets?: unknown }
-const repo = 'jensen-org/release'
+const repo = 'jensen-org/releases'
 export const releasesUrl = `https://github.com/${repo}/releases`
 function isPublicGithubUrl(value: unknown): value is string { try { const url = new URL(String(value)); return url.protocol === 'https:' && (url.hostname === 'github.com' || url.hostname === 'objects.githubusercontent.com') } catch { return false } }
 export function selectReleases(payload: unknown): ReleaseResponse {

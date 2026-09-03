@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import handler, { MAX_BUILDS, selectReleases } from '../api/release'
-const release = (date: string, assets: unknown[], extra = {}) => ({ tag_name: `v${date.slice(0, 4)}`, published_at: date, html_url: 'https://github.com/jensen-org/release/releases/v1', assets, ...extra })
-const asset = (name: string, extra = {}) => ({ name, size: 100, browser_download_url: `https://github.com/jensen-org/release/releases/download/${name}`, ...extra })
+const release = (date: string, assets: unknown[], extra = {}) => ({ tag_name: `v${date.slice(0, 4)}`, published_at: date, html_url: 'https://github.com/jensen-org/releases/releases/v1', assets, ...extra })
+const asset = (name: string, extra = {}) => ({ name, size: 100, browser_download_url: `https://github.com/jensen-org/releases/releases/download/${name}`, ...extra })
 describe('release selection', () => {
   it('lists newest first, drops drafts and prefers arm64', () => { const result = selectReleases([release('2020-01-01', [asset('old-aarch64.dmg')]), release('2024-01-01', [asset('new-aarch64.dmg'), asset('new-arm64.dmg', { digest: 'sha256:x' })]), release('2025-01-01', [asset('draft-arm64.dmg')], { draft: true })]) as { status: string; builds: { version: string; assetName: string; digest?: string }[] }; expect(result.status).toBe('available'); expect(result.builds.map((build) => build.version)).toEqual(['v2024', 'v2020']); expect(result.builds[0]).toMatchObject({ assetName: 'new-arm64.dmg', digest: 'sha256:x' }) })
   it('caps the list so the card stays short', () => { const many = Array.from({ length: MAX_BUILDS + 3 }, (_, year) => release(`20${10 + year}-01-01`, [asset('x-arm64.dmg')])); expect((selectReleases(many) as { builds: unknown[] }).builds).toHaveLength(MAX_BUILDS) })
