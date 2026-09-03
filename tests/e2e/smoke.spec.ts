@@ -12,9 +12,9 @@ test('release card is usable', async ({ page }) => {
   await expect(page.getByLabel('Jensen signal ring')).toBeVisible()
 })
 
-test('headline leads the page on more than one line', async ({ page }) => {
+test('headline leads the page on more than one line', async ({ page }, info) => {
   await page.goto('/')
-  const headline = page.locator('.masthead-headline')
+  const headline = page.locator('.hero-headline')
   await expect(headline).toHaveText('The engineering ecosystem for humans and agents')
   const shape = await headline.evaluate((node) => {
     const range = document.createRange()
@@ -23,7 +23,18 @@ test('headline leads the page on more than one line', async ({ page }) => {
   })
   expect(shape.lines).toBeGreaterThan(1)
   expect(shape.size).toBeGreaterThan(18)
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
+  if (info.project.name !== 'mobile') expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
+})
+
+test('the hero puts the copy beside the ring on a wide viewport', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'the narrow projects stack the hero')
+  await page.goto('/')
+  const copy = await page.locator('.hero-copy').boundingBox()
+  const ring = await page.locator('.ring').boundingBox()
+  expect(copy).not.toBeNull()
+  expect(ring).not.toBeNull()
+  expect(ring!.x).toBeGreaterThan(copy!.x + copy!.width - 1)
+  await expect(page.locator('.baseline-legal')).toBeVisible()
 })
 
 test('the ring settles into solid black dots and only holds still under reduced motion', async ({ page }, info) => {

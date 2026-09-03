@@ -12,6 +12,8 @@ vi.mock('../src/components/SignalRing.vue', () => ({ default: { render: () => h(
 const response = (body: unknown) => Promise.resolve({ json: () => Promise.resolve(body) })
 const build = (version: string, byteSize: number) => ({ version, publishedAt: '2026-08-14T00:00:00Z', byteSize, downloadUrl: `https://github.com/jensen-org/jensen-release/releases/download/${version}/Jensen-arm64.dmg`, releaseUrl: 'https://github.com/r' })
 
+globalThis.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} } as unknown as typeof ResizeObserver
+
 const mountApp = () => mount(App, { global: { plugins: [[PrimeVue, { ripple: false, theme: { preset, options: { darkModeSelector: false } } }]], components: { Card, Button } } })
 
 afterEach(() => vi.restoreAllMocks())
@@ -65,8 +67,23 @@ describe('release card', () => {
     globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
     const wrapper = mountApp()
     expect(wrapper.find('h1').text()).toBe('The engineering ecosystem for humans and agents')
-    expect(wrapper.find('.masthead-headline').element.tagName).toBe('H1')
+    expect(wrapper.find('.hero-headline').element.tagName).toBe('H1')
     expect(wrapper.find('.shelf-title').text()).toBe('Jensen for macOS')
     expect(wrapper.find('.shelf-title').element.tagName).toBe('H2')
+  })
+
+  it('says what Jensen is under the headline', () => {
+    globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
+    const wrapper = mountApp()
+    const sub = wrapper.find('.hero-sub')
+    expect(sub.text()).toContain('An AI-first IDE for large, complex codebases')
+    expect(sub.text()).toContain('hands that map to your AI assistant')
+  })
+
+  it('closes the page with the build status and the licence', () => {
+    globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
+    const wrapper = mountApp()
+    expect(wrapper.find('.baseline-status').text()).toContain('Beta 0.1.0')
+    expect(wrapper.find('.baseline-legal').attributes('href')).toContain('polyformproject.org')
   })
 })

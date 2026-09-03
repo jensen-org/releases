@@ -15,8 +15,8 @@ export function generateGeometry(width: number, height: number, bits = encodeMes
   const outer = ring * OUTER_RATIO
   const dots: Dot[] = []
   for (let spoke = 0; spoke < SPOKES; spoke += 1) {
-    const angle = (spoke / SPOKES) * Math.PI * 2 - Math.PI / 2
     for (let position = 0; position < POSITIONS; position += 1) {
+      const angle = bandAngle(position, spoke)
       const radius = inner + ((outer - inner) * position) / (POSITIONS - 1)
       const bitIndex = position * SPOKES + spoke
       dots.push({ x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius, bit: (bits[bitIndex] ?? 0) as 0 | 1, index: spoke * POSITIONS + position, bitIndex, spoke, position, angle, radius })
@@ -42,6 +42,61 @@ function hash(x: number, y: number, z: number): number {
   const mixed = Math.imul(x, 374761393) ^ Math.imul(y, 668265263) ^ Math.imul(z, 1274126177)
   const spread = Math.imul(mixed ^ (mixed >>> 13), 1274126177)
   return spread ^ (spread >>> 16)
+}
+
+export const MASTER_SLOTS = 1980
+export const BAND_SLOTS = [132, 132, 132, 132, 132, 132, 165, 165, 165, 180, 180, 132, 198, 198, 198, 220]
+const CANYONS = 9
+
+function shares(total: number, parts: number, key: number): number[] {
+  const weights = Array.from({ length: parts }, (_, i) => 1 + ((hash(key, i, 19) >>> 8) % 1000) / 1000)
+  const sum = weights.reduce((a, b) => a + b, 0)
+  const out = weights.map((weight) => Math.max(1, Math.floor((total * weight) / sum)))
+  let drift = total - out.reduce((a, b) => a + b, 0)
+  for (let i = 0; drift > 0; i = (i + 1) % parts) { out[i] += 1; drift -= 1 }
+  for (let i = 0; drift < 0; i = (i + 1) % parts) { if (out[i] > 1) { out[i] -= 1; drift += 1 } }
+  return out
+}
+
+const CANYON_CENTRES = Array.from({ length: CANYONS }, (_, k) => (k + 0.35 + (((hash(k, 1, 31) >>> 8) % 1000) / 1000) * 0.3) / CANYONS)
+
+function bandLayout(position: number): Int32Array {
+  const total = BAND_SLOTS[position]
+  const empty = total - SPOKES
+  const map = new Int32Array(SPOKES)
+  if (empty <= 0) { for (let spoke = 0; spoke < SPOKES; spoke += 1) map[spoke] = spoke; return map }
+  const chosen = CANYON_CENTRES.map((_, k) => k).filter((k) => (hash(position, k, 29) >>> 8) % 10 > 2)
+  const active = (chosen.length ? chosen : [0]).slice(0, empty)
+  const widths = shares(empty, active.length, position * 7 + 1)
+  const cut = new Uint8Array(total)
+  active.forEach((canyon, i) => {
+    const width = widths[i]
+    const first = Math.round(CANYON_CENTRES[canyon] * total) - (width >> 1)
+    for (let step = 0; step < width; step += 1) {
+      const slot = ((first + step) % total + total) % total
+      if (slot !== 0) cut[slot] = 1
+    }
+  })
+  let marked = cut.reduce((count, flag) => count + flag, 0)
+  for (let slot = 1; slot < total && marked < empty; slot += 1) {
+    if (cut[slot] || (!cut[slot - 1] && !cut[(slot + 1) % total])) continue
+    cut[slot] = 1
+    marked += 1
+  }
+  for (let slot = 1; slot < total && marked < empty; slot += 1) {
+    if (cut[slot]) continue
+    cut[slot] = 1
+    marked += 1
+  }
+  let spoke = 0
+  for (let slot = 0; slot < total && spoke < SPOKES; slot += 1) if (!cut[slot]) { map[spoke] = slot; spoke += 1 }
+  return map
+}
+
+const BAND_LAYOUT = BAND_SLOTS.map((_, position) => bandLayout(position))
+
+export function bandAngle(position: number, spoke: number): number {
+  return (BAND_LAYOUT[position][spoke] / BAND_SLOTS[position]) * Math.PI * 2 - Math.PI / 2
 }
 
 const fade = (t: number) => t * t * t * (t * (t * 6 - 15) + 10)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { INNER_RATIO, MESSAGE, OUTER_RATIO, POSITIONS, SPOKES, createRingSim, curl2, decodeMessage, dotRadius, encodeMessage, generateGeometry, noise3, visibleDots, type Dot, type RingSim } from '../src/lib/ring'
+import { BAND_SLOTS, INNER_RATIO, MASTER_SLOTS, MESSAGE, OUTER_RATIO, POSITIONS, SPOKES, bandAngle, createRingSim, curl2, decodeMessage, dotRadius, encodeMessage, generateGeometry, noise3, visibleDots, type Dot, type RingSim } from '../src/lib/ring'
 
 const STEP = 1 / 60
 
@@ -100,6 +100,32 @@ describe('signal ring data', () => {
       }
       expect(closest).toBeGreaterThan(diameter * 1.5)
     }
+  })
+
+  it('lands every dot on the shared master lattice', () => {
+    for (const slots of BAND_SLOTS) expect(MASTER_SLOTS % slots).toBe(0)
+    for (const dot of generateGeometry(620, 620)) {
+      const step = ((dot.angle + Math.PI / 2) / (Math.PI * 2)) * MASTER_SLOTS
+      expect(Math.abs(step - Math.round(step))).toBeLessThan(1e-9)
+    }
+    expect(bandAngle(0, 0)).toBeCloseTo(-Math.PI / 2, 12)
+  })
+
+  it('gives every ring its own slot count so the gaps widen outward', () => {
+    const geometry = generateGeometry(620, 620)
+    const widestGap = (position: number) => {
+      const slots = geometry
+        .filter((dot) => dot.position === position)
+        .map((dot) => Math.round(((dot.angle + Math.PI / 2) / (Math.PI * 2)) * BAND_SLOTS[position]))
+        .sort((a, b) => a - b)
+      expect(slots).toHaveLength(SPOKES)
+      expect(new Set(slots)).toHaveProperty('size', SPOKES)
+      expect(slots[0]).toBe(0)
+      return Math.max(...slots.map((slot, i) => (i ? slot - slots[i - 1] : 1)))
+    }
+    expect(BAND_SLOTS).toHaveLength(POSITIONS)
+    expect(new Set(BAND_SLOTS).size).toBeGreaterThan(1)
+    expect(widestGap(POSITIONS - 1)).toBeGreaterThan(widestGap(0) * 4)
   })
 
   it('round trips the hidden message back out of the geometry', () => {
@@ -209,9 +235,9 @@ describe('signal ring simulation', () => {
   })
 
   it('closes the ring seamlessly across twelve o clock', () => {
-    const seam = (spoke: number): Dot => ({ ...generateGeometry(620, 620)[0], spoke, angle: (spoke / SPOKES) * Math.PI * 2 - Math.PI / 2 })
+    const seam = (slot: number): Dot => ({ ...generateGeometry(620, 620)[0], angle: (slot / BAND_SLOTS[0]) * Math.PI * 2 - Math.PI / 2 })
     const first = createRingSim(620, [seam(0)])
-    const lapped = createRingSim(620, [seam(SPOKES)])
+    const lapped = createRingSim(620, [seam(BAND_SLOTS[0])])
     for (let step = 0; step < 60 * 12; step += 1) {
       first.step(STEP)
       lapped.step(STEP)
