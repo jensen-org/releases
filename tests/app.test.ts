@@ -66,7 +66,7 @@ describe('release card', () => {
   it('leads with the product headline and keeps the card title beneath it', () => {
     globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
     const wrapper = mountApp()
-    expect(wrapper.find('h1').text()).toBe('The engineering ecosystem for humans and agents')
+    expect(wrapper.find('h1').text()).toBe('An AI-first IDE for large, complex codebases')
     expect(wrapper.find('.hero-headline').element.tagName).toBe('H1')
     expect(wrapper.find('.shelf-title').text()).toBe('Jensen for macOS')
     expect(wrapper.find('.shelf-title').element.tagName).toBe('H2')
@@ -76,8 +76,8 @@ describe('release card', () => {
     globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
     const wrapper = mountApp()
     const sub = wrapper.find('.hero-sub')
-    expect(sub.text()).toContain('An AI-first IDE for large, complex codebases')
-    expect(sub.text()).toContain('hands that map to your AI assistant')
+    expect(sub.text()).toContain('Jensen integrates with your codebase and cuts the cognitive debt')
+    expect(sub.text()).toContain('less for your agents to guess')
     expect(wrapper.find('.hero-learn').attributes('href')).toBe('https://github.com/jensen-org/jensen')
     expect(wrapper.find('.hero-learn').text()).toContain('Learn more')
   })

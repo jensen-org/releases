@@ -15,13 +15,13 @@ test('release card is usable', async ({ page }) => {
 test('headline leads the page on more than one line', async ({ page }, info) => {
   await page.goto('/?diffusion=off')
   const headline = page.locator('.hero-headline')
-  await expect(headline).toHaveText('The engineering ecosystem for humans and agents')
+  await expect(headline).toHaveText('An AI-first IDE for large, complex codebases')
   const shape = await headline.evaluate((node) => {
     const range = document.createRange()
     range.selectNodeContents(node)
     return { lines: range.getClientRects().length, size: Number.parseFloat(getComputedStyle(node).fontSize) }
   })
-  expect(shape.lines).toBe(info.project.name === 'mobile' ? 3 : 2)
+  expect(shape.lines).toBe(info.project.name === 'mobile' ? 2 : 3)
   expect(shape.size).toBeGreaterThan(18)
   if (info.project.name !== 'mobile') expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
 })
@@ -34,6 +34,10 @@ test('the hero puts the copy beside the ring on a wide viewport', async ({ page 
   expect(copy).not.toBeNull()
   expect(ring).not.toBeNull()
   expect(ring!.x).toBeGreaterThan(copy!.x + copy!.width - 1)
+  const learn = await page.locator('.hero-learn').boundingBox()
+  const headline = await page.locator('.hero-headline').boundingBox()
+  expect(Math.abs(learn!.x + learn!.width - (copy!.x + copy!.width))).toBeLessThanOrEqual(1)
+  expect(Math.abs(learn!.y + learn!.height - (headline!.y + headline!.height))).toBeLessThanOrEqual(1)
   await expect(page.locator('.baseline-legal')).toBeVisible()
 })
 

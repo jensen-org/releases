@@ -95,7 +95,16 @@ h1, h2, p { margin: 0; }
 
 .brand { display: flex; align-items: center; gap: 11px; }
 
+.hero-title-row {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(20px, 3vw, 40px);
+}
+
 .hero-headline {
+  min-width: 0;
   font-size: var(--type-display);
   font-weight: 600;
   letter-spacing: var(--track-display);
@@ -118,7 +127,7 @@ h1, h2, p { margin: 0; }
 }
 
 .hero-learn {
-  margin-block-start: 22px;
+  flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -340,9 +349,9 @@ h1, h2, p { margin: 0; }
 @media (max-width: 860px) {
   .hero { grid-template-columns: minmax(0, 1fr); gap: clamp(16px, 2.4vh, 26px); }
   .hero-copy { justify-self: stretch; max-width: none; }
+  .hero-title-row { flex-direction: column; align-items: flex-start; gap: 18px; }
   .hero-headline { font-size: clamp(24px, 7vw, 34px); max-width: 22ch; }
   .hero-sub { margin-block-start: 12px; line-height: 1.8; max-width: none; }
-  .hero-learn { margin-block-start: 18px; }
   .hero-rule { margin-block-start: 22px; }
   .shelf-card { margin-block-start: 20px; }
   .ring { justify-self: center; block-size: max(302px, min(84vw, 366px)); }
@@ -361,7 +370,7 @@ h1, h2, p { margin: 0; }
 
 .hero-sub { animation: surface 900ms var(--ease) 360ms both; }
 
-.hero-learn { animation: surface 900ms var(--ease) 440ms both; }
+.hero-learn { animation: surface 900ms var(--ease) 240ms both; }
 
 .hero-rule { animation: surface 900ms var(--ease) 520ms both; }
 

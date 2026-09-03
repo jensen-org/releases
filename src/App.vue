@@ -63,17 +63,19 @@ onUnmounted(() => releaseMagnet?.())
 
     <main class="hero">
       <div class="hero-copy">
-        <h1 class="hero-headline">The engineering ecosystem for humans and agents</h1>
+        <div class="hero-title-row">
+          <h1 class="hero-headline">An AI-first IDE for large, complex codebases</h1>
+
+          <a class="hero-learn" :href="PROJECT_URL">
+            Learn more
+            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3" /></svg>
+          </a>
+        </div>
 
         <p class="hero-sub">
-          An AI-first IDE for large, complex codebases. It maps what your source really contains,
-          then hands that map to your AI assistant.
+          Jensen integrates with your codebase and cuts the cognitive debt. Less to hold in your
+          head, less for your agents to guess.
         </p>
-
-        <a class="hero-learn" :href="PROJECT_URL">
-          Learn more
-          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3" /></svg>
-        </a>
 
         <span class="hero-rule" />
 
