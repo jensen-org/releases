@@ -102,6 +102,7 @@ h1, h2, p { margin: 0; }
   font-weight: 600;
   letter-spacing: var(--track-display);
   line-height: 1.06;
+  max-width: min-content;
   text-wrap: balance;
   color: var(--ink);
 }
@@ -343,8 +344,7 @@ h1, h2, p { margin: 0; }
   .hero { grid-template-columns: minmax(0, 1fr); gap: clamp(16px, 2.4vh, 26px); }
   .hero-copy { justify-self: stretch; max-width: none; }
   .hero-learn { justify-self: start; margin-block-start: 18px; }
-  .hero-headline { font-size: clamp(24px, 7vw, 34px); }
-  .hero-headline span { white-space: normal; }
+  .hero-headline { font-size: clamp(22px, 7vw, 34px); }
   .hero-sub { margin-block-start: 12px; line-height: 1.8; max-width: none; }
   .hero-rule { margin-block-start: 22px; }
   .shelf-card { margin-block-start: 20px; }
@@ -364,7 +364,7 @@ h1, h2, p { margin: 0; }
 
 .hero-sub { animation: surface 900ms var(--ease) 360ms both; }
 
-.hero-learn { animation: surface 900ms var(--ease) 240ms both; }
+.hero-learn { animation: surface 900ms var(--ease) 440ms both; }
 
 .hero-rule { animation: surface 900ms var(--ease) 520ms both; }
 

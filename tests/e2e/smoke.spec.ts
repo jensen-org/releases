@@ -20,9 +20,13 @@ test('headline leads the page on more than one line', async ({ page }, info) => 
     const range = document.createRange()
     range.selectNodeContents(node)
     const tops = new Set([...range.getClientRects()].map((rect) => Math.round(rect.top)))
-    return { lines: tops.size, size: Number.parseFloat(getComputedStyle(node).fontSize) }
+    const tail = document.createRange()
+    tail.selectNodeContents(node.lastElementChild!)
+    const tailTops = new Set([...tail.getClientRects()].map((rect) => Math.round(rect.top)))
+    return { lines: tops.size, tail: tailTops.size, size: Number.parseFloat(getComputedStyle(node).fontSize) }
   })
   expect(shape.lines).toBe(2)
+  expect(shape.tail).toBe(1)
   expect(shape.size).toBeGreaterThan(18)
   if (info.project.name !== 'mobile') expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
 })
