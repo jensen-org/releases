@@ -12,4 +12,11 @@ describe('deployment safety', () => {
     const files = readFileSync('dist/index.html', 'utf8')
     expect(files).not.toContain('sentinel-GITHUB_TOKEN')
   })
+
+  it('emits social metadata and crawler files in the production bundle', () => {
+    if (!existsSync('dist')) return
+    const html = readFileSync('dist/index.html', 'utf8')
+    for (const tag of ['rel="canonical"', 'og:image', 'og:url', 'twitter:card', 'apple-touch-icon']) expect(html).toContain(tag)
+    for (const file of ['dist/og.png', 'dist/apple-touch-icon.png', 'dist/robots.txt', 'dist/sitemap.xml']) expect(existsSync(file)).toBe(true)
+  })
 })

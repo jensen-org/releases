@@ -4,7 +4,7 @@ The Jensen release page is a Vue 3 single page application for the Apple Silicon
 
 ## Local development
 
-Install Bun, then run `bun install` and `bun run dev`. The API endpoint is available at `/api/release` in Vercel. The optional `GITHUB_TOKEN` is server-only and raises GitHub API rate limits. Copy `.env.example` when needed.
+Install Bun, then run `bun install` and `bun run dev`. The API endpoint is available at `/api/release` in Vercel, not in `vite dev`, so the download shelf shows its error state locally. `GITHUB_TOKEN` is server-only and raises GitHub API rate limits. Copy `.env.example` when needed.
 
 ## Releases
 
@@ -140,4 +140,14 @@ time five to ten seconds in, then every fifteen to forty, and takes 3.2 seconds.
 
 ## Deployment
 
-Import the repository into Vercel. Vercel detects Vite and `api/release.ts` automatically. Add `GITHUB_TOKEN` only as a server environment variable if required. Security headers are defined in `vercel.json`.
+Import `jensen-org/release` into Vercel. Vercel detects Vite from `bun.lock`, builds to `dist`, and turns
+`api/release.ts` into a Node function at `/api/release`. Production deploys from `main`. Security headers live
+in `vercel.json`; do not add a catch-all rewrite, it would shadow the API route.
+
+Set `GITHUB_TOKEN` as a server environment variable for Production and Preview. It is optional in the sense
+that the function still works without one, but unauthenticated GitHub allows 60 requests per hour per IP and
+Vercel functions share egress addresses, so a live site will hit the ceiling.
+
+Canonical, Open Graph and Twitter tags, plus `robots.txt` and `sitemap.xml`, are generated at build time from
+`VITE_SITE_URL`. Unset, it falls back to Vercel's own production URL. Set it once a domain is attached.
+Preview deployments emit `Disallow: /`.
