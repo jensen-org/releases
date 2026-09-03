@@ -95,11 +95,20 @@ time five to ten seconds in, then every fifteen to forty, and takes 3.2 seconds.
   any scale because the boundary is an interpolated contour rather than a spray of marks.
 - The field is 420 cells on its long side and is drawn upscaled with smoothing, so boundary detail
   and per-frame cost are traded against each other, never against sharpness. The noise itself is
-  evaluated on a half-scale grid and interpolated, which keeps the one-time build inside a frame.
+  evaluated on a half-scale grid and interpolated, a quarter of the work for the same picture.
+- **The build is sliced across frames, and this is load bearing.** Distance transform, noise and
+  heights together take about twenty milliseconds, so doing them in one go cost the ring a visible
+  stall right as the diffusion began. `buildField` is a generator that yields between row bands and
+  the veil drains it against a six millisecond budget per frame, which lands in three frames here
+  and degrades gracefully on slower machines. `tests/diffusion.test.ts` asserts the yield count, so
+  collapsing it back into one step fails the suite.
+- The ring's ink level is an inline `opacity` on the canvas element, not a custom property on the
+  root. A custom property there invalidates every element that reads one, on every frame of the
+  transition.
 - `SignalRing.vue` and `ring.ts` are not touched by any of this. Dark mode reaches the mark through
   `filter: invert(1)` on the element, which leaves the backing store writing `#0E0E0D` in both
-  themes, and the dots empty out of the lattice through a `--ring-ink` custom property the veil
-  drives. The simulation never learns that a flip happened.
+  themes, and the dots empty out of the lattice through an opacity the veil sets on the element
+  from outside. The simulation never learns that a flip happened.
 - The dots leave on their own layer, drawn fresh every frame rather than accumulated, with the
   ring's own hard edge. They stay local to the mark; spreading across the page is the ink's job.
 - The last frame hard-fills the veil to solid white, and the next one swaps `data-theme`, updates

@@ -85,8 +85,10 @@ export function sampleSeeds(source: HTMLCanvasElement, rect: DOMRect, scale: num
 
 const DIAGONAL = Math.SQRT2
 
-/** Chamfer distance from the marked cells, two passes over the grid. */
-export function distanceFromSeeds(marked: Uint8Array, columns: number, rows: number): Float32Array {
+/** Chamfer distance from the marked cells, two passes over the grid. Each pass only reads
+ *  rows the same pass has already written, so it yields between row bands without changing
+ *  the result. */
+export function* distancePasses(marked: Uint8Array, columns: number, rows: number, band: number): Generator<void, Float32Array> {
   const distance = new Float32Array(columns * rows)
   const far = columns + rows
   for (let i = 0; i < distance.length; i += 1) distance[i] = marked[i] ? 0 : far
@@ -94,25 +96,40 @@ export function distanceFromSeeds(marked: Uint8Array, columns: number, rows: num
     const candidate = distance[from] + cost
     if (candidate < distance[at]) distance[at] = candidate
   }
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      const at = row * columns + column
-      if (row > 0) relax(at, at - columns, 1)
-      if (column > 0) relax(at, at - 1, 1)
-      if (row > 0 && column > 0) relax(at, at - columns - 1, DIAGONAL)
-      if (row > 0 && column < columns - 1) relax(at, at - columns + 1, DIAGONAL)
+  for (let first = 0; first < rows; first += band) {
+    yield
+    const past = Math.min(rows, first + band)
+    for (let row = first; row < past; row += 1) {
+      for (let column = 0; column < columns; column += 1) {
+        const at = row * columns + column
+        if (row > 0) relax(at, at - columns, 1)
+        if (column > 0) relax(at, at - 1, 1)
+        if (row > 0 && column > 0) relax(at, at - columns - 1, DIAGONAL)
+        if (row > 0 && column < columns - 1) relax(at, at - columns + 1, DIAGONAL)
+      }
     }
   }
-  for (let row = rows - 1; row >= 0; row -= 1) {
-    for (let column = columns - 1; column >= 0; column -= 1) {
-      const at = row * columns + column
-      if (row < rows - 1) relax(at, at + columns, 1)
-      if (column < columns - 1) relax(at, at + 1, 1)
-      if (row < rows - 1 && column < columns - 1) relax(at, at + columns + 1, DIAGONAL)
-      if (row < rows - 1 && column > 0) relax(at, at + columns - 1, DIAGONAL)
+  for (let first = rows - 1; first >= 0; first -= band) {
+    yield
+    const past = Math.max(-1, first - band)
+    for (let row = first; row > past; row -= 1) {
+      for (let column = columns - 1; column >= 0; column -= 1) {
+        const at = row * columns + column
+        if (row < rows - 1) relax(at, at + columns, 1)
+        if (column < columns - 1) relax(at, at + 1, 1)
+        if (row < rows - 1 && column < columns - 1) relax(at, at + columns + 1, DIAGONAL)
+        if (row < rows - 1 && column > 0) relax(at, at + columns - 1, DIAGONAL)
+      }
     }
   }
   return distance
+}
+
+export function distanceFromSeeds(marked: Uint8Array, columns: number, rows: number): Float32Array {
+  const passes = distancePasses(marked, columns, rows, rows)
+  let step = passes.next()
+  while (!step.done) step = passes.next()
+  return step.value
 }
 
 export type Field = {
@@ -133,7 +150,19 @@ export type Field = {
  * own dots, pulled about by fractal noise, so the front always begins at the mark and grows
  * outward in organic lobes, and the highest cell is covered exactly as the level tops out.
  */
+/** Rows of the noise grid built per slice. The whole build is about twenty milliseconds,
+ *  which is more than a frame, so the caller drains this a slice at a time while the ring
+ *  keeps turning. Nothing is drawn until it finishes. */
+const SLICE_ROWS = 26
+
 export function createField(seeds: Seeds, width: number, height: number, random: () => number = Math.random): Field {
+  const build = buildField(seeds, width, height, random)
+  let step = build.next()
+  while (!step.done) step = build.next()
+  return step.value
+}
+
+export function* buildField(seeds: Seeds, width: number, height: number, random: () => number = Math.random): Generator<void, Field> {
   const long = Math.max(width, height)
   const columns = Math.max(8, Math.round((width / long) * FIELD_LONG))
   const rows = Math.max(8, Math.round((height / long) * FIELD_LONG))
@@ -151,7 +180,7 @@ export function createField(seeds: Seeds, width: number, height: number, random:
     marked[row * columns + column] = 1
   }
 
-  const distance = distanceFromSeeds(marked, columns, rows)
+  const distance = yield* distancePasses(marked, columns, rows, SLICE_ROWS)
   let span = 1
   for (let i = 0; i < distance.length; i += 1) if (distance[i] > span) span = distance[i]
 
@@ -163,11 +192,15 @@ export function createField(seeds: Seeds, width: number, height: number, random:
   const noiseColumns = Math.ceil(columns / 2) + 1
   const noiseRows = Math.ceil(rows / 2) + 1
   const grid = new Float32Array(noiseColumns * noiseRows)
-  for (let row = 0; row < noiseRows; row += 1) {
-    for (let column = 0; column < noiseColumns; column += 1) {
-      const x = ((column * 2 + 0.5) * width) / columns
-      const y = ((row * 2 + 0.5) * height) / rows
-      grid[row * noiseColumns + column] = fbm(x / cell, y / cell, phase)
+  for (let first = 0; first < noiseRows; first += SLICE_ROWS) {
+    yield
+    const past = Math.min(noiseRows, first + SLICE_ROWS)
+    for (let row = first; row < past; row += 1) {
+      for (let column = 0; column < noiseColumns; column += 1) {
+        const x = ((column * 2 + 0.5) * width) / columns
+        const y = ((row * 2 + 0.5) * height) / rows
+        grid[row * noiseColumns + column] = fbm(x / cell, y / cell, phase)
+      }
     }
   }
   const sampleNoise = (column: number, row: number) => {
@@ -182,6 +215,7 @@ export function createField(seeds: Seeds, width: number, height: number, random:
     return top * (1 - ty) + bottom * ty
   }
 
+  yield
   const heights = new Float32Array(columns * rows)
   let low = Infinity
   let high = -Infinity

@@ -3,7 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { prefersReducedMotion } from '../lib/motion'
 import {
   DOT_ALPHA, DOT_FADE, DURATION, RING_BACK, RING_OUT, VEIL_CAP,
-  createField, readSchedule, sampleSeeds, window01,
+  buildField, readSchedule, sampleSeeds, window01,
   type Field,
 } from '../lib/diffusion'
 
@@ -13,6 +13,7 @@ const INTERVAL = [15000, 40000]
 const DEFER = 6000
 const STEP = 1 / 60
 const MAX_STEPS = 4
+const BUILD_BUDGET = 6
 
 const active = ref(false)
 const canvas = ref<HTMLCanvasElement | null>(null)
@@ -35,6 +36,7 @@ let width = 0
 let height = 0
 let mounted = 0
 let dotRadius = 1
+let building = false
 
 const between = ([low, high]: number[]) => low + Math.random() * (high - low)
 
@@ -60,10 +62,18 @@ function disc(radius: number): HTMLCanvasElement {
   return mark
 }
 
-// The ring keeps drawing exactly as it always has; only the element's ink level moves,
-// so the dots empty out of the lattice and return without the ring knowing.
+// The ring keeps drawing exactly as it always has; only the element's opacity moves, so the
+// dots empty out of the lattice and return without the ring knowing. It goes on the element
+// rather than on :root, where a custom property would invalidate the whole document each frame.
+let ringElement: HTMLElement | null = null
+
 function ringInk(value: number) {
-  document.documentElement.style.setProperty('--ring-ink', value.toFixed(3))
+  if (ringElement) ringElement.style.opacity = value.toFixed(3)
+}
+
+function releaseRing() {
+  if (ringElement) ringElement.style.removeProperty('opacity')
+  ringElement = null
 }
 
 function paintInk(progress: number) {
@@ -139,19 +149,22 @@ function tick(now: number) {
 function stop() {
   if (frame) cancelAnimationFrame(frame)
   frame = 0
+  building = false
   field = null
   context = null
   dotContext = null
   levelContext = null
   coverage = null
-  document.documentElement.style.removeProperty('--ring-ink')
+  releaseRing()
   discs = new Map()
   active.value = false
 }
 
+const nextFrame = () => new Promise<void>((resolve) => { frame = requestAnimationFrame(() => resolve()) })
+
 async function ignite() {
   const ring = document.querySelector<HTMLCanvasElement>('.signal-ring')
-  if (!ring || active.value) return
+  if (!ring || active.value || building) return
   const rect = ring.getBoundingClientRect()
   if (rect.width === 0) return
   const scale = Math.min(1, VEIL_CAP / Math.max(window.innerWidth, window.innerHeight))
@@ -159,6 +172,20 @@ async function ignite() {
   height = Math.round(window.innerHeight * scale)
   const seeds = sampleSeeds(ring, rect, scale)
   if (seeds.points.length === 0) return
+
+  // Build the noise landscape a slice per frame before anything is mounted or drawn.
+  // Doing it in one go costs about twenty milliseconds, which the ring loses as a stall.
+  building = true
+  const build = buildField(seeds, width, height)
+  let step = build.next()
+  while (!step.done) {
+    await nextFrame()
+    if (!building) return
+    const until = performance.now() + BUILD_BUDGET
+    while (!step.done && performance.now() < until) step = build.next()
+  }
+  building = false
+  const ready = step.value
 
   active.value = true
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
@@ -175,7 +202,8 @@ async function ignite() {
   context.clearRect(0, 0, width, height)
   dotRadius = Math.max(1, (Math.min(rect.width, rect.height) / 300) * scale)
 
-  field = createField(seeds, width, height)
+  field = ready
+  ringElement = ring
   level.width = field.columns
   level.height = field.rows
   levelContext = level.getContext('2d')
@@ -202,10 +230,10 @@ function schedule(delay: number) {
 function onVisibility() {
   if (document.hidden) {
     window.clearTimeout(timer)
-    if (active.value) stop()
+    if (active.value || building) stop()
     return
   }
-  if (!active.value) schedule(between(INTERVAL))
+  if (!active.value && !building) schedule(between(INTERVAL))
 }
 
 onMounted(() => {

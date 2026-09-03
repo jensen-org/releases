@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
-  DOT_ALPHA, DOT_FADE, DURATION, RING_OUT, createField, distanceFromSeeds, fbm,
-  ramp, readSchedule, window01, type Seeds,
+  DOT_ALPHA, DOT_FADE, DURATION, RING_OUT, buildField, createField, distanceFromSeeds,
+  distancePasses, fbm, ramp, readSchedule, window01, type Seeds,
 } from '../src/lib/diffusion'
 
 const WIDTH = 1000
@@ -70,6 +70,34 @@ describe('the noise landscape', () => {
     expect(distance[7]).toBe(1)
     expect(distance[6]).toBeCloseTo(Math.SQRT2)
     expect(distance[0]).toBeCloseTo(2 * Math.SQRT2)
+  })
+})
+
+describe('building the field', () => {
+  it('hands back control often enough to stay inside a frame', () => {
+    const build = buildField(ringSeeds(), WIDTH, HEIGHT, seeded(13))
+    let yields = 0
+    let step = build.next()
+    while (!step.done) {
+      yields += 1
+      step = build.next()
+    }
+    // The whole build is about twenty milliseconds. Collapsing it back into one step is
+    // the stall this count exists to catch.
+    expect(yields).toBeGreaterThan(12)
+    expect(step.value.columns).toBeGreaterThan(0)
+  })
+
+  it('slicing the distance transform does not change what it computes', () => {
+    const columns = 37
+    const rows = 23
+    const marked = new Uint8Array(columns * rows)
+    for (const at of [0, 200, 411, 660, 838]) marked[at] = 1
+    const whole = distanceFromSeeds(marked, columns, rows)
+    const sliced = distancePasses(marked, columns, rows, 5)
+    let step = sliced.next()
+    while (!step.done) step = sliced.next()
+    expect(Array.from(step.value)).toEqual(Array.from(whole))
   })
 })
 
