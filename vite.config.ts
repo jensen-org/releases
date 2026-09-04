@@ -3,7 +3,7 @@ import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { releasesUrl, selectReleases } from './api/release.ts'
 
-const siteUrl = (process.env.VITE_SITE_URL ?? (process.env.VERCEL ? 'https://jensen-ide.com' : 'http://localhost:5173')).replace(/\/+$/, '')
+const siteUrl = (process.env.VITE_SITE_URL ?? (process.env.VERCEL ? 'https://www.jensen-ide.com' : 'http://localhost:5173')).replace(/\/+$/, '')
 const indexable = process.env.VERCEL_ENV === 'production'
 const title = 'Jensen'
 const description = 'Download Jensen for macOS and Linux.'
