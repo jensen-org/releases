@@ -315,7 +315,7 @@ a change in the map means a real change in the code.
 ## License
 
 Jensen is proprietary software, licensed under the
-[Jensen End User License Agreement 1.0](LICENSE).
+[Jensen End User License Agreement 1.0](LICENSE.md).
 
 Jensen is free to download and free to use, including inside a company and including to build
 products that company sells. Use it at work, on client engagements, on as many machines and for as
@@ -335,8 +335,8 @@ distribution, reseller, or hosting licenses, open a
 
 It publishes every Jensen build, serves the
 [documentation](https://jensen-org.github.io/releases/), and holds the source of the download page
-for the macOS build. The documentation site lives in `docs-site/` and is built and deployed to GitHub
-Pages by `.github/workflows/docs.yml`. How the download page is put together, the ring, the motion,
+for the macOS and Linux builds. The documentation site lives in `docs-site/` and is built and
+deployed to GitHub Pages by `.github/workflows/docs.yml`. How the download page is put together, the ring, the motion,
 the type and the theme flip, is written up in [docs/download-page.md](docs/download-page.md).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

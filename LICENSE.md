@@ -1,4 +1,4 @@
-Jensen End User License Agreement
+# Jensen End User License Agreement
 
     Agreement:      Jensen End User License Agreement
     Version:        1.0
@@ -13,6 +13,24 @@ intellectual property in Jensen to you.
 Jensen is free to download and free to use, including inside a company and including to build
 products that company sells. Jensen may not be sold, resold, sublicensed, redistributed,
 repackaged, or offered to others as a hosted service.
+
+## At a glance
+
+This section is a plain-language summary for orientation only. It is not the agreement, it grants
+nothing, and where it differs from the numbered sections below, those sections govern.
+
+| You can | You cannot |
+| --- | --- |
+| Download and install Jensen at no charge, on as many machines and for as many people in your organization as you like | Sell, resell, rent, lease or sublicense Jensen itself |
+| Use it for personal, educational and research work | Redistribute it, or give copies to other people for their own use |
+| Use it at work and on client engagements, including consulting and contract development | Bundle or package it inside another product you distribute |
+| Build, ship and sell software made with Jensen, with no fee and no share of what you earn | Run it as a hosted, managed or cloud service for other people |
+| Configure it, and modify it as far as your own permitted use technically needs | Publish a modified version, or build a product that competes with Jensen |
+| Write, publish and sell your own Jensen plugins, under the MIT-licensed plugin kits | Reverse engineer it, or remove its licence keys, notices or copyright |
+
+Need something this list puts on the right, such as reselling or hosting Jensen? That takes a
+separate written licence. Open a
+[licensing issue](https://github.com/jensen-org/releases/issues/new?template=licensing.yml).
 
 ---
 

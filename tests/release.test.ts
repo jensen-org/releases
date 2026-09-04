@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import handler, { MAX_BUILDS, selectReleases } from '../api/release'
+import handler, { MAX_BUILDS, classifyAsset, selectReleases } from '../api/release'
 const release = (date: string, assets: unknown[], extra = {}) => ({ tag_name: `v${date.slice(0, 4)}`, published_at: date, html_url: 'https://github.com/jensen-org/releases/releases/v1', assets, ...extra })
 const asset = (name: string, extra = {}) => ({ name, size: 100, browser_download_url: `https://github.com/jensen-org/releases/releases/download/${name}`, ...extra })
 describe('release selection', () => {
@@ -7,6 +7,10 @@ describe('release selection', () => {
   it('caps the list so the card stays short', () => { const many = Array.from({ length: MAX_BUILDS + 3 }, (_, year) => release(`20${10 + year}-01-01`, [asset('x-arm64.dmg')])); expect((selectReleases(many) as { builds: unknown[] }).builds).toHaveLength(MAX_BUILDS) })
   it('excludes wrong, missing, and malformed assets', () => { expect(selectReleases([release('2024-01-01', [asset('x86_64.dmg')])]).status).toBe('unavailable'); expect(selectReleases([]).status).toBe('unavailable'); expect(selectReleases({}).status).toBe('error') })
   it('rejects upstream fields that are not normalized', () => { expect(selectReleases([release('bad', [asset('x-arm64.dmg')])]).status).toBe('unavailable'); expect(selectReleases([release('2024-01-01', [asset('x-arm64.dmg', { size: 0 })])]).status).toBe('unavailable') })
+  it('splits assets across the platforms the card offers', () => { const result = selectReleases([release('2024-01-01', [asset('Jensen-arm64.dmg'), asset('Jensen_amd64.deb'), asset('Jensen.x86_64.rpm'), asset('SHA256SUMS.txt')])]) as { builds: { platform: string; format: string; arch: string }[] }; expect(result.builds.map((build) => `${build.platform}/${build.format}/${build.arch}`)).toEqual(['macos/dmg/arm64', 'linux/deb/x86_64', 'linux/rpm/x86_64']) })
+  it('keeps one build per format so a tab never shows the same package twice', () => { const result = selectReleases([release('2024-01-01', [asset('a_amd64.deb'), asset('b_amd64.deb')])]) as { builds: { assetName: string }[] }; expect(result.builds.map((build) => build.assetName)).toEqual(['a_amd64.deb']) })
+  it('classifies only the packages the page can offer', () => { expect(classifyAsset('Jensen-arm64.dmg')).toMatchObject({ platform: 'macos', format: 'dmg' }); expect(classifyAsset('Jensen-x86_64.dmg')).toBeNull(); expect(classifyAsset('Jensen.AppImage')).toBeNull(); expect(classifyAsset('notes.txt')).toBeNull() })
+  it('still refuses an asset hosted away from github', () => { expect(selectReleases([release('2024-01-01', [asset('x_amd64.deb', { browser_download_url: 'https://evil.example/x_amd64.deb' })])]).status).toBe('unavailable') })
 })
 describe('release handler', () => {
   const response = () => { const result: Record<string, unknown> = {}; const out = { status: (code: number) => { result.code = code; return out }, json: (body: unknown) => { result.body = body; return out }, setHeader: (name: string, value: string) => { result[name] = value; return out } }; return { result, out } }

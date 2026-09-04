@@ -51,6 +51,7 @@ hides which one answered.
 
 ## Status
 
-Jensen is in public beta. It is source-available under the PolyForm Noncommercial License 1.0.0, not
-open source: commercial use requires a separate written license. See
+Jensen is in public beta. It is proprietary software under the Jensen End User License Agreement 1.0,
+not open source. It is free to use, including at work and to build products you sell. What it does
+not allow is selling, redistributing or hosting Jensen itself. See
 [License and security](../../about/license-and-security/).

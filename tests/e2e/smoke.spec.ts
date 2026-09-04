@@ -1,15 +1,51 @@
 import { expect, test } from '@playwright/test'
-const build = { version: 'v1.4.0', publishedAt: '2026-08-14T00:00:00Z', byteSize: 26004684, assetName: 'Jensen-arm64.dmg', downloadUrl: 'https://github.com/jensen-org/releases/releases/download/v1.4.0/Jensen-arm64.dmg', releaseUrl: 'https://github.com/jensen-org/releases/releases/tag/v1.4.0' }
-test.beforeEach(async ({ page }) => { await page.route('**/api/release', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ status: 'available', releaseUrl: build.releaseUrl, builds: [build] }) })) })
+const build = { platform: 'macos', format: 'dmg', arch: 'arm64', version: 'v1.4.0', publishedAt: '2026-08-14T00:00:00Z', byteSize: 26004684, assetName: 'Jensen-arm64.dmg', downloadUrl: 'https://github.com/jensen-org/releases/releases/download/v1.4.0/Jensen-arm64.dmg', releaseUrl: 'https://github.com/jensen-org/releases/releases/tag/v1.4.0' }
+const linux = { ...build, platform: 'linux', format: 'deb', arch: 'x86_64', byteSize: 31447219, assetName: 'Jensen_1.4.0_amd64.deb', downloadUrl: 'https://github.com/jensen-org/releases/releases/download/v1.4.0/Jensen_1.4.0_amd64.deb' }
+test.beforeEach(async ({ page }) => { await page.route('**/api/release', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ status: 'available', releaseUrl: build.releaseUrl, builds: [build, linux] }) })) })
 
 test('release card is usable', async ({ page }) => {
   await page.goto('/?diffusion=off')
-  await expect(page.getByRole('heading', { name: 'Jensen for macOS' })).toBeAttached()
+  await expect(page.getByRole('heading', { name: 'Download Jensen' })).toBeAttached()
   const link = page.getByRole('link', { name: 'Download Jensen for macOS v1.4.0' })
   await expect(link).toHaveAttribute('href', /github\.com/)
   await link.focus()
   await expect(link).toBeFocused()
   await expect(page.getByLabel('Jensen signal ring')).toBeVisible()
+})
+
+test('the platform tabs swap the offer without changing the card height', async ({ page }) => {
+  await page.goto('/?diffusion=off')
+  const card = page.locator('.shelf-card')
+  const macos = page.getByRole('tab', { name: 'macOS' })
+  const linux = page.getByRole('tab', { name: 'Linux' })
+  await expect(macos).toHaveAttribute('aria-selected', 'true')
+  const before = (await card.boundingBox())!.height
+  await linux.click()
+  await expect(linux).toHaveAttribute('aria-selected', 'true')
+  await expect(macos).toHaveAttribute('aria-selected', 'false')
+  await expect(page.locator('.shelf-arch')).toHaveText('x86_64')
+  await expect(page.getByRole('link', { name: /Download Jensen for Linux/ })).toHaveAttribute('href', /amd64\.deb$/)
+  expect((await card.boundingBox())!.height).toBe(before)
+})
+
+test('the page fits its viewport on every width the layout claims to serve', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'the mobile project is pinned to one device width')
+  for (const width of [1024, 1280, 1440, 1920, 2560]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/?diffusion=off')
+    const fit = await page.evaluate(() => ({
+      across: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      down: document.documentElement.scrollHeight - window.innerHeight,
+      hole: (() => {
+        const copy = document.querySelector('.hero-copy')!.getBoundingClientRect()
+        const ring = document.querySelector('.ring')!.getBoundingClientRect()
+        return ring.left - copy.right
+      })(),
+    }))
+    expect(fit.across, `horizontal scrollbar at ${width}`).toBeLessThanOrEqual(0)
+    expect(fit.down, `vertical scrollbar at ${width}`).toBeLessThanOrEqual(0)
+    expect(fit.hole, `gap between the copy and the ring at ${width}`).toBeLessThan(120)
+  }
 })
 
 test('headline leads the page on more than one line', async ({ page }, info) => {
@@ -138,6 +174,20 @@ test('the palette lands on the download button in the same frame as the page', a
   const swap = await caught
   expect(swap.background).toBe('rgb(241, 241, 242)')
   expect(swap.color).toBe('rgb(4, 4, 6)')
+})
+
+test('reduced motion parks the orbit nodes', async ({ page }, info) => {
+  test.skip(info.project.name !== 'reduced-motion', 'only the reduced-motion project asserts this')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/?diffusion=off')
+  const marks = page.locator('.orbit-field g')
+  await expect(marks).toHaveCount(2)
+  const read = () => marks.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('transform')).join('|'))
+  const first = await read()
+  await page.mouse.move(200, 200)
+  await page.mouse.move(900, 600)
+  await page.waitForTimeout(900)
+  expect(await read()).toBe(first)
 })
 
 test('reduced motion never flips the page', async ({ page }, info) => {

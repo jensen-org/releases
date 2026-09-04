@@ -18,13 +18,13 @@ For a security vulnerability, use private reporting rather than a public issue. 
 Open a [feature request](https://github.com/jensen-org/releases/issues/new?template=feature.yml).
 
 Feedback costs you nothing. Ideas, bug reports, reproduction steps, and design discussion are covered
-by the Feedback section of the [Jensen End User License Agreement](LICENSE). The copyright holder may
+by the Feedback section of the [Jensen End User License Agreement](LICENSE.md). The copyright holder may
 use them freely, and you keep ownership of anything you independently wrote.
 
 ## Submitting code
 
 Code, documentation, and configuration contributions carry a licence grant, set out in full in the
-Contributions section of [`LICENSE`](LICENSE). In short: you keep the copyright in your work, and you
+Contributions section of [`LICENSE.md`](LICENSE.md). In short: you keep the copyright in your work, and you
 grant the copyright holder a perpetual, irrevocable, sublicensable licence to use it under any terms,
 including commercial ones. That grant is what lets Jensen ship your patch at all, since Jensen is
 licensed commercially and no inbound-equals-outbound assumption applies.

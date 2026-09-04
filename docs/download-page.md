@@ -1,14 +1,14 @@
 # Jensen Release
 
-The Jensen release page is a Vue 3 single page application for the Apple Silicon macOS build, built with PrimeVue 4 components on a custom Aura preset.
+The Jensen release page is a Vue 3 single page application offering the macOS and Linux builds behind a platform tab, built with PrimeVue 4 components on a custom Aura preset.
 
 ## Local development
 
-Install Bun, then run `bun install` and `bun run dev`. The API endpoint is available at `/api/release` in Vercel, not in `vite dev`, so the download shelf shows its error state locally. `GITHUB_TOKEN` is server-only and raises GitHub API rate limits. Copy `.env.example` when needed.
+Install Bun, then run `bun install` and `bun run dev`. Vercel serves `/api/release` in production; the dev server answers it from `tests/fixtures/releases.json` so the download card is usable locally, and `VITE_RELEASE_LIVE=1` reads the real GitHub feed instead. `GITHUB_TOKEN` is server-only and raises GitHub API rate limits. Copy `.env.example` when needed.
 
 ## Releases
 
-The endpoint reads published GitHub releases, including prereleases, and returns every release carrying an Apple Silicon `.dmg` whose filename contains `arm64` or `aarch64`, newest first and capped at `MAX_BUILDS`. The page offers the newest build as a single download, with the GitHub releases page linked for the rest. Draft releases and other architectures are ignored. Asset and release links must be public `https://github.com/` URLs. `GITHUB_TOKEN` is optional and server-only.
+The endpoint reads published GitHub releases, including prereleases, and classifies each asset by platform: an Apple Silicon `.dmg` whose filename contains `arm64` or `aarch64` is macOS, a `.deb` or `.rpm` is Linux. Releases come back newest first, capped at `MAX_BUILDS`, one build per format per release. The card groups them behind a platform tab and offers the newest build for the active platform, with the GitHub releases page linked for the rest. Draft releases and other architectures are ignored. `/api/release` does not exist under `vite dev`, so the dev server serves `tests/fixtures/releases.json` through the same selector; set `VITE_RELEASE_LIVE=1` to read the real GitHub feed instead. Asset and release links must be public `https://github.com/` URLs. `GITHUB_TOKEN` is optional and server-only.
 
 ## The ring
 
@@ -33,6 +33,26 @@ exactly with nothing left over.
 
 `decodeMessage` in `src/lib/ring.ts` does this in code, and `tests/ring.test.ts` asserts the
 rendered geometry still decodes to the original sentence.
+
+## The orbit
+
+The concentric circles around the mark are a separate layer. `OrbitField.vue` renders an SVG
+sibling inside the same box and reads nothing from the ring, so `SignalRing.vue` and `ring.ts` are
+untouched by any of it and the simulation never learns the layer exists.
+
+- A containment circle sits at `0.98` of the box radius, outside the six percent the simulation
+  overshoots, so a breathing dot never crosses it.
+- The graduated circle carries one tick per spoke of the lattice, `SPOKES` of them, so the scale is
+  the mark's own resolution made visible rather than an arbitrary number of marks. Below a 420 pixel
+  box the count halves, because at that size the ticks close into a solid band.
+- A bracketed arc at `1.9` of the box radius runs only through the eastern half, so it crops against
+  the right edge of the viewport and never reaches the copy. It is dropped below 1024 pixels.
+- Two nodes ride the graduated circle, drifting at different rates and in opposite directions. On a
+  fine pointer they ease toward the pointer's own angle at different strengths, which is the only
+  thing on the page that answers the mouse besides the download button.
+- Strokes are `--edge` and `--haze` and the nodes are `--ink`, so the diffusion flip inverts the
+  layer with the rest of the page and it needs no special case. Under `prefers-reduced-motion` the
+  loop never starts and the nodes park at their rest angles.
 
 ## The motion
 

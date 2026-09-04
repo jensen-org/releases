@@ -1,10 +1,12 @@
+import { readFileSync } from 'node:fs'
 import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { releasesUrl, selectReleases } from './api/release.ts'
 
-const siteUrl = (process.env.VITE_SITE_URL ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:5173')).replace(/\/+$/, '')
+const siteUrl = (process.env.VITE_SITE_URL ?? (process.env.VERCEL ? 'https://jensen-ide.com' : 'http://localhost:5173')).replace(/\/+$/, '')
 const indexable = process.env.VERCEL_ENV === 'production'
-const title = 'Jensen for macOS'
-const description = 'Download Jensen for macOS on Apple Silicon.'
+const title = 'Jensen'
+const description = 'Download Jensen for macOS and Linux.'
 
 const seo = (): Plugin => ({
   name: 'jensen-seo',
@@ -31,4 +33,24 @@ const seo = (): Plugin => ({
   },
 })
 
-export default defineConfig({ plugins: [vue(), seo()] })
+const releaseDev = (): Plugin => ({
+  name: 'jensen-release-dev',
+  apply: 'serve',
+  configureServer(server) {
+    server.middlewares.use('/api/release', async (_request, response) => {
+      let payload: unknown = null
+      try {
+        if (process.env.VITE_RELEASE_LIVE === '1') {
+          const upstream = await fetch(`https://api.github.com/repos/jensen-org/releases/releases?per_page=100`, { headers: { Accept: 'application/vnd.github+json' } })
+          payload = upstream.ok ? await upstream.json() : null
+        } else {
+          payload = JSON.parse(readFileSync('tests/fixtures/releases.json', 'utf8'))
+        }
+      } catch { payload = null }
+      response.setHeader('Content-Type', 'application/json')
+      response.end(JSON.stringify(payload === null ? { status: 'error', code: 'UPSTREAM_UNAVAILABLE', releaseUrl: releasesUrl } : selectReleases(payload)))
+    })
+  },
+})
+
+export default defineConfig({ plugins: [vue(), seo(), releaseDev()] })

@@ -3,8 +3,9 @@ title: Download and install
 description: Where to get Jensen, which build to take for your platform, and how to install it.
 ---
 
-Every Jensen build is published on the
-[releases page](https://github.com/jensen-org/releases/releases).
+Take the build for your platform from the [download page](https://jensen-ide.com/), which
+always offers the newest one. Every build ever published, along with its checksums and signatures,
+is on the [releases page](https://github.com/jensen-org/releases/releases).
 
 ## Which build to take
 
@@ -53,7 +54,8 @@ The current beta is deliberately narrow. Before you install, know that:
 - Semantic knowledge search downloads a small embedding model on first use. On a machine with no
   network it falls back to lexical search with no loss of availability. See
   [Memory and knowledge search](../../knowledge/memory-and-search/).
-- Commercial use requires a separate written license. See
+- Jensen is free to use, at work included. Selling, redistributing or hosting Jensen itself is what
+  needs a separate written licence. See
   [License and security](../../about/license-and-security/).
 
 ## Next

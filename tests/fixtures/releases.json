@@ -1,0 +1,23 @@
+[
+  {
+    "tag_name": "v0.1.0",
+    "draft": false,
+    "published_at": "2026-08-14T09:12:00Z",
+    "html_url": "https://github.com/jensen-org/releases/releases/tag/v0.1.0",
+    "assets": [
+      { "name": "Jensen-0.1.0-arm64.dmg", "size": 26004684, "digest": "sha256:3f1c9a", "browser_download_url": "https://github.com/jensen-org/releases/releases/download/v0.1.0/Jensen-0.1.0-arm64.dmg" },
+      { "name": "Jensen_0.1.0_amd64.deb", "size": 31447219, "digest": "sha256:8b02de", "browser_download_url": "https://github.com/jensen-org/releases/releases/download/v0.1.0/Jensen_0.1.0_amd64.deb" },
+      { "name": "Jensen-0.1.0.x86_64.rpm", "size": 31890114, "browser_download_url": "https://github.com/jensen-org/releases/releases/download/v0.1.0/Jensen-0.1.0.x86_64.rpm" },
+      { "name": "SHA256SUMS.txt", "size": 412, "browser_download_url": "https://github.com/jensen-org/releases/releases/download/v0.1.0/SHA256SUMS.txt" }
+    ]
+  },
+  {
+    "tag_name": "v0.0.9",
+    "draft": false,
+    "published_at": "2026-07-30T16:40:00Z",
+    "html_url": "https://github.com/jensen-org/releases/releases/tag/v0.0.9",
+    "assets": [
+      { "name": "Jensen-0.0.9-arm64.dmg", "size": 25781043, "browser_download_url": "https://github.com/jensen-org/releases/releases/download/v0.0.9/Jensen-0.0.9-arm64.dmg" }
+    ]
+  }
+]

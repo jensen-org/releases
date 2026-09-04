@@ -1,20 +1,27 @@
 ---
 title: License and security
-description: Jensen is source-available, not open source. What the license permits, how to report a vulnerability, and the security posture in plain terms.
+description: Jensen is proprietary and free to use, including at work. What the licence permits, how to report a vulnerability, and the security posture in plain terms.
 ---
 
 ## License
 
-Jensen is source-available under the
-[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
+Jensen is proprietary software, licensed under the
+[Jensen End User License Agreement 1.0](https://github.com/jensen-org/releases/blob/main/LICENSE.md).
+It is free to download and free to use, on as many machines and for as many people in your
+organization as you like. The source is not published.
 
-You may use, modify and redistribute Jensen for permitted **noncommercial** purposes.
+The table below is a summary for orientation. The agreement itself governs.
 
-Commercial use, resale, paid redistribution, hosted offerings, or bundling Jensen into a paid product
-requires a **separate written license** from the copyright holder.
+| You can | You cannot |
+| --- | --- |
+| Use Jensen at work, on client engagements, and for personal, educational and research work | Sell, resell, rent, lease or sublicense Jensen itself |
+| Build, ship and sell software made with Jensen, at no charge and no share of what you earn | Redistribute it, or bundle it inside another product you distribute |
+| Configure it, and modify it as far as your own permitted use technically needs | Run it as a hosted or managed service for other people |
+| Write, publish and sell your own Jensen plugins, under the MIT-licensed plugin kits | Publish a modified version, or build a product that competes with Jensen |
 
-**This is not an open-source license.** All commercial rights not expressly granted remain reserved.
-If you are unsure which side of the line your use falls on, ask before you deploy rather than after.
+**This is not an open-source license.** All rights not expressly granted remain reserved. For a
+distribution, reseller or hosting licence, open a
+[licensing issue](https://github.com/jensen-org/releases/issues/new?template=licensing.yml).
 
 ## Reporting a vulnerability
 
