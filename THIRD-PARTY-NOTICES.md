@@ -6,6 +6,10 @@ Agreement in respect of that component, that license governs that component.
 
 Regenerate this file with `scripts/third-party-notices.sh`.
 
+## Notes on non-standard license strings
+
+- `gsap`: the GSAP Standard "no charge" license, https://gsap.com/community/standard-license/. Free for commercial use, including in products end users pay for. The only restriction is on no-code visual animation builders competing with Webflow, which Jensen is not.
+
 ## Bundled assets
 
 | Component | Version | License |
