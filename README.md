@@ -19,7 +19,7 @@
   </p>
 
   <p align="center">
-    <a href="#license"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue" alt="License: PolyForm Noncommercial 1.0.0"></a>
+    <a href="#license"><img src="https://img.shields.io/badge/license-Jensen%20EULA%201.0-blue" alt="License: Jensen End User License Agreement 1.0"></a>
     <img src="https://img.shields.io/badge/status-beta-orange" alt="Status: beta">
     <img src="https://img.shields.io/badge/beta-0.1.0-blueviolet" alt="Beta 0.1.0">
   </p>
@@ -314,13 +314,20 @@ a change in the map means a real change in the code.
 
 ## License
 
-Jensen is source-available under the
-[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
-You may use, modify and redistribute Jensen for permitted noncommercial purposes. Commercial use,
-resale, paid redistribution, hosted offerings, or bundling Jensen into a paid product requires a
-separate written license from the copyright holder.
+Jensen is proprietary software, licensed under the
+[Jensen End User License Agreement 1.0](LICENSE).
 
-This is not an open-source license. All commercial rights not expressly granted remain reserved.
+Jensen is free to download and free to use, including inside a company and including to build
+products that company sells. Use it at work, on client engagements, on as many machines and for as
+many people as you like, at no charge.
+
+You may not sell, resell, sublicense, redistribute, or repackage Jensen, and you may not offer it to
+others as a hosted or managed service. The source is not published. Third-party components and their
+licenses are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+This is not an open-source license. All rights not expressly granted remain reserved. For
+distribution, reseller, or hosting licenses, open a
+[licensing issue](https://github.com/jensen-org/releases/issues/new?template=licensing.yml).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
