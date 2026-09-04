@@ -2,7 +2,7 @@
 
 <br />
 <div align="center">
-  <img src="public/jensen.png" alt="Jensen" width="280" height="280">
+  <img src=".github/assets/jensen-mark.png" alt="Jensen" width="280" height="280">
   <h3 align="center">Jensen</h3>
 
   <p align="center">
