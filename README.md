@@ -126,8 +126,8 @@ Every build is published on this repository's [releases page](https://github.com
 Beta builds are published as prereleases, so GitHub does not expose them through the `latest`
 release URL. Take them from the releases page itself.
 
-Every release also carries `SHA256SUMS`, its detached signature `SHA256SUMS.asc`, and
-`release.json` describing the build.
+Every release also carries a checksum file per platform, its detached signature, the signing
+public key `JENSEN_RELEASE_PUBKEY.asc`, and a `release-*.json` describing the build.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -158,8 +158,8 @@ shell needs to show the app's own icon.
 Check the file against the published checksums, from the directory you downloaded into:
 
 ```bash
-shasum -a 256 -c SHA256SUMS   # macOS
-sha256sum -c SHA256SUMS       # Linux
+shasum -a 256 -c SHA256SUMS-macos-arm64    # macOS
+sha256sum -c SHA256SUMS-linux-x86_64       # Linux
 ```
 
 The checksum file is signed, so you can confirm it came from the release pipeline rather than from
@@ -167,7 +167,7 @@ whoever handed you the link:
 
 ```bash
 gpg --import JENSEN_RELEASE_PUBKEY.asc
-gpg --verify SHA256SUMS.asc SHA256SUMS
+gpg --verify SHA256SUMS-macos-arm64.asc SHA256SUMS-macos-arm64
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
