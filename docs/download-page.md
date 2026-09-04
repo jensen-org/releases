@@ -36,23 +36,26 @@ rendered geometry still decodes to the original sentence.
 
 ## The orbit
 
-The concentric circles around the mark are a separate layer. `OrbitField.vue` renders an SVG
-sibling inside the same box and reads nothing from the ring, so `SignalRing.vue` and `ring.ts` are
-untouched by any of it and the simulation never learns the layer exists.
+Two hairline circles sit behind the whole page, concentric on the page's own centre at every
+viewport, one contained and one cropping against the frame. `OrbitField.vue` renders them as a
+sibling layer that reads nothing from the mark, so `SignalRing.vue` and `ring.ts` are untouched by
+any of it and the simulation never learns the layer exists.
 
-- A containment circle sits at `0.98` of the box radius, outside the six percent the simulation
-  overshoots, so a breathing dot never crosses it.
-- The graduated circle carries one tick per spoke of the lattice, `SPOKES` of them, so the scale is
-  the mark's own resolution made visible rather than an arbitrary number of marks. Below a 420 pixel
-  box the count halves, because at that size the ticks close into a solid band.
-- A bracketed arc at `1.9` of the box radius runs only through the eastern half, so it crops against
-  the right edge of the viewport and never reaches the copy. It is dropped below 1024 pixels.
-- Two nodes ride the graduated circle, drifting at different rates and in opposite directions. On a
-  fine pointer they ease toward the pointer's own angle at different strengths, which is the only
-  thing on the page that answers the mouse besides the download button.
-- Strokes are `--edge` and `--haze` and the nodes are `--ink`, so the diffusion flip inverts the
-  layer with the rest of the page and it needs no special case. Under `prefers-reduced-motion` the
-  loop never starts and the nodes park at their rest angles.
+- The SVG carries a `0 0 100 100` box with `xMidYMid slice`, so the circles stay circular and crop
+  against the longer axis instead of stretching. Both are centred at `50 50`, which is the centre of
+  the `.page` box the layer is positioned against.
+- Three dots pin the product's own pillars to the circles, named as the README and the docs name
+  them: the shared map, honest by design, the git guard. Each label carries one line of mono
+  supporting type, dropped below 1024 pixels, and the whole pin is dropped below 860 where the hero
+  stacks.
+- A pin is placed by solving the circle for a target height expressed as a fraction of the viewport,
+  then taking the left or right intersection. That keeps every label in the empty band above or
+  below the hero at any aspect ratio, rather than at a fixed angle that drifts onto the copy.
+- The dot, not the label, is what lands on the circle. The pin translates by half a dot rather than
+  half its own width, and the label flips to the other side once the dot crosses the page's midline.
+- Strokes are `--edge` and the dots are `--ink`, so the diffusion flip inverts the layer with the
+  rest of the page and it needs no special case. A pointer parallax shifts the circles by a fraction
+  of a unit; under `prefers-reduced-motion` or a coarse pointer it never starts.
 
 ## The motion
 
