@@ -3,7 +3,7 @@ title: Download and install
 description: Where to get Jensen, which build to take for your platform, and how to install it.
 ---
 
-Take the build for your platform from the [download page](https://jensen-ide.com/), which
+Take the build for your platform from the [download page](https://www.jensen-ide.com/), which
 always offers the newest one. Every build ever published, along with its checksums and signatures,
 is on the [releases page](https://github.com/jensen-org/releases/releases).
 
