@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { hasCoarsePointer, prefersReducedMotion } from '../lib/motion'
 
 type Ring = { cx: number; cy: number; r: number }
 
@@ -18,19 +17,12 @@ const PINS = [
 const host = ref<HTMLDivElement | null>(null)
 const pins = ref<HTMLElement[]>([])
 const sides = ref(PINS.map(() => 'right'))
-const drift = ref<SVGGElement | null>(null)
 
 let observer: ResizeObserver | undefined
-let onPointer: ((event: PointerEvent) => void) | undefined
-let frame = 0
-let shiftX = 0
-let shiftY = 0
-let aimX = 0
-let aimY = 0
 
-const polar = (ring: Ring, angle: number, radius = ring.r) => ({
-  x: ring.cx + Math.cos(angle) * radius,
-  y: ring.cy + Math.sin(angle) * radius,
+const polar = (ring: Ring, angle: number) => ({
+  x: ring.cx + Math.cos(angle) * ring.r,
+  y: ring.cy + Math.sin(angle) * ring.r,
 })
 
 function place() {
@@ -54,41 +46,19 @@ function place() {
   })
 }
 
-function ease(now: number) {
-  frame = 0
-  shiftX += (aimX - shiftX) * 0.06
-  shiftY += (aimY - shiftY) * 0.06
-  drift.value?.setAttribute('transform', `translate(${shiftX.toFixed(3)} ${shiftY.toFixed(3)})`)
-  if (Math.abs(aimX - shiftX) > 0.002 || Math.abs(aimY - shiftY) > 0.002) frame = requestAnimationFrame(ease)
-  void now
-}
-
 onMounted(() => {
   place()
   observer = new ResizeObserver(() => place())
   if (host.value) observer.observe(host.value)
-  if (prefersReducedMotion() || hasCoarsePointer()) return
-  onPointer = (event) => {
-    aimX = (event.clientX / window.innerWidth - 0.5) * 1.6
-    aimY = (event.clientY / window.innerHeight - 0.5) * 1.6
-    if (!frame) frame = requestAnimationFrame(ease)
-  }
-  window.addEventListener('pointermove', onPointer, { passive: true })
 })
 
-onUnmounted(() => {
-  observer?.disconnect()
-  if (frame) cancelAnimationFrame(frame)
-  if (onPointer) window.removeEventListener('pointermove', onPointer)
-})
+onUnmounted(() => observer?.disconnect())
 </script>
 
 <template>
   <div ref="host" class="orbit-field" aria-hidden="true">
     <svg class="orbit-plot" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" focusable="false">
-      <g ref="drift">
-        <circle v-for="(ring, index) in RINGS" :key="index" class="orbit-line" :cx="ring.cx" :cy="ring.cy" :r="ring.r" path-length="1" />
-      </g>
+      <circle v-for="(ring, index) in RINGS" :key="index" class="orbit-line" :cx="ring.cx" :cy="ring.cy" :r="ring.r" path-length="1" />
     </svg>
 
     <p

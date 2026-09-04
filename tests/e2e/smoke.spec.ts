@@ -192,17 +192,17 @@ test('the palette lands on the download button in the same frame as the page', a
   expect(swap.color).toBe('rgb(4, 4, 6)')
 })
 
-test('reduced motion holds the orbit still', async ({ page }, info) => {
-  test.skip(info.project.name !== 'reduced-motion', 'only the reduced-motion project asserts this')
-  await page.emulateMedia({ reducedMotion: 'reduce' })
+test('the orbit never answers the pointer', async ({ page }, info) => {
+  test.skip(info.project.name === 'mobile', 'a phone has no hovering pointer')
   await page.goto('/?diffusion=off')
-  const drift = page.locator('.orbit-plot g')
-  await expect(drift).toHaveCount(1)
-  const first = await drift.getAttribute('transform')
-  await page.mouse.move(200, 200)
-  await page.mouse.move(1100, 700)
+  const read = () => page.locator('.orbit-line').evaluateAll((nodes) => nodes.map((node) => {
+    const box = node.getBoundingClientRect()
+    return `${box.left.toFixed(2)},${box.top.toFixed(2)},${box.width.toFixed(2)}`
+  }).join('|'))
+  const first = await read()
+  for (const [x, y] of [[120, 120], [900, 300], [400, 800], [1200, 650]]) await page.mouse.move(x, y)
   await page.waitForTimeout(900)
-  expect(await drift.getAttribute('transform')).toBe(first)
+  expect(await read()).toBe(first)
 })
 
 test('the pillars sit on the orbit and name what the docs name', async ({ page }, info) => {

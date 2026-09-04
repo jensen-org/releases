@@ -54,8 +54,8 @@ any of it and the simulation never learns the layer exists.
 - The dot, not the label, is what lands on the circle. The pin translates by half a dot rather than
   half its own width, and the label flips to the other side once the dot crosses the page's midline.
 - Strokes are `--edge` and the dots are `--ink`, so the diffusion flip inverts the layer with the
-  rest of the page and it needs no special case. A pointer parallax shifts the circles by a fraction
-  of a unit; under `prefers-reduced-motion` or a coarse pointer it never starts.
+  rest of the page and it needs no special case. Nothing here moves: the layer answers a resize and
+  nothing else, so it costs no frames and needs no reduced-motion branch.
 
 ## The motion
 
