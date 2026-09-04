@@ -1,0 +1,43 @@
+name: Bug report
+description: Report reproducible Jensen behavior.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for helping improve Jensen. Remove credentials and private source code before submitting.
+  - type: input
+    id: version
+    attributes:
+      label: Jensen version
+      placeholder: v0.1.0
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: Ubuntu 24.04 x86_64
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Include the expected result, actual result, and the smallest safe reproduction.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs
+      render: shell
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed credentials, tokens, private source code, and personal data.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

@@ -9,7 +9,7 @@ interface Release { status: 'available' | 'unavailable' | 'error'; builds?: Buil
 
 const RELEASES_URL = 'https://github.com/jensen-org/releases/releases'
 const DOCS_URL = 'https://jensen-org.github.io/releases/'
-const LICENSE_URL = 'https://polyformproject.org/licenses/noncommercial/1.0.0'
+const LICENSE_URL = 'https://github.com/jensen-org/releases/blob/main/LICENSE'
 const APPLE_GLYPH = 'M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C61.8 141.2 12 184.5 12 272.3c0 25.9 4.7 52.7 14.2 80.3 12.6 36.4 58.1 125.7 105.6 124.2 24.8-.6 42.4-17.6 74.7-17.6 31.3 0 47.6 17.6 75.3 17.6 47.9-.7 89.1-81.8 101.1-118.3-64.3-30.3-64.2-88.9-64.2-90.7zm-56.4-165.4c27.2-32.3 24.7-61.7 23.9-72.3-24 1.4-51.8 16.4-67.6 34.9-17.4 19.8-27.6 44.3-25.4 71.9 25.9 2 49.6-11.3 69.1-34.5z'
 
 const release = ref<Release | null>(null)
@@ -124,7 +124,7 @@ onUnmounted(() => releaseMagnet?.())
         <span class="baseline-dot" aria-hidden="true" />
         Beta 0.1.0
       </span>
-      <a class="baseline-legal" :href="LICENSE_URL">PolyForm Noncommercial 1.0.0</a>
+      <a class="baseline-legal" :href="LICENSE_URL">Jensen EULA 1.0</a>
     </footer>
 
     <DiffusionVeil />

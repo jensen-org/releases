@@ -86,6 +86,6 @@ describe('release card', () => {
     globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
     const wrapper = mountApp()
     expect(wrapper.find('.baseline-status').text()).toContain('Beta 0.1.0')
-    expect(wrapper.find('.baseline-legal').attributes('href')).toContain('polyformproject.org')
+    expect(wrapper.find('.baseline-legal').attributes('href')).toContain('jensen-org/releases/blob/main/LICENSE')
   })
 })
