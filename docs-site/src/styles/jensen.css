@@ -1,0 +1,467 @@
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/poppins-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/poppins-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/poppins-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/jetbrains-mono-400.woff2') format('woff2');
+}
+
+/* Starlight is dark first: bare :root is the dark theme. */
+:root {
+  --paper: #040406;
+  --ink: #f1f1f2;
+  --ink-lift: #d1d1d6;
+  --graphite: #a9a9b0;
+  --haze: #57575f;
+  --edge: #1b1b21;
+
+  --sl-color-white: #f1f1f2;
+  --sl-color-gray-1: #d1d1d6;
+  --sl-color-gray-2: #b6b6bd;
+  --sl-color-gray-3: #a9a9b0;
+  --sl-color-gray-4: #6f6f78;
+  --sl-color-gray-5: #57575f;
+  --sl-color-gray-6: #1b1b21;
+  --sl-color-gray-7: #101015;
+  --sl-color-black: #040406;
+
+  --sl-color-accent-low: #2a2a30;
+  --sl-color-accent: #d1d1d6;
+  --sl-color-accent-high: #f1f1f2;
+
+  --sl-color-text: #d1d1d6;
+  --sl-color-text-accent: #f1f1f2;
+  --sl-color-text-invert: #040406;
+
+  --sl-color-bg: #040406;
+  --sl-color-bg-nav: #040406;
+  --sl-color-bg-sidebar: #040406;
+  --sl-color-bg-inline-code: #17171d;
+  --sl-color-bg-accent: #f1f1f2;
+
+  --sl-color-hairline: #1b1b21;
+  --sl-color-hairline-light: #26262e;
+  --sl-color-hairline-shade: #101015;
+
+  --sl-color-backdrop-overlay: rgba(4, 4, 6, 0.76);
+
+  --sl-shadow-sm: none;
+  --sl-shadow-md: none;
+  --sl-shadow-lg: none;
+
+  --jensen-grain-opacity: 0.05;
+}
+
+:root[data-theme='light'] {
+  --paper: #fbfbf9;
+  --ink: #0e0e0d;
+  --ink-lift: #2e2e29;
+  --graphite: #56564f;
+  --haze: #a8a8a0;
+  --edge: #e4e4de;
+
+  --sl-color-white: #0e0e0d;
+  --sl-color-gray-1: #2e2e29;
+  --sl-color-gray-2: #43433d;
+  --sl-color-gray-3: #56564f;
+  --sl-color-gray-4: #7d7d75;
+  --sl-color-gray-5: #a8a8a0;
+  --sl-color-gray-6: #e4e4de;
+  --sl-color-gray-7: #f1f1ec;
+  --sl-color-black: #fbfbf9;
+
+  --sl-color-accent-low: #e4e4de;
+  --sl-color-accent: #2e2e29;
+  --sl-color-accent-high: #0e0e0d;
+
+  --sl-color-text: #2e2e29;
+  --sl-color-text-accent: #0e0e0d;
+  --sl-color-text-invert: #fbfbf9;
+
+  --sl-color-bg: #fbfbf9;
+  --sl-color-bg-nav: #fbfbf9;
+  --sl-color-bg-sidebar: #fbfbf9;
+  --sl-color-bg-inline-code: #f1f1ec;
+  --sl-color-bg-accent: #0e0e0d;
+
+  --sl-color-hairline: #e4e4de;
+  --sl-color-hairline-light: #eeeee9;
+  --sl-color-hairline-shade: #f1f1ec;
+
+  --sl-color-backdrop-overlay: rgba(251, 251, 249, 0.76);
+
+  --jensen-grain-opacity: 0.038;
+}
+
+:root {
+  --sl-font: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --sl-content-width: 45rem;
+  --sl-line-height: 1.78;
+  --sl-line-height-headings: 1.16;
+
+  --track-label: 0.14em;
+  --track-wide: 0.2em;
+  --track-wider: 0.42em;
+  --track-mono: 0.12em;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--sl-color-white);
+  color: var(--sl-color-bg);
+}
+
+/* Masthead: the ink tile and the tracked-out wordmark from the download page. */
+.site-title {
+  font-size: var(--sl-text-sm);
+  font-weight: 500;
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  text-indent: var(--track-wider);
+  color: var(--sl-color-white);
+  gap: 0.7rem;
+}
+
+.site-title::before {
+  content: '';
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 6px;
+  background: var(--sl-color-white);
+}
+
+header.header {
+  border-bottom: 1px solid var(--sl-color-hairline);
+}
+
+/* Sidebar: wide uppercase micro-labels for group headings. */
+.sidebar-content summary,
+.sidebar-content > ul > li > details > summary .large,
+.sl-sidebar-state-persist summary {
+  letter-spacing: var(--track-label);
+}
+
+.sidebar-content .large,
+.sidebar-content h2 {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  text-indent: var(--track-label);
+  color: var(--sl-color-gray-3);
+}
+
+.sidebar-content a {
+  font-size: var(--sl-text-sm);
+  border-radius: 2px;
+  transition: color 320ms var(--ease), background 320ms var(--ease);
+}
+
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover {
+  background: var(--sl-color-bg-accent);
+  color: var(--sl-color-text-invert);
+  font-weight: 500;
+}
+
+/* Headings keep the display tracking; body text stays comfortable. */
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.content-panel h1 {
+  letter-spacing: -0.018em;
+  color: var(--sl-color-white);
+}
+
+.sl-markdown-content h2 {
+  display: block;
+  padding-block-start: 0.7rem;
+  border-block-start: 1px solid var(--sl-color-hairline);
+}
+
+/* Dotted hairline rule, the same 5px lattice as the download page. */
+.sl-markdown-content hr {
+  border: 0;
+  height: 1px;
+  background-image: radial-gradient(circle, var(--sl-color-gray-4) 0.5px, transparent 0.5px);
+  background-size: 5px 1px;
+  background-repeat: repeat-x;
+}
+
+.sl-markdown-content a {
+  text-underline-offset: 0.25em;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--sl-color-gray-5);
+  transition: text-decoration-color 320ms var(--ease);
+}
+
+.sl-markdown-content a:hover {
+  text-decoration-color: var(--sl-color-white);
+}
+
+/* Machine-readable values take the mono face and half the sans tracking. */
+.sl-markdown-content code:not(:where(.expressive-code *)) {
+  font-size: 0.875em;
+  letter-spacing: var(--track-mono);
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 2px;
+  padding: 0.1em 0.36em;
+}
+
+.sl-markdown-content table {
+  font-size: var(--sl-text-sm);
+}
+
+.sl-markdown-content th {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--sl-color-gray-3);
+}
+
+.sl-markdown-content :is(th, td) {
+  border-color: var(--sl-color-hairline);
+}
+
+/* Tables and wide blocks scroll inside their own container. */
+.sl-markdown-content :is(table, .expressive-code) {
+  overflow-x: auto;
+}
+
+.sl-markdown-content blockquote {
+  border-inline-start-color: var(--sl-color-gray-5);
+  color: var(--sl-color-gray-2);
+}
+
+/* Controls: 2px radius on a 1px edge, filling solid ink on hover. */
+.sl-link-button {
+  border-radius: 2px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  text-indent: var(--track-label);
+  padding: 0.85rem 1.15rem;
+  text-decoration: none;
+  transition: border-color 420ms var(--ease), background 420ms var(--ease), color 420ms var(--ease);
+}
+
+.sl-link-button.minimal {
+  border: 1px solid var(--sl-color-hairline);
+  color: var(--sl-color-white);
+  padding-inline: 1.15rem;
+}
+
+.sl-link-button.minimal:hover {
+  border-color: var(--sl-color-white);
+  background: var(--sl-color-bg-accent);
+  color: var(--sl-color-text-invert);
+}
+
+.sl-link-button.primary {
+  background: var(--sl-color-bg-accent);
+  color: var(--sl-color-text-invert);
+  border: 1px solid var(--sl-color-white);
+}
+
+.sl-link-button.primary:hover {
+  background: transparent;
+  color: var(--sl-color-white);
+}
+
+.sl-link-button.secondary {
+  border: 1px solid var(--sl-color-hairline);
+  color: var(--sl-color-white);
+}
+
+.sl-link-button:focus-visible {
+  outline: 2px solid var(--sl-color-white);
+  outline-offset: 3px;
+}
+
+/* Splash page. */
+[data-has-hero] .hero h1 {
+  font-size: clamp(2rem, 4.2vw, 3.1rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+[data-has-hero] .hero .tagline {
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: var(--track-wide);
+  line-height: 2;
+  text-transform: uppercase;
+  text-indent: var(--track-wide);
+  color: var(--sl-color-gray-3);
+  max-width: 34rem;
+}
+
+[data-has-hero] header.header {
+  border-bottom: 1px solid var(--sl-color-hairline);
+}
+
+.card-grid .card {
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 2px;
+  background: transparent;
+}
+
+.card-grid .card .title {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  text-indent: var(--track-label);
+  color: var(--sl-color-white);
+}
+
+.card-grid .card .icon {
+  color: var(--sl-color-gray-3);
+  background: transparent;
+  border: none;
+}
+
+/* Asides read as bracketed panels, not coloured callouts. */
+.starlight-aside {
+  border-inline-start-width: 1px;
+  border-radius: 0;
+  background: transparent;
+  border-block: 1px solid var(--sl-color-hairline);
+  border-inline-end: 1px solid var(--sl-color-hairline);
+  padding: 1rem 1.1rem;
+}
+
+.starlight-aside__title {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--sl-color-white);
+}
+
+.starlight-aside--note,
+.starlight-aside--tip,
+.starlight-aside--caution,
+.starlight-aside--danger {
+  border-inline-start-color: var(--sl-color-white);
+  color: var(--sl-color-gray-2);
+}
+
+.starlight-aside--caution .starlight-aside__title::after,
+.starlight-aside--danger .starlight-aside__title::after {
+  content: '';
+}
+
+.starlight-aside__icon {
+  color: var(--sl-color-gray-3);
+}
+
+/* Search takes the same 2px control radius as everything else. */
+site-search button,
+.sl-flex > button[aria-label*='Search'],
+dialog[aria-label*='Search'] {
+  border-radius: 2px;
+}
+
+site-search button {
+  border: 1px solid var(--sl-color-hairline);
+  letter-spacing: var(--track-mono);
+}
+
+site-search kbd {
+  border-radius: 2px;
+  font-family: var(--sl-font-mono);
+  font-size: 0.6875rem;
+  background: transparent;
+  border: 1px solid var(--sl-color-hairline);
+}
+
+.pagefind-ui__search-input,
+.pagefind-ui__result {
+  border-radius: 2px;
+}
+
+/* Three cards fit the row on a wide splash instead of orphaning the third. */
+@media (min-width: 72rem) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .card-grid.stagger .card:nth-child(n) {
+    margin-block-start: 0;
+  }
+}
+
+/* Animated film grain, the same lattice the download page runs. */
+body::after {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: var(--jensen-grain-opacity);
+  will-change: transform;
+  animation: jensen-grain 1s steps(8) infinite;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+:root[data-theme='light'] body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes jensen-grain {
+  0% { transform: translate3d(0, 0, 0); }
+  12.5% { transform: translate3d(-1%, -2%, 0); }
+  25% { transform: translate3d(-3%, 1%, 0); }
+  37.5% { transform: translate3d(2%, -3%, 0); }
+  50% { transform: translate3d(-1%, 3%, 0); }
+  62.5% { transform: translate3d(3%, 1%, 0); }
+  75% { transform: translate3d(1%, -1%, 0); }
+  87.5% { transform: translate3d(-2%, 2%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after { animation: none; }
+  .sidebar-content a,
+  .sl-markdown-content a,
+  .sl-link-button { transition: none; }
+}

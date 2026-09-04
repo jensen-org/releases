@@ -1,0 +1,70 @@
+---
+title: Jensen
+description: An AI-first IDE for large, complex codebases. Understand the codebase before you change it.
+template: splash
+editUrl: false
+head:
+  - tag: title
+    content: Jensen
+hero:
+  title: Understand the codebase before you change it
+  tagline: An AI-first IDE for large, complex codebases.
+  actions:
+    - text: Get started
+      link: /releases/start/what-is-jensen/
+      variant: primary
+    - text: Download
+      link: https://github.com/jensen-org/releases/releases
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components'
+
+Big multi-service codebases are hard to hold in your head. New to a repo, you spend days tracing what
+talks to what. AI assistants make that worse in a specific way: pointed at raw source, they burn
+effort re-scanning files and confidently invent an architecture that was never there.
+
+Jensen maps your project into a navigable picture of how it actually fits together, then hands that
+same map to your assistant, so you both work from a shared understanding instead of guessing.
+
+---
+
+<CardGrid>
+  <Card title="The map">
+    A navigable picture of the real structure: services, the calls between them, the routes they
+    expose. Open it at whatever altitude you need.
+
+    [Project, the map](/releases/app/project/)
+  </Card>
+
+  <Card title="Your assistant">
+    Jensen supplies the context, not the model. It works with the assistant already on your machine.
+
+    [How it works](/releases/ai/how-it-works/)
+  </Card>
+
+  <Card title="The guard">
+    A commit carrying a secret or junk is refused where you type it, whoever typed it.
+
+    [The git guard](/releases/safety/git-guard/)
+  </Card>
+</CardGrid>
+
+## Honest by design
+
+A map is only worth leaning on if you can trust every line of it. Jensen's core rule is that it never
+guesses. Everything it shows you is one of two things, something it observed directly in your source
+or something your team declared on purpose, and the two stay distinguishable. Where Jensen does not
+know, it says unknown rather than inventing an answer.
+
+[Read the guarantee](/releases/start/honest-by-design/)
+
+## Start here
+
+New to Jensen, in order: [what it is](/releases/start/what-is-jensen/),
+[download and install](/releases/start/download-and-install/), then
+[first run](/releases/start/first-run/), which turns it on for a project in one command.
+
+Already running it: [the four views](/releases/app/getting-around/),
+[what your assistant can do](/releases/ai/what-your-assistant-can-do/), or the
+[CLI reference](/releases/reference/cli/).

@@ -335,7 +335,8 @@ distribution, reseller, or hosting licenses, open a
 
 It publishes every Jensen build, serves the
 [documentation](https://jensen-org.github.io/releases/), and holds the source of the download page
-for the macOS build. How that page is put together, the ring, the motion, the type and the theme
-flip, is written up in [docs/download-page.md](docs/download-page.md).
+for the macOS build. The documentation site lives in `docs-site/` and is built and deployed to GitHub
+Pages by `.github/workflows/docs.yml`. How the download page is put together, the ring, the motion,
+the type and the theme flip, is written up in [docs/download-page.md](docs/download-page.md).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
