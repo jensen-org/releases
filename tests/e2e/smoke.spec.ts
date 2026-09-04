@@ -28,6 +28,22 @@ test('the platform tabs swap the offer without changing the card height', async 
   expect((await card.boundingBox())!.height).toBe(before)
 })
 
+test('a keyboard reaches both platforms and their downloads', async ({ page }, info) => {
+  test.skip(info.project.name === 'mobile', 'the tab key is not how a phone reaches this')
+  await page.goto('/?diffusion=off')
+  await page.getByRole('tab', { name: 'macOS' }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('tab', { name: 'Linux' })).toBeFocused()
+  await expect(page.getByRole('tab', { name: 'Linux' })).toHaveAttribute('aria-selected', 'true')
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('link', { name: /Download Jensen for Linux/ })).toBeFocused()
+  await page.getByRole('tab', { name: 'Linux' }).focus()
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByRole('tab', { name: 'macOS' })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('link', { name: /Download Jensen for macOS/ })).toBeFocused()
+})
+
 test('the page fits its viewport on every width the layout claims to serve', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'the mobile project is pinned to one device width')
   for (const width of [1024, 1280, 1440, 1920, 2560]) {

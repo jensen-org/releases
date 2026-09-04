@@ -157,6 +157,32 @@ describe('platform tabs', () => {
     expect(wrapper.find('.shelf-body button').attributes('disabled')).toBeDefined()
   })
 
+  it('reaches the other platform with the arrow keys', async () => {
+    globalThis.fetch = vi.fn(() => response(both)) as unknown as typeof fetch
+    const wrapper = mountApp()
+    await vi.waitFor(() => expect(wrapper.find('a[download]').exists()).toBe(true))
+    await tabs(wrapper)[0].trigger('keydown', { key: 'ArrowRight' })
+    expect(active(wrapper)!.text()).toBe('Linux')
+    await tabs(wrapper)[1].trigger('keydown', { key: 'ArrowRight' })
+    expect(active(wrapper)!.text()).toBe('macOS')
+    await tabs(wrapper)[0].trigger('keydown', { key: 'End' })
+    expect(active(wrapper)!.text()).toBe('Linux')
+    await tabs(wrapper)[1].trigger('keydown', { key: 'Home' })
+    expect(active(wrapper)!.text()).toBe('macOS')
+    await tabs(wrapper)[0].trigger('keydown', { key: 'Enter' })
+    expect(active(wrapper)!.text()).toBe('macOS')
+  })
+
+  it('leads with the newest version even when an older one shipped another format', async () => {
+    globalThis.fetch = vi.fn(() => response({ status: 'available', releaseUrl: 'https://github.com/r', builds: [rpm('v1.4.0', 31890114), deb('v1.3.0', 31447219)] })) as unknown as typeof fetch
+    const wrapper = mountApp()
+    await vi.waitFor(() => expect(wrapper.text()).not.toContain('Checking latest release'))
+    await tabs(wrapper)[1].trigger('click')
+    expect(wrapper.text()).toContain('Download .rpm')
+    expect(wrapper.text()).toContain('v1.4.0')
+    expect(wrapper.find('.shelf-links a[download]').exists()).toBe(false)
+  })
+
   it('wires the tablist for assistive technology', async () => {
     globalThis.fetch = vi.fn(() => response(both)) as unknown as typeof fetch
     const wrapper = mountApp()

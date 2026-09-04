@@ -24,17 +24,29 @@ const release = ref<Release | null>(null)
 const loading = ref(true)
 const platform = ref<Platform>('macos')
 const downloadEl = ref<HTMLElement | null>(null)
+const tabEls = ref<HTMLButtonElement[]>([])
+
+function reachTab(event: KeyboardEvent, index: number) {
+  const steps: Record<string, number> = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: TABS.length - 1 }
+  const step = steps[event.key]
+  if (step === undefined) return
+  event.preventDefault()
+  const next = (step + TABS.length) % TABS.length
+  platform.value = TABS[next].id
+  tabEls.value[next]?.focus()
+}
 
 const tab = computed(() => TABS.find((entry) => entry.id === platform.value) ?? TABS[0])
 
 const offered = computed(() => (release.value?.builds ?? []).filter((build) => build.platform === platform.value))
 
 const primary = computed(() => {
+  const newest = offered.value.filter((build) => build.version === offered.value[0]?.version)
   for (const format of tab.value.formats) {
-    const build = offered.value.find((entry) => entry.format === format)
+    const build = newest.find((entry) => entry.format === format)
     if (build) return build
   }
-  return null
+  return newest[0] ?? null
 })
 
 const alternate = computed(() => {
@@ -121,9 +133,10 @@ onUnmounted(() => releaseMagnet?.())
 
               <div class="shelf-tabs" role="tablist" aria-labelledby="shelf-title">
                 <button
-                  v-for="entry in TABS"
+                  v-for="(entry, index) in TABS"
                   :id="`tab-${entry.id}`"
                   :key="entry.id"
+                  :ref="(el) => { if (el) tabEls[index] = el as HTMLButtonElement }"
                   class="shelf-tab"
                   type="button"
                   role="tab"
@@ -131,6 +144,7 @@ onUnmounted(() => releaseMagnet?.())
                   :aria-controls="`panel-${entry.id}`"
                   :tabindex="platform === entry.id ? 0 : -1"
                   @click="platform = entry.id"
+                  @keydown="reachTab($event, index)"
                 >
                   {{ entry.label }}
                 </button>
