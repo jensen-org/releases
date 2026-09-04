@@ -8,8 +8,8 @@ interface Build { version: string; publishedAt: string; byteSize: number; downlo
 interface Release { status: 'available' | 'unavailable' | 'error'; builds?: Build[] }
 
 const RELEASES_URL = 'https://github.com/jensen-org/releases/releases'
-const PROJECT_URL = 'https://github.com/jensen-org/jensen'
-const LICENSE_URL = 'https://polyformproject.org/licenses/noncommercial/1.0.0/'
+const DOCS_URL = 'https://jensen-org.github.io/releases/'
+const LICENSE_URL = 'https://polyformproject.org/licenses/noncommercial/1.0.0'
 const APPLE_GLYPH = 'M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C61.8 141.2 12 184.5 12 272.3c0 25.9 4.7 52.7 14.2 80.3 12.6 36.4 58.1 125.7 105.6 124.2 24.8-.6 42.4-17.6 74.7-17.6 31.3 0 47.6 17.6 75.3 17.6 47.9-.7 89.1-81.8 101.1-118.3-64.3-30.3-64.2-88.9-64.2-90.7zm-56.4-165.4c27.2-32.3 24.7-61.7 23.9-72.3-24 1.4-51.8 16.4-67.6 34.9-17.4 19.8-27.6 44.3-25.4 71.9 25.9 2 49.6-11.3 69.1-34.5z'
 
 const release = ref<Release | null>(null)
@@ -70,7 +70,7 @@ onUnmounted(() => releaseMagnet?.())
           head, less for your agents to guess.
         </p>
 
-        <a class="hero-learn" :href="PROJECT_URL">
+        <a class="hero-learn" :href="DOCS_URL">
           Learn more
           <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3" /></svg>
         </a>

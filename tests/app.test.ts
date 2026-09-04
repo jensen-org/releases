@@ -78,7 +78,7 @@ describe('release card', () => {
     const sub = wrapper.find('.hero-sub')
     expect(sub.text()).toContain('Jensen integrates with your codebase and cuts the cognitive debt')
     expect(sub.text()).toContain('less for your agents to guess')
-    expect(wrapper.find('.hero-learn').attributes('href')).toBe('https://github.com/jensen-org/jensen')
+    expect(wrapper.find('.hero-learn').attributes('href')).toBe('https://jensen-org.github.io/releases/')
     expect(wrapper.find('.hero-learn').text()).toContain('Learn more')
   })
 

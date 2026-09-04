@@ -13,7 +13,7 @@
     <br />
     <a href="#download">Download</a>
     ·
-    <a href="#capabilities">Capabilities</a>
+    <a href="https://jensen-org.github.io/releases/">Documentation</a>
     ·
     <a href="https://github.com/jensen-org/releases/issues">Report a bug</a>
   </p>
@@ -326,8 +326,9 @@ This is not an open-source license. All commercial rights not expressly granted 
 
 ## This repository
 
-It publishes every Jensen build, and it holds the source of the download page for the macOS build.
-How that page is put together, the ring, the motion, the type and the theme flip, is written up in
-[docs/download-page.md](docs/download-page.md).
+It publishes every Jensen build, serves the
+[documentation](https://jensen-org.github.io/releases/), and holds the source of the download page
+for the macOS build. How that page is put together, the ring, the motion, the type and the theme
+flip, is written up in [docs/download-page.md](docs/download-page.md).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
