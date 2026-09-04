@@ -192,18 +192,32 @@ test('the palette lands on the download button in the same frame as the page', a
   expect(swap.color).toBe('rgb(4, 4, 6)')
 })
 
-test('reduced motion parks the orbit nodes', async ({ page }, info) => {
+test('reduced motion holds the orbit still', async ({ page }, info) => {
   test.skip(info.project.name !== 'reduced-motion', 'only the reduced-motion project asserts this')
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/?diffusion=off')
-  const marks = page.locator('.orbit-field g')
-  await expect(marks).toHaveCount(2)
-  const read = () => marks.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('transform')).join('|'))
-  const first = await read()
+  const drift = page.locator('.orbit-plot g')
+  await expect(drift).toHaveCount(1)
+  const first = await drift.getAttribute('transform')
   await page.mouse.move(200, 200)
-  await page.mouse.move(900, 600)
+  await page.mouse.move(1100, 700)
   await page.waitForTimeout(900)
-  expect(await read()).toBe(first)
+  expect(await drift.getAttribute('transform')).toBe(first)
+})
+
+test('the pillars sit on the orbit and name what the docs name', async ({ page }, info) => {
+  test.skip(info.project.name === 'mobile', 'the pillars are hidden when the hero stacks')
+  await page.goto('/?diffusion=off')
+  const pins = page.locator('.orbit-pin')
+  await expect(pins).toHaveCount(3)
+  await expect(pins.nth(0)).toContainText('Shared map')
+  await expect(pins.nth(1)).toContainText('Honest by design')
+  await expect(pins.nth(2)).toContainText('Git guard')
+  const inside = await pins.evaluateAll((nodes) => nodes.every((node) => {
+    const box = node.getBoundingClientRect()
+    return box.top >= 0 && box.left >= 0 && box.right <= window.innerWidth && box.bottom <= window.innerHeight
+  }))
+  expect(inside, 'every pillar label sits inside the viewport').toBe(true)
 })
 
 test('reduced motion never flips the page', async ({ page }, info) => {

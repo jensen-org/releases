@@ -101,6 +101,8 @@ onUnmounted(() => releaseMagnet?.())
 
 <template>
   <div class="page">
+    <OrbitField />
+
     <header class="masthead">
       <div class="brand">
         <span class="brand-tile">
@@ -189,7 +191,6 @@ onUnmounted(() => releaseMagnet?.())
       </div>
 
       <div class="ring">
-        <OrbitField />
         <SignalRing />
       </div>
     </main>

@@ -2,81 +2,78 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { hasCoarsePointer, prefersReducedMotion } from '../lib/motion'
 
-const CENTRE = 50
-const CONTAIN = 49
-const SCALE = 58
-const TICK_INNER = SCALE - 0.8
-const TICK_OUTER = SCALE + 0.8
-const BLEED = 95
-const BLEED_ARC = 1.35
-const BLEED_GAP = 0.14
-const NODES = [
-  { drift: 0.058, rest: -1.15, pull: 1 },
-  { drift: -0.034, rest: 2.05, pull: 0.42 },
+type Ring = { cx: number; cy: number; r: number }
+
+const RINGS: Ring[] = [
+  { cx: 50, cy: 50, r: 27 },
+  { cx: 50, cy: 50, r: 41 },
 ]
 
-const host = ref<SVGSVGElement | null>(null)
-const marks = ref<SVGGElement[]>([])
-const ticks = ref('')
+const PINS = [
+  { ring: 0, at: 'left', band: 0.14, label: 'Shared map', note: 'services, calls, routes' },
+  { ring: 1, at: 'right', band: 0.1, label: 'Honest by design', note: 'it never guesses' },
+  { ring: 0, at: 'right', band: 0.9, label: 'Git guard', note: 'secrets refused at commit' },
+]
 
-let frame = 0
+const host = ref<HTMLDivElement | null>(null)
+const pins = ref<HTMLElement[]>([])
+const sides = ref(PINS.map(() => 'right'))
+const drift = ref<SVGGElement | null>(null)
+
 let observer: ResizeObserver | undefined
 let onPointer: ((event: PointerEvent) => void) | undefined
-let still = false
-let last = 0
-let aim: number | null = null
-const angles = NODES.map((node) => node.rest)
+let frame = 0
+let shiftX = 0
+let shiftY = 0
+let aimX = 0
+let aimY = 0
 
-const polar = (radius: number, angle: number) => `${(CENTRE + Math.cos(angle) * radius).toFixed(3)} ${(CENTRE + Math.sin(angle) * radius).toFixed(3)}`
-
-const arc = (radius: number, from: number, to: number) =>
-  `M${polar(radius, from)}A${radius} ${radius} 0 ${to - from > Math.PI ? 1 : 0} 1 ${polar(radius, to)}`
-
-function graduate(count: number) {
-  let path = ''
-  for (let i = 0; i < count; i += 1) {
-    const angle = (i / count) * Math.PI * 2 - Math.PI / 2
-    path += `M${polar(TICK_INNER, angle)}L${polar(TICK_OUTER, angle)}`
-  }
-  ticks.value = path
-}
+const polar = (ring: Ring, angle: number, radius = ring.r) => ({
+  x: ring.cx + Math.cos(angle) * radius,
+  y: ring.cy + Math.sin(angle) * radius,
+})
 
 function place() {
-  marks.value.forEach((mark, i) => {
-    if (mark) mark.setAttribute('transform', `rotate(${((angles[i] * 180) / Math.PI).toFixed(2)} ${CENTRE} ${CENTRE})`)
+  const box = host.value?.getBoundingClientRect()
+  if (!box) return
+  const scale = Math.max(box.width, box.height) / 100
+  const originX = (box.width - 100 * scale) / 2
+  const originY = (box.height - 100 * scale) / 2
+  PINS.forEach((pin, index) => {
+    const element = pins.value[index]
+    if (!element) return
+    const ring = RINGS[pin.ring]
+    const height = (box.height * pin.band - originY) / scale
+    const rise = Math.max(-1, Math.min(1, (height - ring.cy) / ring.r))
+    const right = Math.asin(rise)
+    const point = polar(ring, pin.at === 'right' ? right : Math.PI - right)
+    const x = originX + point.x * scale
+    element.style.left = `${x}px`
+    element.style.top = `${originY + point.y * scale}px`
+    sides.value[index] = x > box.width / 2 ? 'left' : 'right'
   })
 }
 
-function tick(now: number) {
-  const step = Math.min(0.05, (now - last) / 1000)
-  last = now
-  NODES.forEach((node, i) => {
-    const target = aim === null ? angles[i] + node.drift * step : aim + node.rest
-    const delta = Math.atan2(Math.sin(target - angles[i]), Math.cos(target - angles[i]))
-    angles[i] += aim === null ? node.drift * step : delta * Math.min(1, node.pull * step * 3.2)
-  })
-  place()
-  frame = requestAnimationFrame(tick)
+function ease(now: number) {
+  frame = 0
+  shiftX += (aimX - shiftX) * 0.06
+  shiftY += (aimY - shiftY) * 0.06
+  drift.value?.setAttribute('transform', `translate(${shiftX.toFixed(3)} ${shiftY.toFixed(3)})`)
+  if (Math.abs(aimX - shiftX) > 0.002 || Math.abs(aimY - shiftY) > 0.002) frame = requestAnimationFrame(ease)
+  void now
 }
 
 onMounted(() => {
-  still = prefersReducedMotion()
-  const measure = () => graduate((host.value?.clientWidth ?? 0) < 420 ? 66 : 131)
-  measure()
   place()
-  if (still) return
-  observer = new ResizeObserver(measure)
+  observer = new ResizeObserver(() => place())
   if (host.value) observer.observe(host.value)
-  if (!hasCoarsePointer()) {
-    onPointer = (event) => {
-      const box = host.value?.getBoundingClientRect()
-      if (!box) return
-      aim = Math.atan2(event.clientY - (box.top + box.height / 2), event.clientX - (box.left + box.width / 2))
-    }
-    window.addEventListener('pointermove', onPointer, { passive: true })
+  if (prefersReducedMotion() || hasCoarsePointer()) return
+  onPointer = (event) => {
+    aimX = (event.clientX / window.innerWidth - 0.5) * 1.6
+    aimY = (event.clientY / window.innerHeight - 0.5) * 1.6
+    if (!frame) frame = requestAnimationFrame(ease)
   }
-  last = performance.now()
-  frame = requestAnimationFrame(tick)
+  window.addEventListener('pointermove', onPointer, { passive: true })
 })
 
 onUnmounted(() => {
@@ -87,15 +84,25 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <svg ref="host" class="orbit-field" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-    <circle class="orbit-contain" :cx="CENTRE" :cy="CENTRE" :r="CONTAIN" />
-    <circle class="orbit-scale" :cx="CENTRE" :cy="CENTRE" :r="SCALE" />
-    <path class="orbit-ticks" :d="ticks" />
-    <path class="orbit-bleed" :d="arc(BLEED, -BLEED_ARC, -BLEED_GAP)" />
-    <path class="orbit-bleed" :d="arc(BLEED, BLEED_GAP, BLEED_ARC)" />
-    <g v-for="(node, index) in NODES" :key="index" :ref="(el) => { if (el) marks[index] = el as SVGGElement }">
-      <path class="orbit-leader" :d="`M${polar(CONTAIN + 0.8, 0)}L${polar(SCALE - 1.6, 0)}`" />
-      <circle class="orbit-node" :cx="CENTRE + SCALE" :cy="CENTRE" r="1.15" />
-    </g>
-  </svg>
+  <div ref="host" class="orbit-field" aria-hidden="true">
+    <svg class="orbit-plot" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <g ref="drift">
+        <circle v-for="(ring, index) in RINGS" :key="index" class="orbit-line" :cx="ring.cx" :cy="ring.cy" :r="ring.r" path-length="1" />
+      </g>
+    </svg>
+
+    <p
+      v-for="(pin, index) in PINS"
+      :key="pin.label"
+      :ref="(el) => { if (el) pins[index] = el as HTMLElement }"
+      class="orbit-pin"
+      :class="`is-${sides[index]}`"
+    >
+      <span class="orbit-dot" />
+      <span class="orbit-label">
+        <span class="orbit-name">{{ pin.label }}</span>
+        <span class="orbit-note">{{ pin.note }}</span>
+      </span>
+    </p>
+  </div>
 </template>
