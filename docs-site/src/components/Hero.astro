@@ -1,0 +1,11 @@
+---
+import Default from '@astrojs/starlight/components/Hero.astro'
+import SignalRing from './SignalRing.astro'
+---
+
+<div class="jensen-hero">
+  <Default><slot /></Default>
+  <div class="jensen-hero-ring" aria-hidden="true">
+    <SignalRing />
+  </div>
+</div>

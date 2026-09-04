@@ -54,7 +54,9 @@ export default defineConfig({
       description:
         'Documentation for Jensen, an AI-first IDE for large, complex codebases. Understand the codebase before you change it.',
       favicon: '/favicon.svg',
+      logo: { src: './src/assets/jensen.png' },
       customCss: ['./src/styles/jensen.css'],
+      components: { Hero: './src/components/Hero.astro' },
       editLink: { baseUrl: 'https://github.com/jensen-org/releases/edit/main/docs-site/' },
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/jensen-org/releases' },

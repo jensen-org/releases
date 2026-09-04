@@ -125,6 +125,7 @@
   --sl-line-height: 1.78;
   --sl-line-height-headings: 1.16;
 
+  --jensen-mark-ground: #fbfbf9;
   --track-label: 0.14em;
   --track-wide: 0.2em;
   --track-wider: 0.42em;
@@ -153,13 +154,23 @@ body {
   gap: 0.7rem;
 }
 
-.site-title::before {
-  content: '';
-  width: 22px;
-  height: 22px;
+.site-title img {
+  width: 30px;
+  height: 30px;
   flex: none;
-  border-radius: 6px;
-  background: var(--sl-color-white);
+  padding: 5px;
+  box-sizing: border-box;
+  border-radius: 7px;
+  background: var(--jensen-mark-ground);
+  transition: transform 520ms var(--ease);
+}
+
+:root[data-theme='light'] .site-title img {
+  filter: invert(1);
+}
+
+.site-title:hover img {
+  transform: translateY(-2px) scale(1.06);
 }
 
 header.header {
@@ -424,6 +435,56 @@ site-search kbd {
   }
   .card-grid.stagger .card:nth-child(n) {
     margin-block-start: 0;
+  }
+}
+
+/* The signal ring, carried over from the download page. Decorative only. */
+.jensen-hero {
+  position: relative;
+}
+
+.jensen-hero-ring {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: none;
+  place-items: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.jensen-hero .hero {
+  position: relative;
+  z-index: 1;
+}
+
+.signal-ring {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+:root:not([data-theme='light']) .signal-ring {
+  filter: invert(1);
+}
+
+@media (min-width: 60rem) {
+  .jensen-hero-ring {
+    display: grid;
+    block-size: min(30rem, 62vh);
+    inline-size: min(30rem, 62vh);
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+  }
+
+  .jensen-hero .hero {
+    max-inline-size: 38rem;
+  }
+}
+
+@media (min-width: 87.5rem) {
+  .jensen-hero-ring {
+    inset-inline-end: 2rem;
   }
 }
 

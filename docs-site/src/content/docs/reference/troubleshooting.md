@@ -61,6 +61,10 @@ is what fixes it. In a process list it appears as `jensend`.
 The Sessions view says so directly when it is down: *The workflow daemon is unavailable. Workflow
 controls will be available when it starts.*
 
+It is the one part of Jensen that needs the app. The context server, the map commands, the knowledge
+store and the git guard all work without it. See
+[You do not have to use the app](../../start/first-run/#you-do-not-have-to-use-the-app).
+
 ## Storage and cleanup
 
 The **Storage** panel in the project overview breaks usage into **Code graph**, **Knowledge**,

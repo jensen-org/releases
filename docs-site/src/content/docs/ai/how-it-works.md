@@ -34,6 +34,11 @@ The important consequence: **it does not matter where you start.** An assistant 
 shell gets the same context server, the same tools and the same conventions as one running inside the
 app.
 
+That holds all the way to never opening the app at all. The context server, the command line and the
+git guard work with it closed, which is how Jensen fits an ecosystem you already have rather than
+asking you to move into a new one. See
+[You do not have to use the app](../../start/first-run/#you-do-not-have-to-use-the-app).
+
 See [The context server](../context-server/).
 
 ## What it does not do

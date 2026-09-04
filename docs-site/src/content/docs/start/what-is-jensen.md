@@ -46,6 +46,8 @@ hides which one answered.
 - [Download and install](../download-and-install/) gets the app onto your machine.
 - [First run](../first-run/) turns Jensen on for a project in one command.
 - [How Jensen works with your assistant](../../ai/how-it-works/) is the short version of the AI story.
+- [You do not have to use the app](../first-run/#you-do-not-have-to-use-the-app), if you would rather
+  keep your current setup and reach Jensen from the terminal and your assistant.
 
 ## Status
 

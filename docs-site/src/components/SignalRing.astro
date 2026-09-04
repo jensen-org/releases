@@ -1,0 +1,120 @@
+---
+---
+
+<canvas class="signal-ring" role="img" aria-label="Jensen signal ring"></canvas>
+
+<script>
+  import { createRingSim, dotRadius, generateGeometry, visibleDots, type RingSim } from '../lib/ring'
+
+  const INK = '#0E0E0D'
+  const STEP = 1 / 60
+  const MAX_STEPS = 4
+
+  function mount(canvas: HTMLCanvasElement) {
+    let sim: RingSim | null = null
+    let still = new Float64Array(0)
+    let frame = 0
+    let running = false
+    let last = 0
+    let carry = 0
+    let side = 0
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    function build(next: number) {
+      if (reduced) {
+        const dots = visibleDots(generateGeometry(next, next))
+        still = new Float64Array(dots.length * 2)
+        dots.forEach((dot, i) => {
+          still[i * 2] = dot.x
+          still[i * 2 + 1] = dot.y
+        })
+        return
+      }
+      if (sim) sim.resize(next)
+      else sim = createRingSim(next, visibleDots(generateGeometry(next, next)))
+    }
+
+    function render() {
+      const context = canvas.getContext('2d')
+      if (!context) return
+      const width = canvas.clientWidth
+      const height = canvas.clientHeight
+      if (width === 0 || height === 0) return
+      const ratio = window.devicePixelRatio || 1
+      const next = Math.min(width, height)
+      if (next !== side) {
+        side = next
+        build(side)
+      }
+      const pixelWidth = Math.round(width * ratio)
+      const pixelHeight = Math.round(height * ratio)
+      if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+        canvas.width = pixelWidth
+        canvas.height = pixelHeight
+      }
+      const points = sim ? sim.positions : still
+      const total = points.length / 2
+      const radius = dotRadius(side)
+      const offsetX = (width - side) / 2
+      const offsetY = (height - side) / 2
+      const fading = Boolean(sim) && !sim!.revealed
+      context.setTransform(ratio, 0, 0, ratio, 0, 0)
+      context.clearRect(0, 0, width, height)
+      context.globalAlpha = 1
+      context.fillStyle = INK
+      for (let i = 0; i < total; i += 1) {
+        if (fading) {
+          const reveal = sim!.alpha[i]
+          if (reveal === 0) continue
+          context.globalAlpha = reveal
+        }
+        context.beginPath()
+        context.arc(offsetX + points[i * 2], offsetY + points[i * 2 + 1], radius, 0, Math.PI * 2)
+        context.fill()
+      }
+      context.globalAlpha = 1
+    }
+
+    function tick(now: number) {
+      frame = 0
+      if (!running) return
+      carry += Math.min(0.25, (now - last) / 1000)
+      last = now
+      let steps = 0
+      while (carry >= STEP && steps < MAX_STEPS) {
+        sim?.step(STEP)
+        carry -= STEP
+        steps += 1
+      }
+      if (carry > STEP) carry = 0
+      render()
+      frame = requestAnimationFrame(tick)
+    }
+
+    function setRunning(value: boolean) {
+      if (reduced || running === value) return
+      running = value
+      if (frame) cancelAnimationFrame(frame)
+      frame = 0
+      if (!running) return
+      last = performance.now()
+      carry = 0
+      frame = requestAnimationFrame(tick)
+    }
+
+    render()
+    const observer = new IntersectionObserver((entries) => setRunning(Boolean(entries[0]?.isIntersecting)))
+    observer.observe(canvas)
+    const onResize = () => render()
+    window.addEventListener('resize', onResize)
+
+    document.addEventListener('astro:before-swap', () => {
+      observer.disconnect()
+      running = false
+      if (frame) cancelAnimationFrame(frame)
+      window.removeEventListener('resize', onResize)
+    }, { once: true })
+  }
+
+  for (const canvas of document.querySelectorAll<HTMLCanvasElement>('canvas.signal-ring')) mount(canvas)
+</script>

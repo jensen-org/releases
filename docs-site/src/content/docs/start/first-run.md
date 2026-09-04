@@ -29,13 +29,61 @@ Both run the same steps.
 | `attribution` | Silences the assistant's commit byline. |
 | `debrief-command` | Installs the `/jensen-debrief` command that saves what a session learned. |
 | `guidance` | Writes the shared agent conventions into the project. |
-| `daemon` | Prepares the background service. |
+| `daemon` | Checks the background service. |
 | `project` | Indexes the project so its map and knowledge are ready to query. |
 | `state` | Records what was wired. |
 
 **The point of all that is that it does not matter where you start.** An assistant you launch in a
 plain shell gets the same context server, the same tools and the same conventions as one running
 inside the app.
+
+## Setup is per project, and it works out the answers itself
+
+You do not describe your machine to Jensen. Setup goes and looks, and every decision it makes is
+scoped to the project it was run in.
+
+- **It finds your assistants.** Whichever assistant command-line tools are installed get the context
+  server registered, once at user scope, so you approve it a single time instead of once per project.
+  It does not ask you to name them, and it does not install one.
+- **It wires each assistant the way that assistant expects.** Session lifecycle hooks, the plan
+  format, the debrief command and the commit-byline setting are applied per assistant, in that
+  assistant's own configuration.
+- **It works out your language tooling from the repository.** A tool your repository configured beats
+  a higher-priority rival, and a binary beside the project beats a global one, searched from each
+  edited file upward, so a package inside a monorepo gets its own answer rather than the
+  repository's.
+- **It reconciles rather than overwrites.** Every step probes what is already in place first. Setup
+  never replaces configuration you own, and it never touches hooks or binaries it did not install.
+- **It leaves the project's own settings in the project.** Branch policy, agent hooks, tool overrides
+  and project context are per project, so two repositories on the same machine can work completely
+  differently.
+
+## You do not have to use the app
+
+The desktop app is one way to reach Jensen, not the only one. Everything that matters to your
+existing setup, the context server, the command line and the git guard, works with the app closed.
+
+Run `jensen setup` once, then keep working exactly as you do now:
+
+```bash
+jensen query . "calls:authenticate" --json   # ask the map from a script
+jensen gen .                                 # write the map for another tool to read
+jensen watch .                               # keep it current as you edit
+jensen ingest . ./docs                       # add documentation to the knowledge store
+jensen worktree create . fix-login           # isolate a task
+jensen doctor --json                         # gate a pipeline on it
+```
+
+Your assistant, launched from any terminal, connects to the same context server and gets the same
+map, the same project knowledge and the same conventions. Your commits pass the same guard, because
+it runs from your project's git hooks rather than from the app. Nothing in that path opens a window.
+
+That is what makes Jensen fit an existing ecosystem instead of replacing it. The map is written as
+portable, git-friendly, deterministic files, so a tool that is not Jensen can read them too.
+
+**One thing does need the app.** The background service, which drives workflow runs and polls your
+connected integrations, is started by opening the desktop app rather than by the command line. Check
+it with `jensen ping`. Everything listed above works without it.
 
 ## It is safe to re-run
 
