@@ -205,19 +205,20 @@ test('the orbit never answers the pointer', async ({ page }, info) => {
   expect(await read()).toBe(first)
 })
 
-test('the pillars sit on the orbit and name what the docs name', async ({ page }, info) => {
-  test.skip(info.project.name === 'mobile', 'the pillars are hidden when the hero stacks')
-  await page.goto('/?diffusion=off')
-  const pins = page.locator('.orbit-pin')
-  await expect(pins).toHaveCount(3)
-  await expect(pins.nth(0)).toContainText('Shared map')
-  await expect(pins.nth(1)).toContainText('Honest by design')
-  await expect(pins.nth(2)).toContainText('Git guard')
-  const inside = await pins.evaluateAll((nodes) => nodes.every((node) => {
-    const box = node.getBoundingClientRect()
-    return box.top >= 0 && box.left >= 0 && box.right <= window.innerWidth && box.bottom <= window.innerHeight
-  }))
-  expect(inside, 'every pillar label sits inside the viewport').toBe(true)
+test('both orbit circles stay centred on the page at every width', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'the narrow projects are pinned to one device width')
+  for (const [width, height] of [[1024, 768], [1440, 900], [1920, 1080], [2560, 1440]]) {
+    await page.setViewportSize({ width, height })
+    await page.goto('/?diffusion=off')
+    const reading = await page.evaluate(() => {
+      const middle = (node: Element) => { const box = node.getBoundingClientRect(); return [box.left + box.width / 2, box.top + box.height / 2] }
+      const sheet = middle(document.querySelector('.page')!)
+      const circles = [...document.querySelectorAll('.orbit-line')].map(middle)
+      return { count: circles.length, drift: circles.map(([x, y]) => Math.max(Math.abs(x - sheet[0]), Math.abs(y - sheet[1]))) }
+    })
+    expect(reading.count, `two circles at ${width}`).toBe(2)
+    for (const off of reading.drift) expect(off, `circle centred on the page at ${width}`).toBeLessThanOrEqual(1)
+  }
 })
 
 test('reduced motion never flips the page', async ({ page }, info) => {

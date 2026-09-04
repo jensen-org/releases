@@ -213,62 +213,17 @@ h1, h2, p { margin: 0; }
   position: absolute;
   inset: 0;
   z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  overflow: clip;
 }
-
-.orbit-plot { display: block; width: 100%; height: 100%; }
 
 .orbit-line {
   fill: none;
   stroke: var(--edge);
   stroke-width: 1.3;
   vector-effect: non-scaling-stroke;
-}
-
-.orbit-pin {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transform: translate(calc(var(--dot) / -2), -50%);
-  white-space: nowrap;
-  --dot: 7px;
-}
-
-.orbit-pin.is-left {
-  flex-direction: row-reverse;
-  transform: translate(calc(var(--dot) / 2 - 100%), -50%);
-}
-
-.orbit-dot {
-  width: var(--dot);
-  height: var(--dot);
-  flex: none;
-  border-radius: 50%;
-  background: var(--ink);
-}
-
-.orbit-label { display: grid; gap: 3px; }
-
-.orbit-pin.is-left .orbit-label { text-align: right; }
-
-.orbit-name {
-  font-size: var(--type-label);
-  font-weight: 500;
-  letter-spacing: var(--track-label);
-  text-transform: uppercase;
-  text-indent: var(--track-label);
-  color: var(--ink);
-}
-
-.orbit-note {
-  font-family: var(--mono);
-  font-size: var(--type-micro);
-  letter-spacing: var(--track-mono);
-  text-transform: uppercase;
-  text-indent: var(--track-mono);
-  color: var(--haze);
 }
 
 .baseline {
@@ -457,7 +412,6 @@ h1, h2, p { margin: 0; }
   .hero { gap: clamp(18px, 2.4vw, 30px); }
   .hero-sub { max-width: 52ch; }
   .shelf-tabs { gap: 16px; }
-  .orbit-note { display: none; }
 }
 
 @media (max-width: 860px) {
@@ -474,7 +428,6 @@ h1, h2, p { margin: 0; }
   .shelf-body { flex-direction: column; align-items: stretch; gap: 16px; padding: 16px; }
   .shelf-card .p-button { justify-content: center; }
   .shelf-facts { align-items: flex-start; text-align: left; }
-  .orbit-pin { display: none; }
 }
 
 @media (max-width: 520px) {
@@ -510,9 +463,7 @@ h1, h2, p { margin: 0; }
 
 .baseline { animation: surface 900ms var(--ease) 720ms both; }
 
-.orbit-plot { animation: surface 1400ms var(--ease) 300ms both; }
-
-.orbit-pin { animation: surface 900ms var(--ease) 900ms both; }
+.orbit-field { animation: surface 1400ms var(--ease) 300ms both; }
 
 @keyframes settle {
   from { transform: translateY(-10px); }
@@ -584,7 +535,7 @@ h1, h2, p { margin: 0; }
   .releases-link::after, .brand-tile, .brand-tile img { transition: none; }
   .page::after { animation: none; }
   .masthead, .brand, .hero-headline, .hero-sub, .hero-learn, .hero-rule, .shelf-card, .baseline { animation: none; }
-  .orbit-plot, .orbit-pin { animation: none; }
+  .orbit-field { animation: none; }
   .shelf-tab { transition: none; }
   .diffusion-veil { display: none; }
 }
