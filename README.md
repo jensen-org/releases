@@ -1,153 +1,333 @@
-# Jensen Release
+<a name="readme-top"></a>
 
-The Jensen release page is a Vue 3 single page application for the Apple Silicon macOS build, built with PrimeVue 4 components on a custom Aura preset.
+<br />
+<div align="center">
+  <img src="public/jensen.png" alt="Jensen" width="280" height="280">
+  <h3 align="center">Jensen</h3>
 
-## Local development
+  <p align="center">
+    An AI-first IDE for large, complex codebases.
+    <br />
+    Understand the codebase before you change it.
+    <br />
+    <br />
+    <a href="#download">Download</a>
+    ·
+    <a href="#capabilities">Capabilities</a>
+    ·
+    <a href="https://github.com/jensen-org/releases/issues">Report a bug</a>
+  </p>
 
-Install Bun, then run `bun install` and `bun run dev`. The API endpoint is available at `/api/release` in Vercel, not in `vite dev`, so the download shelf shows its error state locally. `GITHUB_TOKEN` is server-only and raises GitHub API rate limits. Copy `.env.example` when needed.
+  <p align="center">
+    <a href="#license"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue" alt="License: PolyForm Noncommercial 1.0.0"></a>
+    <img src="https://img.shields.io/badge/status-beta-orange" alt="Status: beta">
+    <img src="https://img.shields.io/badge/beta-0.1.0-blueviolet" alt="Beta 0.1.0">
+  </p>
+</div>
 
-## Releases
+## Table of contents
 
-The endpoint reads published GitHub releases, including prereleases, and returns every release carrying an Apple Silicon `.dmg` whose filename contains `arm64` or `aarch64`, newest first and capped at `MAX_BUILDS`. The page offers the newest build as a single download, with the GitHub releases page linked for the rest. Draft releases and other architectures are ignored. Asset and release links must be public `https://github.com/` URLs. `GITHUB_TOKEN` is optional and server-only.
+- [What is Jensen](#what-is-jensen)
+- [Honest by design](#honest-by-design)
+- [How it works](#how-it-works)
+- [Download](#download)
+- [Install](#install)
+- [Verify a download](#verify-a-download)
+- [First run](#first-run)
+- [Choose an AI assistant](#choose-an-ai-assistant)
+- [The git guard](#the-git-guard)
+- [Capabilities](#capabilities)
+- [CLI reference](#cli-reference)
+- [The shared map](#the-shared-map)
+- [License](#license)
+- [This repository](#this-repository)
 
-## The ring
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-The mark on the page is not decoration. It carries a 262 byte message as a polar lattice of
-131 spokes by 16 rings, one bit per slot, and the geometry is sized so the message fills it
-exactly with nothing left over.
+## What is Jensen
 
-- A drawn dot is a one. An empty slot is a zero.
-- Bit *n* sits on ring `n / 131` counting outward, and spoke `n % 131` counting clockwise from
-  twelve o'clock.
-- Read the innermost ring clockwise from twelve o'clock, then each ring outward in turn, and
-  group the bits into bytes. The first byte is `01010011`, a capital S.
-- `MESSAGE` must stay exactly `SPOKES * POSITIONS / 8` bytes long. Reword it freely, but keep that
-  byte count or pick a new pair of lattice dimensions to match.
-- `dotRadius` sizes a dot against the lattice so slots never touch at any ring size, which
-  `tests/ring.test.ts` asserts as a minimum clearance on the static geometry.
-- `FRAME` insets the whole mark inside its canvas. The simulation breathes and shears the lattice
-  to about six percent past the outer band, and at the old inset of none that overshoot was clipped
-  flat against the canvas edge. Every size in this file is inset with it, so the CSS box is divided
-  by `FRAME` in turn and the drawn mark, its dots and its motion are all unchanged; the canvas
-  simply carries the room the overshoot needs.
+**Jensen** is an AI-first IDE built for large, complex codebases. It maps your project into a
+navigable picture of how it actually fits together, the services, the calls between them, the
+routes they expose, and hands that same map to your AI assistant so you both work from a shared
+understanding instead of guessing.
 
-`decodeMessage` in `src/lib/ring.ts` does this in code, and `tests/ring.test.ts` asserts the
-rendered geometry still decodes to the original sentence.
+Big multi-service codebases are hard to hold in your head. New to a repo, you spend days tracing
+what talks to what. AI assistants make that worse in a specific way: pointed at raw source, they
+burn effort re-scanning files and confidently invent an architecture that was never there. Jensen
+removes that friction for both of you. You get a map you can open from wherever you stand, and
+your assistant gets a compact, trustworthy description of the real structure, so its answers about
+the system are faster and correct.
 
-## The motion
+Jensen supplies the context, not the model. It embeds no AI model of its own and works with the
+assistant you already use.
 
-The lattice is where each dot lives, not where it sits. `createRingSim` runs a particle
-simulation and the canvas only draws it, so the entrance and the idle loop are one continuous
-system rather than an animation that hands off to another.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-- The ring opens with a fade, staggered from the inner band outward over about a second, and
-  every dot is `#0E0E0D` at full opacity and full radius from then on. Nothing modulates a dot's
-  ink once the reveal is done, because at a two pixel radius a change in opacity or size is
-  indistinguishable from a change in colour. All of the steady state life comes from position.
-- Each particle is a spring anchored to its lattice slot, damped a little under critical so it
-  overshoots once. `OMEGA` sets the rate and `ZETA` the damping.
-- The anchor itself moves. Rings twist against each other by `SHEAR` and the whole lattice
-  breathes by `BREATH`, both driven by the same noise, so particles chase a target that is
-  already alive. Twist is a rigid rotation per ring and breath is a uniform scale, so neither
-  can bring two dots closer than the radial gap no matter how far they are pushed.
-- Ambient wander comes from the curl of a 3D gradient noise field, sampled at the particle's
-  home so the equation stays linear and the spring cannot amplify how far neighbours separate.
-  Curl is divergence free, which is why the flow swirls instead of collecting dots into sinks.
-- The whole lattice also turns slowly by `SPIN`, so the mark is never twice in the same place.
-- `noise3` is a hashed lattice, so the simulation is deterministic with no seeding. Vitest and
-  the browser produce identical frames at a fixed timestep.
-- Motion amplitude scales with `budget`, the air left between slots, not with the ring size.
-  `dotRadius` bottoms out at one pixel below a 323 pixel canvas while the gaps keep shrinking, so
-  anything scaled to the ring would close them.
-- `tests/ring.test.ts` runs the simulation and measures the true closest pair through a spatial
-  hash. It also asserts the particles keep moving, so damping the ring to death fails the suite.
+## Honest by design
 
-## The type
+A map is only worth leaning on if you can trust every line of it. Jensen's core rule is that it
+never guesses. Everything it shows you is one of two things, something it observed directly in
+your source or something your team declared on purpose, and the two stay distinguishable, each
+carrying the evidence behind it. Where Jensen does not know, it says unknown rather than inventing
+an answer.
 
-Two faces, and the split is a rule rather than a judgement call each time: Poppins sets display
-and human language, JetBrains Mono sets machine-readable values. The version, the byte size, the
-date, "Apple Silicon", the beta number and the licence are mono. The headline, the lede, the card
-title and both button labels are Poppins. Mono already has uniform advance widths, so wherever it
-is used the tracking drops to `--track-mono`, roughly half what the sans labels carry, or it
-sprawls at nine pixels.
+That single guarantee is what makes the map safe for a human to rely on and safe for an AI to
+build on. When the map says two services are connected, they are. When it stays silent, that
+silence is honest, not a gap papered over with a plausible guess.
 
-Both faces are self-hosted from `public/fonts`. `vercel.json` sets `font-src 'self'`, so a Google
-Fonts link or `@import` is blocked in production; a new face has to be a file and a fourth
-`@font-face`, never a stylesheet from someone else's origin.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## The flip
+## How it works
 
-The page has two themes and it moves between them by diffusion, not by a fade or a sweep. The
-ring's dots liquefy, ink spreads out of the lattice and floods the viewport until it has eaten the
-page, and the dots then settle back into the lattice in the theme that arrived. It runs the first
-time five to ten seconds in, then every fifteen to forty, and takes 3.2 seconds.
+```mermaid
+flowchart TD
+    A["Your codebase"]
+    B["Declared topology\n(optional, from your team)"]
+    C["Jensen\nmaps the project"]
+    D["A navigable map\nopen from where you stand"]
+    E["You\nexplore and understand"]
+    F["Your AI assistant\nworks from the same map"]
 
-- The dark palette is the **exact difference-inverse** of the light one, `255 - v` per channel, in
-  both `style.css` and the PrimeVue preset. That is not an aesthetic choice, it is what makes the
-  hand-off seamless, and the cool cast that falls out of inverting warm paper is the point.
-- `DiffusionVeil.vue` paints white into a fixed full-viewport canvas composited with
-  `mix-blend-mode: difference`. On a monochrome page that is exact inversion: white flips what is
-  under it, transparent changes nothing. Light to dark reads as black ink flooding paper; dark to
-  light is the same code and shows the ink as white on black.
-- Seeds come from **the ring's own pixels**. The canvas is drawn into a 150 pixel scratch canvas
-  once at ignition and every lit pixel becomes a seed, so the front starts exactly where the dots
-  are, including whatever spin and shear the simulation had reached.
-- The ink is a **level set through a Perlin landscape**, not a cloud of particles. Height is the
-  chamfer distance from those seeds, raised to a power so it climbs steeply at the dots, minus four
-  octaves of fractal noise. A threshold sweeps from the lowest cell to the highest, so the front
-  always begins at the mark, grows in organic lobes rather than as a circle, and closes exactly as
-  the level tops out. Particles gave a furry, stippled edge; a level set is smooth at any scale
-  because the boundary is an interpolated contour rather than a spray of marks.
-- **The landscape moves under the front.** The noise is built at four depths and interpolated as
-  progress advances, so the boundary keeps reshaping while it travels instead of revealing a fixed
-  outline. Depths sit close together in the noise: spacing them further apart decorrelates them,
-  and averaging two decorrelated fields flattens the amplitude that gives the front its shape.
-- **Wetted cells are held at their high-water mark.** Without that, a morphing landscape would lift
-  a cell back above the level and the ink would visibly recede. With it the front writhes and the
-  page only ever gets wetter, which is both what ink does and what the tests assert.
-- The field is 420 cells on its long side and is drawn upscaled with smoothing, so boundary detail
-  and per-frame cost are traded against each other, never against sharpness. The noise itself is
-  evaluated on a half-scale grid and interpolated, a quarter of the work for the same picture.
-- **The build is sliced across frames, and this is load bearing.** Distance transform, noise and
-  heights together take about twenty milliseconds, so doing them in one go cost the ring a visible
-  stall right as the diffusion began. `buildField` is a generator that yields between row bands and
-  the veil drains it against a six millisecond budget per frame, which lands in three frames here
-  and degrades gracefully on slower machines. `tests/diffusion.test.ts` asserts the yield count, so
-  collapsing it back into one step fails the suite.
-- The ring's ink level is an inline `opacity` on the canvas element, not a custom property on the
-  root. A custom property there invalidates every element that reads one, on every frame of the
-  transition.
-- `SignalRing.vue` and `ring.ts` are not touched by any of this. Dark mode reaches the mark through
-  `filter: invert(1)` on the element, which leaves the backing store writing `#0E0E0D` in both
-  themes, and the dots empty out of the lattice through an opacity the veil sets on the element
-  from outside. The simulation never learns that a flip happened.
-- The dots ride on the same canvas, composited with `difference` there, which gives the same
-  picture as stacking a second difference layer over the page for half the blended area. They are
-  drawn fresh every frame with the ring's own hard edge, and stay local to the mark; spreading
-  across the page is the ink's job.
-- Three things cost this transition its frame rate before they were found, and all three are worth
-  keeping in mind before changing the drawing: `imageSmoothingQuality: 'high'` is a CPU resample in
-  Chrome and made the upscale eight times slower than bilinear; a second full-viewport blended
-  layer roughly doubled the compositing; and a live CSS `filter` on the animated grain made dark
-  mode permanently more expensive than light, so that inversion is baked into the image instead.
-- The last frame hard-fills the veil to solid white, and the next one swaps `data-theme`, updates
-  `theme-color` and clears the canvas together. `difference(14, 255)` and `invert(14)` are both 241,
-  so nothing moves on the seam.
-- The schedule stands down while the tab is hidden, defers six seconds while the pointer is over
-  the download card or a control holds focus, and never starts at all under
-  `prefers-reduced-motion`. `?diffusion=off` disables it and `?diffusion=now` runs one immediately,
-  which is how the end-to-end tests stay deterministic.
+    A --> C
+    B --> C
+    C --> D
+    D --> E
+    D --> F
+```
 
-## Deployment
+Point Jensen at your project and it builds the map from what is really there: services, calls,
+routes, files, symbols and project knowledge. If your team wants to describe cross-service
+topology that no single repo can show on its own, which services exist and how they connect, you
+declare it and Jensen folds it into the same picture. From there you open the map at whatever
+altitude you need, the whole system at a glance or one service drilled down to its internals. Your
+assistant reads that same map, so you are never explaining the architecture to it from scratch.
 
-Import `jensen-org/releases` into Vercel. Vercel detects Vite from `bun.lock`, builds to `dist`, and turns
-`api/release.ts` into a Node function at `/api/release`. Production deploys from `main`. Security headers live
-in `vercel.json`; do not add a catch-all rewrite, it would shadow the API route.
+<!--
+Screenshots. Drop the files at these paths and remove this comment to publish them.
 
-Set `GITHUB_TOKEN` as a server environment variable for Production and Preview. It is optional in the sense
-that the function still works without one, but unauthenticated GitHub allows 60 requests per hour per IP and
-Vercel functions share egress addresses, so a live site will hit the ceiling.
+| | |
+| --- | --- |
+| ![The graph](docs/images/graph.png) | ![Infrastructure view](docs/images/infrastructure.png) |
+| ![A session](docs/images/session.png) | ![The editor](docs/images/editor.png) |
+-->
 
-Canonical, Open Graph and Twitter tags, plus `robots.txt` and `sitemap.xml`, are generated at build time from
-`VITE_SITE_URL`. Unset, it falls back to Vercel's own production URL. Set it once a domain is attached.
-Preview deployments emit `Disallow: /`.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Download
+
+Every build is published on this repository's [releases page](https://github.com/jensen-org/releases/releases).
+
+| Platform | Architecture | Asset |
+| --- | --- | --- |
+| macOS | Apple Silicon | `.dmg` |
+| Debian, Ubuntu | x86_64 | `.deb` |
+| Fedora, RHEL, openSUSE | x86_64 | `.rpm` |
+
+Beta builds are published as prereleases, so GitHub does not expose them through the `latest`
+release URL. Take them from the releases page itself.
+
+Every release also carries `SHA256SUMS`, its detached signature `SHA256SUMS.asc`, and
+`release.json` describing the build.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Install
+
+On macOS, open the disk image and drag Jensen into your Applications folder. The build is signed
+and notarized, so it opens like any other app.
+
+On Debian or Ubuntu:
+
+```bash
+sudo apt install ./Jensen_*_amd64.deb
+```
+
+On Fedora, RHEL or openSUSE:
+
+```bash
+sudo dnf install ./Jensen-*.x86_64.rpm
+```
+
+Both put `jensen-desktop` and the `jensen` CLI on your `PATH`, and register the desktop entry the
+shell needs to show the app's own icon.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Verify a download
+
+Check the file against the published checksums, from the directory you downloaded into:
+
+```bash
+shasum -a 256 -c SHA256SUMS   # macOS
+sha256sum -c SHA256SUMS       # Linux
+```
+
+The checksum file is signed, so you can confirm it came from the release pipeline rather than from
+whoever handed you the link:
+
+```bash
+gpg --import JENSEN_RELEASE_PUBKEY.asc
+gpg --verify SHA256SUMS.asc SHA256SUMS
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## First run
+
+Open a project, then turn Jensen on for it. Use Setup in Settings, About, or run this in the
+project from a terminal:
+
+```bash
+jensen setup
+```
+
+One command wires everything. It links `jensen` on your `PATH`, turns Jensen on for the project,
+installs the git guard and points the project's hooks at it, registers the context server with
+every supported assistant CLI it finds, wires the session and plan hooks, silences assistant
+commit bylines, installs the `/jensen-debrief` command, writes the agent conventions into the
+project, and indexes it.
+
+The point of all that is that it does not matter where you start. An assistant you launch in a
+plain shell gets the same context server, the same tools and the same conventions as one running
+inside the app.
+
+Running it again is safe. Every step checks what is already in place and leaves it alone, and it
+never touches hooks or binaries it did not install. To see what is wired without changing
+anything:
+
+```bash
+jensen setup --status
+```
+
+Skip indexing, the slow part on a large repo, with `--no-scan`. Run one part with
+`--only <step>`, and reverse any of it with `--uninstall`.
+
+Once the command is on your `PATH`, open a project from the terminal the way you would with an
+editor. Restart your shell first, or source your profile, so the new link is found.
+
+```bash
+jensen .
+```
+
+Codex needs a one-time trust review for user-installed command hooks. After setup, start Codex and
+use `/hooks` to review and trust the Jensen entries. Claude Code and Gemini CLI pick up their
+updated settings on the next session.
+
+Knowledge search runs offline. On first use it tries to fetch a small embedding model to enrich
+ranking, and on a machine with no network it falls back to lexical search with no loss of
+availability.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Choose an AI assistant
+
+Jensen discovers the assistant CLIs already on your machine, Claude Code, Codex, Gemini CLI and
+Antigravity, and registers the context server with each of them once at user scope, so you approve
+it a single time instead of once per project. Pick the default for new sessions, plans,
+implementation runs and AI actions in Settings, AI assistants, or from the terminal:
+
+```bash
+jensen assistant list
+jensen assistant set codex   # claude, codex, gemini, antigravity, or automatic
+```
+
+Automatic selection is deliberately conservative. Jensen chooses for you only when exactly one
+assistant is available. When several are configured it asks instead of silently preferring one,
+and an explicit choice never falls back to a different provider when its CLI is missing.
+
+Workspace trust is a separate gate. A new repository stays restricted until you approve it. A
+restricted workspace can be browsed and edited, but cannot run project commands, local toolchains,
+debug adapters or plan acceptance checks. Review or revoke that decision in Settings, Security.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## The git guard
+
+Setup installs a guard into the project's git hooks, so it fires for every commit however it was
+made, from a terminal, an editor, an assistant or another tool. A commit carrying a secret or junk
+is refused outright:
+
+```console
+$ git commit -m "wip"
+jensen: commit blocked, staged changes contain secrets or junk:
+  env-file in .env (.env)
+Remove them, or accept a finding in Jensen. To bypass once: git commit --no-verify
+```
+
+It recognises `.env` files, private keys, provider tokens, dependency and build directories, and
+other common leaks. A push that would discard commits the remote already has is refused the same
+way. To remove it, run `jensen setup --only git-shim --only git-hooks --uninstall`, which takes
+out the guard and unwires this project's hooks from it.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Capabilities
+
+| Capability | What it does | Status |
+| --- | --- | --- |
+| Map a codebase | Builds a navigable graph of the real structure: services, calls between symbols, and the routes they expose. | Available |
+| Declare topology | Lets your team assert cross-service structure, which services exist, how they connect, and over what protocol, and merges it into the same map. | Available |
+| Open from where you stand | Views the map at any altitude, from the whole-system topology down to a single service's internals, and stays consistent across sessions. | Available |
+| Share the map with your AI | Emits a portable, git-friendly, always-honest map any AI assistant can read, so it answers questions about the system faster and more correctly. | Available |
+| Ask the map questions | Query the structure directly: what calls this, what connects to that, where these routes live. | In progress |
+| Stay live | Keeps the map current as you edit, and pulls in work items and pipeline status from GitHub, GitLab and Slack. | Planned |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## CLI reference
+
+The `jensen` CLI is one entry point for all of it. Run `jensen` with no arguments for the command
+list, and `jensen help <command>` for one command's flags and examples.
+
+| Command | What it does |
+| --- | --- |
+| `jensen setup [path]` | Turn Jensen on for this machine and project. |
+| `jensen setup --status` | Report what is wired. Writes nothing. |
+| `jensen <path>`, `jensen open [path]` | Open the app on a directory, the way `code .` does. |
+| `jensen assistant` | Inspect or choose the default AI assistant. |
+| `jensen view <path>` | Print the file and import graph. |
+| `jensen query <path> <q>` | Ask the map a question. |
+| `jensen gen <path>` | Write the full map to disk. |
+| `jensen watch <path>` | Keep the map current as you edit. |
+| `jensen ingest <path> <doc>` | Add a documentation source. |
+| `jensen knowledge` | Inspect, compact or export what Jensen knows. |
+| `jensen learn` | Record, browse and reuse learned skills. |
+| `jensen worktree` | Isolated worktrees for parallel tasks. |
+| `jensen bridge <path>` | The context server your assistant connects to. It launches this for you. |
+| `jensen doctor` | What is working and what is not. |
+| `jensen ping` | Check that the daemon is running. |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## The shared map
+
+The map is not locked inside the IDE. Jensen writes it out as portable files that live alongside
+your code and any AI assistant can read. They are the context your assistant works from, a compact
+description of the system instead of the whole repository.
+
+Two properties make those files dependable. They are git-friendly, so the map lives in version
+control next to the code it describes and its changes show up in review. And they are
+deterministic, the same codebase always produces the same map, so diffs stay clean and honest, and
+a change in the map means a real change in the code.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## License
+
+Jensen is source-available under the
+[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
+You may use, modify and redistribute Jensen for permitted noncommercial purposes. Commercial use,
+resale, paid redistribution, hosted offerings, or bundling Jensen into a paid product requires a
+separate written license from the copyright holder.
+
+This is not an open-source license. All commercial rights not expressly granted remain reserved.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## This repository
+
+It publishes every Jensen build, and it holds the source of the download page for the macOS build.
+How that page is put together, the ring, the motion, the type and the theme flip, is written up in
+[docs/download-page.md](docs/download-page.md).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
