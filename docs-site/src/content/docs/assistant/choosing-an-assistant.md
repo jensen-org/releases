@@ -56,4 +56,4 @@ settings on the next session.
 
 A project can define reusable profiles that select an assistant, a prompt and a permission allowlist
 for a particular kind of work. See
-[Agent profiles and workflows](../profiles-and-workflows/).
+[Agent profiles and workflows](../../automation/workflows/).

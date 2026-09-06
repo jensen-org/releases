@@ -59,4 +59,4 @@ rather than trusting that the tier you asked for is the tier you got.
 
 The tier and its resolution appear on the workflow node in the Sessions view, alongside the node's
 own status. See [Sessions](../../app/sessions/#the-workflow-canvas) and
-[Agent profiles and workflows](../profiles-and-workflows/).
+[Agent profiles and workflows](../../automation/workflows/).

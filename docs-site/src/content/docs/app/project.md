@@ -104,7 +104,7 @@ jensen watch .                                # keep it current as you edit
 Your assistant asks the same questions through the context server rather than by grepping. See
 [What your assistant can do](../../reference/assistant-tools/).
 
-## The shared map files
+## The map files
 
 The map is not locked inside the IDE. Jensen writes it out as portable files that live alongside your
 code and any AI assistant can read. They are the context your assistant works from, a compact

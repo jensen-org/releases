@@ -58,7 +58,7 @@ integration action?** approval. Agent runs stop at their own gates too, **Approv
 **Approve execution**, which surface in the Background Tasks centre.
 
 A separate gate covers agent hooks that open a session and edit files: **Let agent hooks start
-assistants**, with **Allow** and **Revoke**. See [Agent hooks](../agent-hooks/).
+assistants**, with **Allow** and **Revoke**. See [Agent hooks](../../automation/agent-hooks/).
 
 ## Where enforcement happens
 
@@ -72,4 +72,4 @@ Two of these are worth stating plainly because they are the difference between a
 ## What is not a gate
 
 Choosing an assistant is not a permission. It decides which model answers, not what it may do. See
-[Choosing an assistant](../choosing-an-assistant/).
+[Choosing an assistant](../../assistant/choosing-an-assistant/).

@@ -39,10 +39,10 @@ That distinction runs through the whole product. Jensen never asks you to switch
 ## Where to go next
 
 - [Honest by design](../honest-by-design/) is a guarantee everything else rests on.
-- [Download and install](../download-and-install/) gets the app onto your machine.
-- [First run](../first-run/), setup Jensen in your project. 
+- [Download and install](../install/) gets the app onto your machine.
+- [First run](../turn-jensen-on/), setup Jensen in your project. 
 - [How Jensen works with your assistant](../../assistant/how-it-works/), learn how Jensen integrates with your AI ecosystem.
-- [You do not have to use the app](../first-run/#you-do-not-have-to-use-the-app), if you would rather
+- [You do not have to use the app](../../assistant/working-outside-the-app/), if you would rather
   keep your current setup and reach Jensen from the terminal and your assistant.
 
 ## Status

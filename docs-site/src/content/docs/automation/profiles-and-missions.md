@@ -44,7 +44,7 @@ an imported agent profile or a shared Kit.*
 ## How it relates to everything else
 
 A mission does not grant authority you have not already granted. Its permissions are a subset of what
-is enabled under [Trust, approvals and permissions](../trust-approvals-and-permissions/), and its
+is enabled under [Trust, approvals and permissions](../../safety/trust-and-permissions/), and its
 runs still stop at the same approval gates as any other agent run.
 
 For one-off specialists that do not need a lifetime or a schedule, use a specialized session instead.

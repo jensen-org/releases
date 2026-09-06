@@ -1,118 +1,175 @@
 ---
-title: What your assistant can do
-description: The catalogue of capabilities Jensen gives a connected assistant, grouped by purpose, and which of them are gated writes.
+title: Assistant tool reference
+description: Every capability Jensen gives a connected assistant, grouped by purpose, with the gate each one sits behind.
 ---
 
-Once connected, your assistant can ask Jensen questions instead of guessing, and act on the project
-through capabilities you control. Around ninety are available. They group like this.
+You never call these. Your assistant does, through the context server, once Jensen is set up for the
+project. This page exists so you can see exactly what it is able to do.
+
+Which assistant receives them is set in **Settings, AI, AI assistant**. Two gates apply, and the
+Gate column below says which:
+
+- **Trust** means the workspace must be trusted, because the call runs a program. Granted in
+  **Settings, System, Security**.
+- **Permission** means a named integration permission must be enabled in **Settings, Extensions,
+  Integrations, Permissions**. Each one is separate.
+
+Everything else is ungated and read-only.
+
+One rule runs through the whole catalogue. Where a tool ranks or suggests rather than observes, its
+answer is a lead to investigate and not a verdict, and Jensen labels it that way.
 
 ## Recall and knowledge
 
-Search across confirmed facts, evidence-backed procedures, ingested documentation and indexed source
-symbols, before reading files or guessing. Also: ingest a documentation source, store a durable
-project memory, and delete one that turned out to be wrong.
+| Tool | What it answers | Gate |
+| --- | --- | --- |
+| `search_knowledge` | Hybrid search over the map, memory, skills and ingested documentation. | |
+| `remember` | Store a durable project fact. | |
+| `forget` | Remove one that turned out wrong. | |
+| `ingest_docs` | Add a documentation source to the store. | |
+| `get_project_brief` | The project's context documents. | |
+| `onboarding`, `save_onboarding` | The seeded interview that writes project context. | |
+| `update_project_context` | Edit one context document. | |
+| `steering_refresh_preview`, `steering_apply_refresh` | Propose evidence-backed context changes, then apply only the ones you accept. | |
 
-A separate search over the catalogue itself lets an assistant discover the right capability without
-loading the whole list into its context.
+See [Memory and knowledge search](../../knowledge/memory-and-search/) and
+[Project context](../../knowledge/project-context/).
 
 ## Navigating the code
 
-Instead of `ls`, `find`, `tree` and grep:
-
-| Capability | What it answers |
-| --- | --- |
-| List files | What is here, already filtered by your ignore rules. |
-| Dependencies | What this depends on, without grepping imports. |
-| Impact analysis | The blast radius of a change to a symbol. Treated as a lead, not a verdict. |
-| Explain a service | A structural profile from the map. |
-| Detect languages | Which languages this project actually uses. |
-| Rename a symbol | A project-wide whole-word rename. |
-| Project brief | Where to start in a project it has never seen, with every fact naming the file it came from. |
-
-## Bugs and quality
-
-Existing findings are checked before any bug or regression work begins. From a bug report or a
-failing job log, likely source locations are ranked, again as a lead to investigate rather than an
-answer. A separate structural read supports a quality review: over-connected hubs, low-cohesion
-components, dependency cycles, oversized files and likely copy-paste clones.
-
-See [Findings and screening](../../knowledge/findings/).
-
-## Git and changes
-
-History, and a semantic diff that projects working-tree changes onto the symbols that own them.
-Staged changes are screened for leaked secrets and junk files before a commit, and every blocking
-finding has to be resolved or accepted by you first. Recent history movements are surfaced as
-labelled undo points, so an assistant can offer a safe target instead of a raw commit hash.
-
-Every edit is recorded on the session timeline, which is what makes it reversible. See
-[Undo and the session trace](../../safety/undo-and-the-session-trace/).
-
-## Worktrees
-
-List, open and remove the isolated checkouts that keep parallel tasks from sharing an index. See
-[Worktrees for parallel work](../../safety/worktrees/).
-
-## Plans, decisions and objectives
-
-Fetch the canonical plan skeleton, register a plan, update its status or tick one of its steps, and
-record a departure from it: a decision that supersedes the plan, a critical bug found outside its
-scope, or a blocker. Objectives bind a set of plans, chats, ordered goals and standing constraints
-for one feature that may span many days.
-
-See [Plans and objectives](../plans-and-objectives/).
+| Tool | What it answers | Gate |
+| --- | --- | --- |
+| `list_files` | The tree, without shelling out to `ls` or `find`. | |
+| `get_dependencies` | What a node depends on. | |
+| `impact_analysis` | What breaks if you change it. | |
+| `explain_service` | What a service is and does. | |
+| `detect_languages` | Which languages the repository uses. | |
+| `rename_symbol` | Rename across the project, using the map rather than text search. | |
+| `get_git_history` | History for a path. | |
+| `git_semantic_diff` | A diff described in terms of symbols. | |
 
 ## Architecture
 
-An assistant can read the material behind your architecture and submit an inference from it. That
-inference is stored as **inferred** and shown to you for confirmation. It never enters the map on its
-own, and an assistant is told not to confirm its own inference without your go-ahead. See
-[Honest by design](../../start/honest-by-design/).
+| Tool | What it answers | Gate |
+| --- | --- | --- |
+| `get_architecture` | The confirmed architecture. | |
+| `get_architecture_material` | The evidence an architecture proposal would rest on. | |
+| `submit_architecture` | Propose one, stored as inferred. | |
+| `confirm_architecture` | Promote it into the map. | |
+
+An assistant cannot confirm its own inference. See [Honest by design](../../start/honest-by-design/).
+
+## Bugs and quality
+
+| Tool | What it answers | Gate |
+| --- | --- | --- |
+| `list_findings` | What Jensen has noticed about the project. | |
+| `localize_bug` | The likely places to look, from a report or a failing log. | |
+| `get_quality_material` | Structural quality signals. | |
+| `get_diagnostics` | Language server diagnostics for a file. | |
+| `screen_changes` | Secrets and junk in a change, before it becomes a commit. | |
+
+See [Findings and analysis](../../knowledge/findings/).
+
+## Changes and recovery
+
+| Tool | What it answers | Gate |
+| --- | --- | --- |
+| `record_change` | Record an edit on the session timeline. | |
+| `draft_change_context` | Draft the description of a change. | |
+| `list_undo_points` | The reversible points on the timeline. | |
+| `record_decision` | Log a departure from an approved plan. Publishing it to the issue needs Permission. | Permission |
+
+See [Undo and the session trace](../../safety/undo-and-the-session-trace/).
+
+## Worktrees
+
+| Tool | What it answers | Gate |
+| --- | --- | --- |
+| `list_worktrees` | Which isolated checkouts exist. | |
+| `open_worktree` | Create or reuse one. | |
+| `remove_worktree` | Remove one. | |
+| `checkout_profiles` | The checkout profiles available. | |
+
+See [Worktrees for parallel work](../../safety/worktrees/).
+
+## Plans and objectives
+
+| Tool | What it answers | Gate |
+| --- | --- | --- |
+| `plan_template` | The canonical plan skeleton. | |
+| `plan_register` | Register a plan Jensen should track. | |
+| `plan_update` | Move a plan through its lifecycle. | |
+| `objective_create`, `objective_get`, `objective_list`, `objective_update` | Longer work held together across many sessions. | |
+
+See [Plans and objectives](../../automation/plans-and-objectives/).
 
 ## Spec-driven development
 
-Create a feature specification, analyze it for review issues before approval, refine it, approve it,
-sync it, run it, and trace requirements to the work that satisfies them. Jensen never installs
-software or reaches the network to do it, and initialising a specification toolkit requires your
-explicit approval.
+`sdd_create`, `sdd_analyze`, `sdd_refine`, `sdd_approve`, `sdd_inspect`, `sdd_list`, `sdd_status`,
+`sdd_sync`, `sdd_trace`, `sdd_run`, `sdd_repair` and `sdd_cancel` drive a specification from draft to
+traced implementation. `speckit_init`, `speckit_feature`, `speckit_run` and `speckit_status` do the
+same for a Spec Kit project. None are gated on their own, though the work they start is.
 
 ## Your tracker, merge requests and CI
 
-**Reads are not gated.** Issue context, work items, your inbox, labels, a merge request, pipeline
-status and a job log are all available.
+Reading is never gated:
 
-**Writes are gated, individually.** Each one is blocked until you enable the matching permission, and
-each says so in its own description. They are: comment on an issue, create an issue, set issue
-labels, set issue state, assign an issue, schedule a work item, create a merge request, review a
-merge request, and post to Slack.
+`get_issue_context`, `list_work_items`, `list_inbox`, `list_labels`, `get_merge_request`,
+`get_pipeline_status`, `get_job_log`.
 
-See [Trust, approvals and permissions](../trust-approvals-and-permissions/).
+Every write is gated individually:
+
+| Tool | Permission it needs |
+| --- | --- |
+| `create_issue` | Create issues |
+| `comment_issue` | Comment on issues |
+| `set_issue_labels` | Change issue labels |
+| `set_issue_state` | Close or reopen issues |
+| `assign_issue` | Assign yourself to issues |
+| `set_work_item_schedule` | Schedule work items |
+| `create_merge_request` | Create merge requests |
+| `review_merge_request` | Approve merge requests |
+| `notify_slack` | Send Slack messages |
+
+This is the same list you see in **Settings, Extensions, Integrations, Permissions**, and it applies
+whether you clicked the button or your assistant did. See
+[Trust and permissions](../../safety/trust-and-permissions/).
 
 ## Developer tooling and health
 
-List which tools a language resolves to, install one from the catalog, run the formatter or the
-linter, read diagnostics, and report what is and is not working in the project's Jensen setup:
-workspace trust, the tools its languages need, whether it is indexed, and whether an assistant can
-see it.
+| Tool | What it answers | Gate |
+| --- | --- | --- |
+| `list_tools`, `search_tools` | Which language tools are installed and what the catalog offers. | |
+| `install_tool` | Install one from the catalog. | Trust |
+| `run_formatter` | Format a file. | Trust |
+| `run_linter` | Lint a file. | Trust |
+| `check_health` | The same checks as `jensen doctor`. | |
 
 ## Debugging
 
-Start, continue, step, pause and stop a debug session, set breakpoints, inspect the stack or the
-variables, and evaluate an expression in the running program. An assistant can drive the debugger
-rather than reason from a stack trace.
-
-Debugging requires a trusted workspace.
+`debug_session`, `debug_breakpoints`, `debug_inspect` and `debug_evaluate` start and drive a debug
+session, set breakpoints, read the stack and variables, and evaluate an expression in the running
+program. All need Trust, because they run your program. An assistant can drive the debugger instead
+of reasoning from a stack trace.
 
 ## Skills and hooks
 
-Search, list and use approved skills, and read a file belonging to one. A generated skill is staged
-as pending your approval rather than added silently, and running a skill's script needs explicit
-permission and stays confined to that skill's package. Agent hooks can be listed, registered and
-evaluated.
+| Tool | What it answers | Gate |
+| --- | --- | --- |
+| `skill_search`, `skill_list`, `skill_read_file` | Find and read a recorded procedure. | |
+| `skill_use`, `skill_stage` | Deliver one for use. | |
+| `skill_execute` | Run a skill's script. | Trust |
+| `hook_list`, `hook_register`, `hook_evaluate` | Read, add and test agent hooks. | |
 
-See [Skills](../../knowledge/skills/) and [Agent hooks](../agent-hooks/).
+See [Skills](../../knowledge/skills/) and [Agent hooks](../../automation/agent-hooks/).
 
 ## Plugins
 
-Validate a plugin manifest and publish a plugin. See
-[Plugins and themes](../../extending/plugins-and-themes/).
+`validate_plugin_manifest` checks a plugin manifest, and `publish_plugin` generates the manifest and
+registry entry. See [Plugins and themes](../../extending/plugins-and-themes/).
+
+## In a project that was never set up
+
+Only `activate_project` is offered, and any other call answers that the project is inactive. An
+empty answer there means the project was never indexed, and not that the code is empty.
