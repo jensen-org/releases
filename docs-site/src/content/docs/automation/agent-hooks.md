@@ -6,7 +6,7 @@ description: Rules that run something when something happens in the project, the
 An agent hook is a rule: when this happens in the project, do that. The plan-lifecycle hooks are on
 by default and keep your tracker in step with your plans. Everything else is opt-in.
 
-Configured in **Settings, Agent Hooks**.
+Configured in **Settings, AI, Agent Hooks**.
 
 ## The built-in catalogue
 
@@ -69,7 +69,7 @@ authors, and whether a merge request is a draft.
 Two more controls keep a noisy trigger sane: a debounce in milliseconds, and a maximum number of
 attempts.
 
-## A note on naming
+## What these are called
 
 The project conventions written into a repository sometimes call these automations. The app calls
 them **Agent Hooks**, and that is the name to look for in Settings.

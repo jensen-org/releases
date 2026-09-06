@@ -14,7 +14,7 @@ something is actually broken**, so it can gate a pipeline.
 
 `--json` and `--markdown` give you output you can paste somewhere.
 
-The same checks run inside the app as **Settings, Health**, with advice per check, **Re-check**, and
+The same checks run inside the app as **Settings, System, Health**, with advice per check, **Re-check**, and
 **Copy as Markdown**. They also appear as **Project checks** in the project overview.
 
 ## Is Jensen wired for this project?
@@ -24,11 +24,11 @@ jensen setup --status
 ```
 
 Reports what is and is not wired, and writes nothing. To fix what is missing, re-run `jensen setup`.
-It is safe: every step checks what is already in place and leaves it alone, and it never touches
-hooks or binaries it did not install.
+Re-running is safe. See
+[Re-running it is safe](../../start/turn-jensen-on/#re-running-it-is-safe).
 
-Inside the app the **Connect** step of the wizard does the same reconciliation, reports "N of M
-wired", and offers **Fix all**.
+Inside the app the **Connect** step of the wizard does the same reconciliation, reports how many
+checks are wired, and offers **Fix all**.
 
 ## Common causes
 
@@ -36,9 +36,9 @@ wired", and offers **Fix all**.
 | --- | --- |
 | The map is empty or stale | The project was never indexed, or was set up with `--no-scan`. Run `jensen setup` again, or `jensen watch .`. |
 | An assistant cannot see the project | The context server is not registered for that assistant, or the project was never activated. `jensen setup --status`. |
-| Commands, toolchains or the debugger will not run | The workspace is not trusted. **Settings, Security**. |
-| A write to your tracker silently does nothing | The matching permission is off. **Settings, Integrations, Permissions**. |
-| Semantic search is not ranking well | The embedding model has not been fetched. Lexical search still works offline. **Settings, Knowledge**. |
+| Commands, toolchains or the debugger will not run | The workspace is not trusted. **Settings, System, Security**. |
+| A write to your tracker silently does nothing | The matching permission is off. **Settings, Extensions, Integrations, Permissions**. |
+| Semantic search is not ranking well | The embedding model has not been fetched. Lexical search still works offline. **Settings, AI, Knowledge**. |
 | Codex is not running Jensen's hooks | It needs a one-time trust review. Start Codex and use `/hooks`. |
 | A Linux build will not start | Builds need glibc 2.39 or newer, so they do not run on Ubuntu 22.04. An AppImage may need FUSE 2. |
 

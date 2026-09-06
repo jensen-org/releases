@@ -4,7 +4,12 @@ description: The canonical plan format, its lifecycle and approval gates, how it
 ---
 
 A plan is the hand-off artifact between the agent that designed a change and whoever implements it.
-In Jensen the format is a contract, not a suggestion.
+In Jensen the format is a contract.
+
+## The plan inspector
+
+A plan opens in its own inspector, from the Sessions view while a session is running it, or from
+**Active work** in the project overview. See [Sessions](../../app/sessions/#plans-in-a-session).
 
 ## Where a plan lives
 
@@ -29,9 +34,8 @@ In this order:
 | **Verification** | How to prove it end to end. |
 | **Deviations and findings** | Filled in as the work runs, from recorded decisions. |
 
-The style rules are as load-bearing as the sections: tables and checklists over prose, real paths and
-symbols in code spans and nothing else, and every acceptance criterion something you can actually
-run.
+The style rules carry as much weight as the sections. Tables and checklists over prose, code spans
+only for real paths and symbols, and every acceptance criterion something you can actually run.
 
 ## The lifecycle
 
@@ -43,8 +47,8 @@ run.
 | **Implemented** | The agent, the moment the work lands. |
 | **Blocked** | The agent, when it cannot proceed. |
 
-A stale status is a defect rather than a formality. A plan left below done after its work is finished
-reads to you as still open, and makes you redo it.
+A stale status is a defect. A plan left below done after its work is finished reads to you as still
+open, and makes you redo it.
 
 For larger work the plan moves through phased approval gates: **Requirements**, then **Design**, then
 **Tasks**.
@@ -55,17 +59,17 @@ Approving a canonical plan creates its tracking issue, assigns it to the agent, 
 plan's own front matter, and closes it when the plan reaches done. That only happens for a plan in
 Jensen's format. A plan written some other way silently gets no issue.
 
-Work that is not a plan, a bug found in passing, a follow-up nobody is doing yet, gets an issue
-created explicitly instead. See [Work](../../app/work/).
+Work that is not a plan gets an issue created explicitly instead. That covers a bug found in
+passing, or a follow-up nobody is doing yet. See [Work](../../app/work/).
 
-## The plan inspector
+## What the inspector gives you
 
-Open a plan and you get the document itself, with:
+The document itself, with:
 
 - **Add comment** and **Mark done** inline against any part of it.
 - **Plan discussion**, the thread about the plan rather than about the code.
 - **Steps** as checkboxes that move the status with them.
-- **Blast radius**, what else the change touches, labelled as a heuristic rather than a verdict.
+- **Blast radius**, what else the change touches, labelled as a heuristic and not a verdict.
 - **Acceptance checks** you can **Run all**.
 - **Start session**, to begin the work in its own worktree.
 
@@ -73,9 +77,9 @@ Revision comments you send go back to the agent while the session is still runni
 
 ## Recording a departure
 
-Plans meet reality. Rather than quietly diverging, an agent records the departure: a decision that
-supersedes the plan, a critical bug found outside its scope, or a blocker. Those land in the plan's
-**Deviations and findings** section, and the plan's issue gets a digest of them.
+Plans meet reality. Instead of quietly diverging, an agent records the departure. That covers a
+decision that supersedes the plan, a critical bug found outside its scope, or a blocker. Those land
+in the plan's **Deviations and findings** section, and the plan's issue gets a digest of them.
 
 ## Objectives
 

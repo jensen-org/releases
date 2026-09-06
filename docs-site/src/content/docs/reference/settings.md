@@ -3,7 +3,7 @@ title: Settings reference
 description: Every settings section, what it controls, and where to find it.
 ---
 
-Settings opens from the space switcher, from the command palette, or with the **Settings** command.
+Settings opens with `Cmd ,`, from the space switcher, or from the command palette.
 There is a search box across every section.
 
 Four groups.
@@ -15,10 +15,9 @@ Four groups.
 The theme picker, with **Search themes**, plus **Interface size**, **Indent guides**, **Render
 whitespace** and **Inline problem messages**.
 
-### Editor
-
-**Code editor**, **Tab size**, **Auto save** and its delay, and a **Settings scope** control so a
-preference can apply to one project or to all of them. **Reset all** returns the section to defaults.
+The editor controls live here too: **Code editor**, **Tab size**, **Auto save** and its delay, and a
+**Settings scope** control so a preference can apply to one project or to all of them. **Reset all**
+returns the section to defaults.
 
 ### Project settings
 
@@ -33,11 +32,13 @@ VS Code or Kiro.* Pick an **Export target IDE**, **Preview** what would change, 
 detects VS Code and Kiro configuration, you **Review import**, then **Confirm and apply**. **Rollback
 Jensen changes** undoes it.
 
-**Jensen checks only standard local locations and does not scan your home directory.**
+Jensen checks only standard local locations, and does not scan your home directory.
 
 ### Keyboard
 
-Rebind any command. **Reset to default** for one, **Unbind** to remove a binding, **Reset all** to
+Rebind any command. The default map is on
+[Getting around](../../app/getting-around/#the-keyboard-map). **Reset to default** for one,
+**Unbind** to remove a binding, **Reset all** to
 start over. A command with no binding reads **Unbound**.
 
 ### Git
@@ -51,8 +52,7 @@ The workflow policy editor:
 - The merge rules.
 - **Task branches**, which enforces no branches without a worktree.
 
-These are persisted in the project workflow policy and enforced by the git guard, not merely
-suggested. See [Agent profiles and workflows](../../automation/workflows/#environments).
+These are persisted in the project workflow policy and enforced by the git guard. See [Agent profiles and workflows](../../automation/workflows/#environments).
 
 ## AI
 

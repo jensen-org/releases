@@ -3,8 +3,8 @@ title: Work
 description: Issues, merge requests and pipelines from GitHub and GitLab, with Slack, in the same workspace as the code.
 ---
 
-The Work view puts your tracker next to your code, so an issue becomes something you can start rather
-than something you have to go and read somewhere else.
+The Work view puts your tracker next to your code, so an issue becomes something you can start.
+Press `Cmd 3` to reach it.
 
 With no project open it reads **Track issues and pipelines**.
 
@@ -50,11 +50,11 @@ read, and **Share to Slack** posts it to a channel.
 ## Pipelines
 
 Recent runs, with their jobs and logs. A failed run offers **Fix with AI**, which opens a session
-pointed at the failure and its log rather than at a blank prompt.
+pointed at the failure and its log instead of a blank prompt.
 
-## Every write is behind a permission
+## Writes are gated
 
-Reading your tracker is not gated. Writing to it always is. An action you have not enabled shows a
+Reading your tracker is never gated. Writing to it always is. An action you have not enabled shows a
 link to the exact permission that unblocks it, such as **Open comment permission** or **Open Slack
 permission**, and a blocked action raises an **Allow this integration action?** approval.
 
@@ -63,7 +63,7 @@ This applies whether you clicked the button or your assistant did. See
 
 ## Connecting GitHub, GitLab and Slack
 
-Connections are configured in **Settings, Integrations**. For each host you store a credential, a
+Connections are configured in **Settings, Extensions, Integrations**. For each host you store a credential, a
 personal access token for GitHub or GitLab, a bot user OAuth token for Slack, then:
 
 - **Test connection** confirms the credential works.

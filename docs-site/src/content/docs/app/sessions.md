@@ -3,11 +3,13 @@ title: Sessions
 description: Terminals and agents, each in its own isolated checkout, with the artifacts and approvals a run produces.
 ---
 
-A session is one piece of work with an assistant, running in its own git worktree so parallel tasks
-never collide on a shared index.
+A session is one piece of work with an assistant. Press `Cmd 2` to reach the view.
 
-Open a project with no sessions and it says **Open a terminal**, with the subtitle *Open a terminal in
-its own git worktree, then run claude, codex, or anything else.*
+Every session runs in its own git worktree, so parallel tasks never collide on a shared index. See
+[Worktrees for parallel work](../../safety/worktrees/).
+
+Open a project with no sessions and it says **Open a terminal**, with the subtitle *Open a terminal
+in its own git worktree, then run claude, codex, or anything else.*
 
 ## The tab strip
 
@@ -23,8 +25,7 @@ Sessions run as tabs. Each tab carries its own worktree, and its own context men
 
 A tab badges the plan it is bound to, and a specialist session is marked with a sparkle.
 
-Sessions you start outside the app are adopted rather than ignored. They appear as **External
-session**, described as *Ongoing session started out of Jensen*, with **View in terminal**.
+Sessions you start outside the app are adopted, not ignored. They appear as **External session**, described as *Ongoing session started out of Jensen*, with **View in terminal**.
 
 ## Two ways to run
 
@@ -34,8 +35,8 @@ Which one you get depends on how your AI connection is configured. See
 ### The assistant flow
 
 The default. A real terminal running your assistant's own command-line tool, with Jensen's context
-server, tools and conventions already wired into it. Nothing about your assistant changes; it simply
-knows the project.
+server, tools and conventions already wired into it. Nothing about your assistant changes. It knows
+the project.
 
 ### The chat flow
 
@@ -53,13 +54,13 @@ Alongside the conversation it carries:
 ## The workflow canvas
 
 When a change needs a full run rather than a conversation, the planner proposes a workflow and it
-renders here as a node graph with a run bar and a per-node inspector. Before anything starts it says
-what it is going to do, and waits:
+renders here as a node graph with a run bar and a per-node inspector. It says what it is going to do
+before anything starts:
 
 > **No workflow yet.** Describe a change in the chat. The planner picks a workflow, proposes it here,
 > and waits for you to start it.
 
-See [Agent profiles and workflows](../../automation/workflows/).
+See [Workflows](../../automation/workflows/).
 
 ## Session artifacts
 
@@ -82,7 +83,7 @@ changes for risks*. Jensen drafts a specialization summary from that, you review
 specialist** and **Start session**.
 
 Longer-lived specialists, with their own schedules and expiry, are missions. See
-[Missions and schedules](../../automation/profiles-and-missions/).
+[Agent profiles and missions](../../automation/profiles-and-missions/).
 
 ## Plans in a session
 
@@ -94,10 +95,10 @@ See [Plans and objectives](../../automation/plans-and-objectives/).
 
 ## Background tasks and approvals
 
-Work that outlives the immediate conversation reports into the **Background Tasks** centre:
-documentation indexing, and the gates a mutating run stops at, **Approve requirements** and **Approve
-execution**. Results are taken with **Collect** or thrown away with **Discard**.
+Work that outlives the immediate conversation reports into the **Background Tasks** centre. That
+covers documentation indexing, and the gates a mutating run stops at, **Approve requirements** and
+**Approve execution**. Results are taken with **Collect** or thrown away with **Discard**.
 
-If the background service is not running, the view says so plainly: *The workflow daemon is
-unavailable. Workflow controls will be available when it starts.* See
-[Troubleshooting](../../reference/troubleshooting/#the-background-service).
+With the background service stopped the view says so: *The workflow daemon is unavailable. Workflow
+controls will be available when it starts.* See
+[The background service](../../reference/troubleshooting/#the-background-service).

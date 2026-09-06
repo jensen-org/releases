@@ -3,8 +3,8 @@ title: Code
 description: The editor, its bottom dock, the AI that works inline, the finder, language tooling and the debugger.
 ---
 
-The Code view is a conventional editor workbench, with the map and the assistant a keystroke away
-rather than in a different application.
+The Code view is a conventional editor workbench, with the map and the assistant a keystroke away.
+Press `Cmd 4` to reach it.
 
 With no project open it reads **Understand any codebase**.
 
@@ -66,10 +66,10 @@ before it does.
 Jensen never bundles a language server, formatter, linter or debugger. It discovers what the machine
 already has, and installs what you ask it to from a public catalog into its own directory.
 
-**Selection follows the project, not a fixed preference order.** A tool your repository configured, by
-checking in its own configuration file, beats a higher-priority rival. A binary beside the project
-beats a global one. Both are searched from the edited file upward, so a package inside a monorepo
-gets its own answer rather than the repository's.
+Selection follows the project, and not a fixed preference order. A tool your repository configured,
+by checking in its own configuration file, beats a higher-priority rival. A binary beside the
+project beats a global one. Both are searched from the edited file upward, so a package inside a
+monorepo gets its own answer instead of the repository's.
 
 Settings shows what each language actually resolves to, marks the ones the repository chose, names
 what is declared but not installed, and installs it. You can override any of it:
@@ -79,9 +79,8 @@ what is declared but not installed, and installs it. You can override any of it:
 | Every project on this machine | `~/.config/jensen/tools/tools.json` |
 | One project | `.jensen/tools.json` |
 
-A project's own manifest is only read once you trust the workspace, because a tool entry decides
-which program gets executed. See
-[Trust, approvals and permissions](../../safety/trust-and-permissions/).
+A project's own manifest is read only once you trust the workspace, because a tool entry decides
+which program gets executed. See [Trust and permissions](../../safety/trust-and-permissions/).
 
 ## Debugging
 

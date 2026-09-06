@@ -1,13 +1,14 @@
 ---
-title: Trust, approvals and permissions
+title: Trust and permissions
 description: Three separate gates, workspace trust, integration permissions and per-action approval, and what each one actually stops.
 ---
 
-Jensen has three gates, and they are deliberately separate. Each answers a different question.
+Jensen has three gates, kept separate on purpose. Each answers a different question, and none of
+them is granted from the command line.
 
 ## Workspace trust
 
-**The question: may this repository run code on my machine?**
+May this repository run code on my machine?
 
 A new repository stays **restricted** until you approve it. A restricted workspace can be browsed and
 edited, but it cannot:
@@ -18,19 +19,18 @@ edited, but it cannot:
 - run plan acceptance checks,
 - have its own tool manifest read, because a tool entry decides which program gets executed.
 
-Review or revoke the decision in **Settings, Security**, with **Trust workspace** and **Revoke
-trust**.
+Review or revoke the decision in **Settings, System, Security**, with **Trust workspace** and
+**Revoke trust**.
 
-Trust is coarse, and it is worth knowing exactly how coarse. Trusting a workspace to run its
-development server also trusts it to run its git hooks on push. There is no finer split today. See
-[License and security](../../about/license-and-security/).
+Trust is one decision, not a set of them. Trusting a workspace to run its development server also
+trusts it to run its git hooks on push, and there is no finer split today.
 
 ## Integration permissions
 
-**The question: may anything here write to my tracker, my merge requests, or Slack?**
+May anything here write to my tracker, my merge requests, or Slack?
 
-Reads are not gated. Every outbound write is, individually, under **Settings, Integrations,
-Permissions**:
+Reads are never gated. Every outbound write is, individually, under **Settings, Extensions,
+Integrations, Permissions**.
 
 | Permission | What it allows |
 | --- | --- |
@@ -47,11 +47,11 @@ Permissions**:
 | Send Slack messages | Post to Slack channels. |
 
 These apply the same whether you clicked the button or your assistant did. An action you have not
-enabled shows the exact permission that unblocks it rather than failing silently.
+enabled names the exact permission that unblocks it instead of failing silently.
 
 ## Per-action approval
 
-**The question: may this specific thing happen, now?**
+May this specific thing happen, now?
 
 Even with a permission enabled, an action that reaches outside the project raises an **Allow this
 integration action?** approval. Agent runs stop at their own gates too, **Approve requirements** and
@@ -62,12 +62,11 @@ assistants**, with **Allow** and **Revoke**. See [Agent hooks](../../automation/
 
 ## Where enforcement happens
 
-Two of these are worth stating plainly because they are the difference between a rule and a request:
+Two of these are rules rather than requests, which is the whole difference.
 
-- A **profile's tool allowlist is enforced by Jensen**, not by the assistant that was asked to
-  respect it.
-- An **architecture an assistant inferred is stored as inferred** and stays out of the map until you
-  confirm it. An assistant is told not to confirm its own inference on your behalf.
+- A profile's tool allowlist is enforced by Jensen, and not by the assistant asked to respect it.
+- An architecture an assistant inferred is stored as inferred and stays out of the map until you
+  confirm it. An assistant cannot confirm its own inference on your behalf.
 
 ## What is not a gate
 

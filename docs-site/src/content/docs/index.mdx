@@ -20,12 +20,8 @@ hero:
 
 import { Card, CardGrid } from '@astrojs/starlight/components'
 
-Big multi-service codebases are hard to hold in your head. New to a repo, you spend days tracing what
-talks to what. AI assistants make that worse in a specific way: pointed at raw source, they burn
-effort re-scanning files and confidently invent an architecture that was never there.
-
-Jensen maps your project into a navigable picture of how it actually fits together, then hands that
-same map to your assistant, so you both work from a shared understanding instead of guessing.
+Jensen is a desktop application, with a `jensen` command beside it, for codebases too large to hold
+in your head. It maps your project and hands that same map to the AI assistant you already use.
 
 ---
 
@@ -48,23 +44,29 @@ same map to your assistant, so you both work from a shared understanding instead
 
     [The git guard](/releases/safety/git-guard/)
   </Card>
+
+  <Card title="Try it end to end">
+    One run from reading the map to approving a plan to putting a change back.
+
+    [Your first session](/releases/start/your-first-session/)
+  </Card>
 </CardGrid>
 
 ## Honest by design
 
-A map is only worth leaning on if you can trust every line of it. Jensen's core rule is that it never
-guesses. Everything it shows you is one of two things, something it observed directly in your source
-or something your team declared on purpose, and the two stay distinguishable. Where Jensen does not
-know, it says unknown rather than inventing an answer.
+Jensen never guesses. Everything on the map was either observed in your source or declared by your
+team, and the two stay distinguishable.
 
 [Read the guarantee](/releases/start/honest-by-design/)
 
 ## Start here
 
-New to Jensen, in order: [what it is](/releases/start/what-is-jensen/),
-[download and install](/releases/start/install/), then
-[first run](/releases/start/turn-jensen-on/), which turns it on for a project in one command.
+1. [What is Jensen](/releases/start/what-is-jensen/)
+2. [Download and install](/releases/start/install/)
+3. [Open a project](/releases/start/open-a-project/)
+4. [Turn Jensen on](/releases/start/turn-jensen-on/)
+5. [Your first session](/releases/start/your-first-session/)
 
-Already running it: [the four views](/releases/app/getting-around/),
-[what your assistant can do](/releases/reference/assistant-tools/), or the
+Already running it: [the four views and the keyboard map](/releases/app/getting-around/), the
+[assistant tool reference](/releases/reference/assistant-tools/), or the
 [CLI reference](/releases/reference/cli/).

@@ -3,8 +3,8 @@ title: Project, the map
 description: The map of your codebase, its three modes, the overlays you can put on it, and how to declare structure no single repository can show.
 ---
 
-The Project view is the map. It draws your codebase as a graph you drill through by altitude rather
-than by folder, because that is how people reason about systems.
+The Project view is the map. Press `Cmd 1` to reach it. It draws your codebase as a graph you drill
+through by altitude instead of by folder.
 
 ## What the map contains
 
@@ -68,9 +68,9 @@ Runs the vulnerability scanners over your dependencies and code and marks what t
 High, Medium and Low legend. While it runs you get live progress with elapsed time and a **Cancel**;
 a failure offers **Retry**. Results are summarised as **View N findings**.
 
-Jensen does not bundle the scanners. If a scanner is not installed the legend offers an **Install**
-button for it, plus **Re-scan** and a route into language server settings. See
-[Findings and screening](../../knowledge/findings/).
+Jensen bundles no scanners. Where one is not installed the legend offers an **Install** button for
+it, plus **Re-scan** and a route into language server settings. See
+[Findings and analysis](../../knowledge/findings/).
 
 ### Agents self learning
 
@@ -81,35 +81,37 @@ whole project** to clear the focus.
 
 ## Declaring topology
 
-Some structure genuinely cannot be read out of any single repository: which services exist across
-your estate, how they connect, and over what protocol. Your team declares that, and Jensen folds it
-into the same picture, still labelled as declared rather than observed.
+Some structure cannot be read out of any single repository: which services exist across your estate,
+how they connect, and over what protocol. Your team declares that, and Jensen folds it into the same
+picture, still labelled as declared rather than observed.
 
-Declared topology is the one place the map accepts something it did not read from source, and it is
-explicit precisely so the guarantee holds everywhere else.
+This is the one place the map accepts something it did not read from source, and it is explicit so
+that the guarantee holds everywhere else. See [Honest by design](../../start/honest-by-design/).
 
 ## Asking the map questions
 
-You do not have to open the app to query the map. From a terminal:
+Your assistant queries the map through the context server instead of grepping. See the
+[Assistant tool reference](../../reference/assistant-tools/).
 
-```bash
+:::tip[From the terminal]
+```bash frame="none"
 jensen view . --json                          # the file and import graph
 jensen query . "calls:authenticate" --json    # what calls a symbol
 jensen gen .                                  # write the full map to disk
 jensen watch .                                # keep it current as you edit
 ```
-
-`jensen gen` is deterministic: two runs over an unchanged tree produce byte-identical files.
-
-Your assistant asks the same questions through the context server rather than by grepping. See
-[What your assistant can do](../../reference/assistant-tools/).
+:::
 
 ## The map files
 
-The map is not locked inside the IDE. Jensen writes it out as portable files that live alongside your
-code and any AI assistant can read. They are the context your assistant works from, a compact
-description of the system instead of the whole repository.
+The map is not locked inside the IDE. Jensen writes it out as portable files that live alongside
+your code, which any AI assistant can read. They are the context your assistant works from, a
+compact description of the system in place of the whole repository.
 
-Two properties make those files dependable. They are **git friendly**, so the map lives in version
-control next to the code it describes and its changes show up in review. And they are
-**deterministic**, so diffs stay clean and a change in the map means a real change in the code.
+Two properties make those files dependable.
+
+- **Git friendly.** The map lives in version control next to the code it describes, so its changes
+  show up in review.
+- **Deterministic.** The same codebase always produces the same map. Two runs of `jensen gen` over
+  an unchanged tree produce byte-identical files, so diffs stay clean and a change in the map means
+  a real change in the code.

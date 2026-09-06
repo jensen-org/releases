@@ -3,7 +3,8 @@ title: CLI reference
 description: Every jensen command, grouped the way the tool's own help groups them.
 ---
 
-The `jensen` command is one entry point for all of it.
+Installing Jensen puts the `jensen` command on your `PATH` alongside the app. Everything here has an
+equivalent in the application, except where a page says otherwise.
 
 ```bash
 jensen                    # the command list
@@ -31,12 +32,14 @@ again.
 Steps, in order: `cli-path`, `project-activate`, `git-shim`, `git-hooks`, `mcp`, `hooks`,
 `attribution`, `debrief-command`, `guidance`, `daemon`, `project`, `state`.
 
-See [First run](../../start/turn-jensen-on/).
+See [Turn Jensen on](../../start/turn-jensen-on/).
 
 ### `jensen open [path]`
 
 Open the app on a directory, the way `code .` does. `jensen <path>` and `jensen .` are the same
 thing without the subcommand.
+
+See [Open a project](../../start/open-a-project/).
 
 ## Explore the codebase
 
@@ -100,5 +103,5 @@ See [Troubleshooting](../troubleshooting/).
 | `jensen bridge <path>` | The context server your assistant connects to. It launches this for you. |
 | `jensen guard <program>` | The check the git guard runs before a commit. Your git hooks call it. |
 
-A few further commands exist for Jensen's own internal use. They are not printed in the command list
-and are wired by `jensen setup`; you never need to type them.
+A few further commands exist for Jensen's own internal use. They are not printed in the command
+list, they are wired by `jensen setup`, and you never need to type them.

@@ -4,13 +4,10 @@ description: Where Jensen is going, organised by its five product pillars. Direc
 ---
 
 Nothing on this page is a commitment. There are no dates, and anything here can change. It exists so
-you can see the shape of the product rather than guess it from the feature pages, which describe only
+you can see the shape of the product, which the feature pages cannot show because they describe only
 what ships today.
 
 ## Published status
-
-Jensen's own README publishes a capability table with a status column. As of the current beta it
-reads:
 
 | Capability | What it does | Status |
 | --- | --- | --- |
@@ -18,14 +15,8 @@ reads:
 | Declare topology | Lets your team assert cross-service structure, which services exist, how they connect, and over what protocol, and merges it into the same map. | Available |
 | Open from where you stand | Views the map at any altitude, from the whole-system topology down to a single service's internals. | Available |
 | Share the map with your AI | Emits a portable, git-friendly, always-honest map any AI assistant can read. | Available |
-| Ask the map questions | Query the structure directly: what calls this, what connects to that, where these routes live. | In progress |
-| Stay live | Keeps the map current as you edit, and pulls in work items and pipeline status from GitHub, GitLab and Slack. | Planned |
-
-Two of those statuses run behind what the beta actually does. `jensen query` ships and is documented
-in the [CLI reference](../../reference/cli/), and the integrations area ships with credential and
-host configuration, an issue inspector, a merge request list and a pipeline inspector, documented in
-[Work](../../app/work/). Read the table as the published position rather than as the current state,
-and the feature pages as what is there.
+| Ask the map questions | Query the structure directly: what calls this, what connects to that, where these routes live. | Available |
+| Stay live | Keeps the map current as you edit, and pulls in work items and pipeline status from GitHub, GitLab and Slack. | Available |
 
 ## The five pillars
 
@@ -72,5 +63,5 @@ Ahead: architectural constraints defined independently of prompts and checked on
 
 ## Deliberately out of scope
 
-Jensen integrates with the tools you already use rather than replacing them. It is not becoming a
-hosted IDE, a CI system, a package registry or a project management tool.
+Jensen integrates with the tools you already use. It is not becoming a hosted IDE, a CI system, a
+package registry or a project management tool.

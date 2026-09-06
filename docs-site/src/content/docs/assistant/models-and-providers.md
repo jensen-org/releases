@@ -13,7 +13,7 @@ for the chat flow and for the work a workflow node does.
 | **Assistant** | The default. Your assistant's own command-line tool runs in a session terminal, with Jensen's context server wired into it. |
 | **API** | Jensen calls a model directly, which is what gives you the chat pane, canvases and inline answers on the documentation graph. |
 
-Configure this under **Settings, AI assistant**, where **Show API configuration** reveals the second.
+Configure this under **Settings, AI, AI assistant**, where **Show API configuration** reveals the second.
 
 ## Provider profiles are machine-local
 
@@ -24,12 +24,12 @@ a LiteLLM profile.
 A profile takes its credential from an environment variable you name, or from a vault entry. Nothing
 asks you to paste a key into a field that gets stored in the project.
 
-**Custom endpoints require HTTPS**, with one exception: a loopback LiteLLM URL, because there is no
-network hop to protect.
+Custom endpoints require HTTPS, with one exception. A loopback LiteLLM URL is allowed, because there
+is no network hop to protect.
 
-## Three tiers, not a model picker
+## Three tiers
 
-Rather than choosing a model per action, you configure three aliases:
+You configure three aliases, and never pick a model per action.
 
 | Alias | For |
 | --- | --- |
@@ -38,7 +38,7 @@ Rather than choosing a model per action, you configure three aliases:
 | **Quality** | Work where being wrong is expensive. |
 
 Each workflow node requests a tier, and your configuration decides what that resolves to. Changing
-provider is then one edit rather than a sweep through every workflow.
+provider is then one edit, not a sweep through every workflow.
 
 ## What a run records
 
@@ -52,11 +52,11 @@ For each call, the run records:
 
 Resolved credentials are not persisted.
 
-That record is what makes a run auditable after the fact: you can see which model answered and why,
-rather than trusting that the tier you asked for is the tier you got.
+That record is what makes a run auditable afterwards. You can see which model answered and why,
+instead of trusting that the tier you asked for is the tier you got.
 
 ## Where it shows up
 
 The tier and its resolution appear on the workflow node in the Sessions view, alongside the node's
 own status. See [Sessions](../../app/sessions/#the-workflow-canvas) and
-[Agent profiles and workflows](../../automation/workflows/).
+[Workflows](../../automation/workflows/).

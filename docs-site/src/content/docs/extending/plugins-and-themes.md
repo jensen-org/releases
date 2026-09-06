@@ -3,7 +3,7 @@ title: Plugins and themes
 description: What a plugin can contribute, the permissions it must be granted, how to install and scope one, and how themes work.
 ---
 
-Two ways to extend Jensen. A **plugin** adds behaviour. A **theme** changes how it looks.
+A **plugin** adds behaviour. A **theme** changes how Jensen looks.
 
 ## What a plugin can contribute
 
@@ -15,7 +15,7 @@ Two ways to extend Jensen. A **plugin** adds behaviour. A **theme** changes how 
 | **Themes** | The theme picker. |
 | **Tools for your assistant** | The catalogue your connected assistant sees. |
 
-That last one is worth noticing: a plugin can extend what your AI assistant is able to do in this
+The last one matters: a plugin can extend what your AI assistant is able to do in this
 project, not just what you can see.
 
 ## Plugins have no ambient authority
@@ -42,7 +42,7 @@ Plugin integrity is checked against a checksum.
 
 ## Installing and scoping
 
-**Settings, Plugins** carries **Browse plugins**, **Search plugins**, a filter by category, and each
+**Settings, Extensions, Plugins** carries **Browse plugins**, **Search plugins**, a filter by category, and each
 plugin's README. From there, **Install**, **Remove**, **Enable** and **Disable**.
 
 For a plugin that is not in the public catalog, set a **Private registry URL**. **Refresh plugins**
@@ -50,11 +50,14 @@ re-reads whichever registry you are pointed at.
 
 ## Publishing
 
-**Publish** in the same panel, or from a terminal:
+**Publish** in the same panel generates the plugin manifest and registry entry. No forms, no
+prompts.
 
-```bash
+:::tip[From the terminal]
+```bash frame="none"
 jensen publish .
 ```
+:::
 
 It generates the plugin manifest and the registry entry. No forms, no prompts.
 
@@ -72,5 +75,5 @@ Jensen derives only state variants and elevation from what you supply. **It neve
 from a handful of anchor colours**, which is why a Jensen theme looks the way its author intended
 rather than approximately like it.
 
-Themes are validated at publish and again at install. Pick one in **Settings, General**, which also
+Themes are validated at publish and again at install. Pick one in **Settings, Workspace, General**, which also
 carries **Search themes** and the interface size.

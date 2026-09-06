@@ -15,8 +15,10 @@ context server with each of them.
 | Gemini CLI | `.gemini` |
 | Antigravity | its own |
 
-Any other assistant that speaks the same context-server protocol can be connected by hand with its
-equivalent of:
+## Connecting one Jensen does not know about
+
+Any assistant that speaks the same context-server protocol can be wired by hand. The command behind
+the context server is `jensen bridge <path>`, and your assistant launches it for you:
 
 ```bash
 <assistant> mcp add jensen -- jensen bridge .
@@ -25,26 +27,26 @@ equivalent of:
 Jensen still delivers the shared navigation, plan, worktree and learning conventions to that
 assistant, even where it has no adapter for that tool's own lifecycle hooks.
 
-## Selection is deliberately conservative
-
-Jensen selects an assistant automatically **only when exactly one is available**. If several are
-configured it asks you to choose rather than silently preferring one. And an explicit choice never
-falls back to a different provider when its tool is unavailable: it tells you the one you picked is
-missing.
-
-That is a decision about trust, not about convenience. Silently switching which model answered would
-make every other guarantee harder to reason about.
-
 ## Setting the default
 
-In the app, **Settings, AI assistant**. The default is used for new sessions, drafts and reviews.
+**Settings, AI, AI assistant** shows what Jensen found on this machine and which one is the default.
+The default is used for new sessions, drafts and reviews.
 
-From a terminal:
-
-```bash
+:::tip[From the terminal]
+```bash frame="none"
 jensen assistant list          # what was discovered, the evidence, and the effective default
 jensen assistant set codex     # claude, codex, gemini, antigravity, or automatic
 ```
+:::
+
+## How Jensen picks one
+
+Jensen selects an assistant on its own only when exactly one is available. Where several are
+configured it asks you. An explicit choice never falls back to a different provider when its tool is
+missing, and says so instead.
+
+That is a decision about trust. Silently switching which model answered would make every other
+guarantee harder to reason about.
 
 ## After you change it
 
@@ -56,4 +58,4 @@ settings on the next session.
 
 A project can define reusable profiles that select an assistant, a prompt and a permission allowlist
 for a particular kind of work. See
-[Agent profiles and workflows](../../automation/workflows/).
+[Agent profiles and missions](../../automation/profiles-and-missions/).

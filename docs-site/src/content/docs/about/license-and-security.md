@@ -30,10 +30,9 @@ policy on the [repository](https://github.com/jensen-org/releases).
 
 ## Security posture
 
-Jensen is candid about what its protections do and do not cover. Four things are worth knowing before
-you rely on any of them.
+Four things are worth knowing before you rely on any of the protections below.
 
-### Credentials are machine-bound, not user-bound
+### Credentials are bound to the machine
 
 Integration credentials are encrypted on the machine they are stored on. That protects a credential
 file copied off the machine. It does not separate one user account on that machine from another.
