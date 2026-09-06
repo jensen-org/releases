@@ -52,14 +52,14 @@ The workflow policy editor:
 - **Task branches**, which enforces no branches without a worktree.
 
 These are persisted in the project workflow policy and enforced by the git guard, not merely
-suggested. See [Agent profiles and workflows](../../ai/profiles-and-workflows/#environments).
+suggested. See [Agent profiles and workflows](../../automation/workflows/#environments).
 
 ## AI
 
 ### AI assistant
 
 **Default AI assistant**, used for new sessions, drafts and reviews. **Show API configuration**
-reveals the direct-provider setup. See [Models and providers](../../ai/models-and-providers/).
+reveals the direct-provider setup. See [Models and providers](../../assistant/models-and-providers/).
 
 ### Project context
 
@@ -76,7 +76,7 @@ and **Review learning records** with **Review with AI**, **Approve** and **Dismi
 
 Enable or disable the built-in hooks, create a custom one with **New agent hook**, reset or delete
 any of them. **Let agent hooks start assistants** is the separate gate for hooks that open a session
-and edit files. See [Agent hooks](../../ai/agent-hooks/).
+and edit files. See [Agent hooks](../../automation/agent-hooks/).
 
 ### Skills
 
@@ -108,12 +108,12 @@ GitHub, GitLab and Slack. Per host: a credential, **Test connection**, **Verify 
 **Saved hosts**, the required scopes, and a **Bug label** term.
 
 Below them, the **Permissions** toggles that gate every outbound write. See
-[Trust, approvals and permissions](../../ai/trust-approvals-and-permissions/).
+[Trust, approvals and permissions](../../safety/trust-and-permissions/).
 
 ### Mission Control
 
 *Coordinate temporary specialists, bounded schedules, and verified work.* See
-[Missions and schedules](../../ai/missions-and-schedules/).
+[Missions and schedules](../../automation/profiles-and-missions/).
 
 ## System
 
@@ -132,4 +132,4 @@ The version, **What's new**, and **Privacy**.
 
 ### Setup
 
-Reopens the guided setup wizard. See [First run](../../start/first-run/#the-guided-wizard).
+Reopens the guided setup wizard. See [First run](../../start/turn-jensen-on/#the-guided-wizard).

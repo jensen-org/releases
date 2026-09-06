@@ -70,7 +70,7 @@ a failure offers **Retry**. Results are summarised as **View N findings**.
 
 Jensen does not bundle the scanners. If a scanner is not installed the legend offers an **Install**
 button for it, plus **Re-scan** and a route into language server settings. See
-[Findings and screening](../../safety/findings-and-screening/).
+[Findings and screening](../../knowledge/findings/).
 
 ### Agents self learning
 
@@ -102,7 +102,7 @@ jensen watch .                                # keep it current as you edit
 `jensen gen` is deterministic: two runs over an unchanged tree produce byte-identical files.
 
 Your assistant asks the same questions through the context server rather than by grepping. See
-[What your assistant can do](../../ai/what-your-assistant-can-do/).
+[What your assistant can do](../../reference/assistant-tools/).
 
 ## The shared map files
 

@@ -50,7 +50,7 @@ Through the context server, an assistant can search approved skills, list them, 
 approved skill package and record that it used one, and read an archived reference file belonging to
 one. Usage is recorded, so a skill that never gets used is visible as such.
 
-See [What your assistant can do](../../ai/what-your-assistant-can-do/#skills-and-hooks).
+See [What your assistant can do](../../reference/assistant-tools/#skills-and-hooks).
 
 ## Skills, memory and context
 

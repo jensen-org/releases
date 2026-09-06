@@ -49,7 +49,7 @@ corrected by the harness rather than by you noticing in review.
 
 ## Onboarding
 
-The full first-run flow, including this, is in [First run](../../start/first-run/#the-guided-wizard).
+The full first-run flow, including this, is in [First run](../../start/turn-jensen-on/#the-guided-wizard).
 A project that was never onboarded returns no context rather than empty context, and an assistant is
 told to read the code directly and tell you `jensen setup` is available, instead of reporting that
 the project has nothing in it.

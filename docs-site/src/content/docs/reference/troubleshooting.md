@@ -63,7 +63,7 @@ controls will be available when it starts.*
 
 It is the one part of Jensen that needs the app. The context server, the map commands, the knowledge
 store and the git guard all work without it. See
-[You do not have to use the app](../../start/first-run/#you-do-not-have-to-use-the-app).
+[You do not have to use the app](../../assistant/working-outside-the-app/).
 
 ## Storage and cleanup
 

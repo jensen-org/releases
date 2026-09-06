@@ -18,7 +18,7 @@ Any directory works. Inside the app, the space switcher at the top left offers *
 ## What happens the first time
 
 Opening a project it has not seen before, Jensen indexes it. An overlay on the map reads **Scanning
-project**, then **Indexing graph**. On a large repository this is the slow part; `jensen setup
+project**, then **Indexing graph**. On a large repository this is can be a little bit slow; `jensen setup
 --no-scan` skips it if you would rather index later.
 
 Two things are deliberately not automatic:
@@ -26,9 +26,9 @@ Two things are deliberately not automatic:
 - **The project is not trusted yet.** A new repository stays restricted until you approve it. You can
   browse and edit a restricted workspace, but it cannot run project commands, local toolchains,
   debug adapters or plan acceptance checks. See
-  [Trust, approvals and permissions](../../ai/trust-approvals-and-permissions/).
+  [Trust, approvals and permissions](../../safety/trust-and-permissions/).
 - **The assistant is not chosen for you** unless exactly one is available. See
-  [Choosing an assistant](../../ai/choosing-an-assistant/).
+  [Choosing an assistant](../../assistant/choosing-an-assistant/).
 
 ## Sandboxes
 

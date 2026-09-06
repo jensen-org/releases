@@ -70,7 +70,7 @@ So that the commands it launches see the environment you expect.
 
 ## Related
 
-- [Trust, approvals and permissions](../../ai/trust-approvals-and-permissions/), for the three gates
+- [Trust, approvals and permissions](../../safety/trust-and-permissions/), for the three gates
   and what each one stops.
 - [The git guard](../../safety/git-guard/), for what is refused before it reaches your history.
 - [Plugins and themes](../../extending/plugins-and-themes/), for what an installed plugin can and

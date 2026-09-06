@@ -59,4 +59,4 @@ granularity does not depend on the agent remembering to save.
 
 Workflow runs add their own layer: recovery is checkpoint based, a retried node reuses or advances
 its idempotency key, and completed git or merge-request effects are reconciled rather than repeated.
-See [Agent profiles and workflows](../../ai/profiles-and-workflows/#recovery).
+See [Agent profiles and workflows](../../automation/workflows/#recovery).

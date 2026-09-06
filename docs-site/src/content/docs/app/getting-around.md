@@ -85,7 +85,7 @@ The top bar has a **Run project** button. It detects the services in your reposi
 With nothing found it says **No services detected**; with nothing running, **No server running**.
 
 Running project commands requires a trusted workspace. See
-[Trust, approvals and permissions](../../ai/trust-approvals-and-permissions/).
+[Trust, approvals and permissions](../../safety/trust-and-permissions/).
 
 ## Notifications and background tasks
 

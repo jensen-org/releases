@@ -81,7 +81,7 @@ what is declared but not installed, and installs it. You can override any of it:
 
 A project's own manifest is only read once you trust the workspace, because a tool entry decides
 which program gets executed. See
-[Trust, approvals and permissions](../../ai/trust-approvals-and-permissions/).
+[Trust, approvals and permissions](../../safety/trust-and-permissions/).
 
 ## Debugging
 
@@ -93,4 +93,4 @@ Debug adapters are discovered and installed the same way as every other tool, an
 commands they require a trusted workspace.
 
 Your assistant can drive the same debugger rather than guessing from a stack trace. See
-[What your assistant can do](../../ai/what-your-assistant-can-do/#debugging).
+[What your assistant can do](../../reference/assistant-tools/#debugging).

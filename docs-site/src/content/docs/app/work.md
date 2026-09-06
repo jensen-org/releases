@@ -40,7 +40,7 @@ scheduling fields: **Milestone**, **Priority**, **Target date** and iteration. F
 - **Open on provider**, to go to GitHub or GitLab itself.
 
 Approving a plan opens and links its tracking issue for you, assigns it, and closes it when the plan
-is done. See [Plans and objectives](../../ai/plans-and-objectives/).
+is done. See [Plans and objectives](../../automation/plans-and-objectives/).
 
 ## Merge requests
 
@@ -59,7 +59,7 @@ link to the exact permission that unblocks it, such as **Open comment permission
 permission**, and a blocked action raises an **Allow this integration action?** approval.
 
 This applies whether you clicked the button or your assistant did. See
-[Trust, approvals and permissions](../../ai/trust-approvals-and-permissions/).
+[Trust, approvals and permissions](../../safety/trust-and-permissions/).
 
 ## Connecting GitHub, GitLab and Slack
 

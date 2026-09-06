@@ -36,7 +36,7 @@ failing job log, likely source locations are ranked, again as a lead to investig
 answer. A separate structural read supports a quality review: over-connected hubs, low-cohesion
 components, dependency cycles, oversized files and likely copy-paste clones.
 
-See [Findings and screening](../../safety/findings-and-screening/).
+See [Findings and screening](../../knowledge/findings/).
 
 ## Git and changes
 

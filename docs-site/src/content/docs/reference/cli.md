@@ -31,7 +31,7 @@ again.
 Steps, in order: `cli-path`, `project-activate`, `git-shim`, `git-hooks`, `mcp`, `hooks`,
 `attribution`, `debrief-command`, `guidance`, `daemon`, `project`, `state`.
 
-See [First run](../../start/first-run/).
+See [First run](../../start/turn-jensen-on/).
 
 ### `jensen open [path]`
 
@@ -80,7 +80,7 @@ See [Memory and knowledge search](../../knowledge/memory-and-search/) and
 | `jensen publish [path]` | Generate a plugin manifest and registry entry. No forms, no prompts. |
 
 See [Worktrees for parallel work](../../safety/worktrees/) and
-[Choosing an assistant](../../ai/choosing-an-assistant/).
+[Choosing an assistant](../../assistant/choosing-an-assistant/).
 
 ## Maintenance
 

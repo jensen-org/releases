@@ -44,7 +44,7 @@ Reconcile with a pull or a rebase. To bypass once: git push --no-verify
 
 A production branch is protected **where the commit is typed**, not later at the provider. A project
 with no branch policy is never blocked by this. The policy is set in **Settings, Git**. See
-[Agent profiles and workflows](../../ai/profiles-and-workflows/#environments).
+[Agent profiles and workflows](../../automation/workflows/#environments).
 
 ## What it adds
 

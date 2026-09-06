@@ -29,7 +29,7 @@ session**, described as *Ongoing session started out of Jensen*, with **View in 
 ## Two ways to run
 
 Which one you get depends on how your AI connection is configured. See
-[Models and providers](../../ai/models-and-providers/).
+[Models and providers](../../assistant/models-and-providers/).
 
 ### The assistant flow
 
@@ -59,7 +59,7 @@ what it is going to do, and waits:
 > **No workflow yet.** Describe a change in the chat. The planner picks a workflow, proposes it here,
 > and waits for you to start it.
 
-See [Agent profiles and workflows](../../ai/profiles-and-workflows/).
+See [Agent profiles and workflows](../../automation/workflows/).
 
 ## Session artifacts
 
@@ -82,7 +82,7 @@ changes for risks*. Jensen drafts a specialization summary from that, you review
 specialist** and **Start session**.
 
 Longer-lived specialists, with their own schedules and expiry, are missions. See
-[Missions and schedules](../../ai/missions-and-schedules/).
+[Missions and schedules](../../automation/profiles-and-missions/).
 
 ## Plans in a session
 
@@ -90,7 +90,7 @@ The plan switcher shows which plan the session is bound to, or **No plan open**,
 into **Today** and **Earlier**. From it you can **Create issue** for the plan, **Delete plan**, or
 **Clean up** finished ones.
 
-See [Plans and objectives](../../ai/plans-and-objectives/).
+See [Plans and objectives](../../automation/plans-and-objectives/).
 
 ## Background tasks and approvals
 

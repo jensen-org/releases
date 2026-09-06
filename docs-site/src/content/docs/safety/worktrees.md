@@ -66,4 +66,4 @@ credential or an invalid target, stops **before** a worktree is created, so ther
 up.
 
 When a plan drives the task, the branch is recorded in the plan so the next agent picks up where the
-last one left off. See [Plans and objectives](../../ai/plans-and-objectives/).
+last one left off. See [Plans and objectives](../../automation/plans-and-objectives/).

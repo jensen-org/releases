@@ -14,16 +14,15 @@ Everything Jensen shows you is one of two things:
 2. **Declared.** Something your team asserted on purpose.
 
 Nothing is inferred. Nothing is filled in to look complete. The two kinds stay distinguishable, each
-carrying the evidence behind it, so you can always ask where a line came from. Where Jensen does not
-know, it says unknown rather than inventing an answer.
+carrying the evidence behind it, so you can always ask where a knowledge came from. Where Jensen does not
+know, is marked unknown until an assistant asks you more information.
 
 ## Why it matters twice
 
 That single guarantee is what makes the map safe for a human to rely on and safe for an AI to build
 on.
 
-When the map says two services are connected, they are. When it stays silent, that silence is honest,
-not a gap papered over with a plausible guess. An assistant reading a map that never guesses cannot
+When the map says two services are connected, they are. An assistant reading a map that never guesses cannot
 inherit a hallucinated architecture from it, which is the failure mode that makes AI assistants
 expensive on large codebases.
 

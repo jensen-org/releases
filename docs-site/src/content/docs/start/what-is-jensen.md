@@ -4,15 +4,13 @@ description: Jensen is an AI-first IDE for large, complex codebases. It maps you
 ---
 
 Jensen is an AI-first IDE built for large, complex codebases. It maps your project into a navigable
-picture of how it actually fits together, the services, the calls between them, the routes they
-expose, and hands that same map to your AI assistant so you both work from a shared understanding
-instead of guessing.
+picture of how your project's components fits together and hands that same map to your AI assistant so you both work from a shared understanding.
 
 ## The problem it solves
 
-Big multi-service codebases are hard to hold in your head. New to a repo, you spend days tracing what
+Big multi-service codebases are hard to hold in your head. When you are new to a repo, you spend days tracing what
 talks to what. AI assistants make that worse in a specific way: pointed at raw source, they burn
-effort re-scanning files and confidently invent an architecture that was never there.
+effort re-scanning files and too confidently invent an architecture or facts that are completely wrong.
 
 Jensen removes that friction for both of you. You get a map you can open from wherever you stand, and
 your assistant gets a compact, trustworthy description of the real structure, so its answers about
@@ -20,13 +18,12 @@ the system are faster and correct.
 
 ## It supplies the context, not the model
 
-Jensen embeds no AI model of its own. It works with the assistant you already use, discovers the
+Jensen embeds no AI model of its own. It works with the assistant you already use. Jensen discovers the
 assistant command-line tools already installed on your machine, and drives whichever one you choose.
 What Jensen adds is everything around the model: the map, the project's accumulated knowledge, the
 conventions, the safety rails, and a record of what happened.
 
-That distinction runs through the whole product. Jensen never asks you to switch models, and it never
-hides which one answered.
+That distinction runs through the whole product. Jensen never asks you to switch models.
 
 ## What you get
 
@@ -41,11 +38,10 @@ hides which one answered.
 
 ## Where to go next
 
-- [Honest by design](../honest-by-design/) is the one guarantee everything else rests on. Read it
-  first if you are deciding whether to trust the map.
+- [Honest by design](../honest-by-design/) is a guarantee everything else rests on.
 - [Download and install](../download-and-install/) gets the app onto your machine.
-- [First run](../first-run/) turns Jensen on for a project in one command.
-- [How Jensen works with your assistant](../../ai/how-it-works/) is the short version of the AI story.
+- [First run](../first-run/), setup Jensen in your project. 
+- [How Jensen works with your assistant](../../assistant/how-it-works/), learn how Jensen integrates with your AI ecosystem.
 - [You do not have to use the app](../first-run/#you-do-not-have-to-use-the-app), if you would rather
   keep your current setup and reach Jensen from the terminal and your assistant.
 
