@@ -37,8 +37,8 @@
 - [Choose an AI assistant](#choose-an-ai-assistant)
 - [The git guard](#the-git-guard)
 - [Capabilities](#capabilities)
-- [CLI reference](#cli-reference)
 - [The shared map](#the-shared-map)
+- [Documentation](#documentation)
 - [License](#license)
 - [This repository](#this-repository)
 
@@ -47,16 +47,18 @@
 ## What is Jensen
 
 **Jensen** is an AI-first IDE built for large, complex codebases. It maps your project into a
-navigable picture of how it actually fits together, the services, the calls between them, the
-routes they expose, and hands that same map to your AI assistant so you both work from a shared
-understanding instead of guessing.
+navigable picture of how its components fit together, and hands that same map to your AI assistant
+so you both work from a shared understanding.
 
-Big multi-service codebases are hard to hold in your head. New to a repo, you spend days tracing
-what talks to what. AI assistants make that worse in a specific way: pointed at raw source, they
-burn effort re-scanning files and confidently invent an architecture that was never there. Jensen
-removes that friction for both of you. You get a map you can open from wherever you stand, and
-your assistant gets a compact, trustworthy description of the real structure, so its answers about
-the system are faster and correct.
+Installing it gives you two things from the same package: a desktop application, and a `jensen`
+command. The application is where you read the map, run sessions and approve what an agent asks
+for. The command line reaches the same map, the same knowledge and the same guard with the app
+closed.
+
+Big multi-service codebases are hard to hold in your head. When you are new to a repo, you spend
+days tracing what talks to what. AI assistants make that worse in a specific way: pointed at raw
+source, they burn effort re-scanning files and confidently invent an architecture that was never
+there. Jensen removes that friction for both of you.
 
 Jensen supplies the context, not the model. It embeds no AI model of its own and works with the
 assistant you already use.
@@ -68,12 +70,11 @@ assistant you already use.
 A map is only worth leaning on if you can trust every line of it. Jensen's core rule is that it
 never guesses. Everything it shows you is one of two things, something it observed directly in
 your source or something your team declared on purpose, and the two stay distinguishable, each
-carrying the evidence behind it. Where Jensen does not know, it says unknown rather than inventing
-an answer.
+carrying the evidence behind it. What Jensen does not know is marked unknown until someone tells
+it.
 
 That single guarantee is what makes the map safe for a human to rely on and safe for an AI to
-build on. When the map says two services are connected, they are. When it stays silent, that
-silence is honest, not a gap papered over with a plausible guess.
+build on. When the map says two services are connected, they are.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -174,48 +175,27 @@ gpg --verify SHA256SUMS-macos-arm64.asc SHA256SUMS-macos-arm64
 
 ## First run
 
-Open a project, then turn Jensen on for it. Use Setup in Settings, About, or run this in the
-project from a terminal:
+Open a project, then turn Jensen on for it. The app runs a setup wizard the first time, and you can
+reach it again from Settings, System, Setup. The same steps run from a terminal:
 
 ```bash
 jensen setup
 ```
 
-One command wires everything. It links `jensen` on your `PATH`, turns Jensen on for the project,
-installs the git guard and points the project's hooks at it, registers the context server with
-every supported assistant CLI it finds, wires the session and plan hooks, silences assistant
-commit bylines, installs the `/jensen-debrief` command, writes the agent conventions into the
-project, and indexes it.
-
-The point of all that is that it does not matter where you start. An assistant you launch in a
-plain shell gets the same context server, the same tools and the same conventions as one running
-inside the app.
-
-Running it again is safe. Every step checks what is already in place and leaves it alone, and it
-never touches hooks or binaries it did not install. To see what is wired without changing
-anything:
+That links `jensen` on your `PATH`, turns Jensen on for the project, installs the git guard on the
+project's hooks, registers the context server with every supported assistant it finds, and indexes
+the code. Running it again is safe, because every step checks what is already in place and leaves
+it alone.
 
 ```bash
-jensen setup --status
+jensen setup --status    # what is wired, writes nothing
+jensen .                 # open a project, the way code . does
 ```
 
-Skip indexing, the slow part on a large repo, with `--no-scan`. Run one part with
-`--only <step>`, and reverse any of it with `--uninstall`.
+Restart your shell first, or source your profile, so the new link is found.
 
-Once the command is on your `PATH`, open a project from the terminal the way you would with an
-editor. Restart your shell first, or source your profile, so the new link is found.
-
-```bash
-jensen .
-```
-
-Codex needs a one-time trust review for user-installed command hooks. After setup, start Codex and
-use `/hooks` to review and trust the Jensen entries. Claude Code and Gemini CLI pick up their
-updated settings on the next session.
-
-Knowledge search runs offline. On first use it tries to fetch a small embedding model to enrich
-ranking, and on a machine with no network it falls back to lexical search with no loss of
-availability.
+Full walkthrough: [Turn Jensen on](https://jensen-org.github.io/releases/start/turn-jensen-on/) and
+[Your first session](https://jensen-org.github.io/releases/start/your-first-session/).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -223,8 +203,8 @@ availability.
 
 Jensen discovers the assistant CLIs already on your machine, Claude Code, Codex, Gemini CLI and
 Antigravity, and registers the context server with each of them once at user scope, so you approve
-it a single time instead of once per project. Pick the default for new sessions, plans,
-implementation runs and AI actions in Settings, AI assistants, or from the terminal:
+it a single time instead of once per project. Pick the default in Settings, AI, AI assistant, or
+from the terminal:
 
 ```bash
 jensen assistant list
@@ -237,7 +217,7 @@ and an explicit choice never falls back to a different provider when its CLI is 
 
 Workspace trust is a separate gate. A new repository stays restricted until you approve it. A
 restricted workspace can be browsed and edited, but cannot run project commands, local toolchains,
-debug adapters or plan acceptance checks. Review or revoke that decision in Settings, Security.
+debug adapters or plan acceptance checks. Review or revoke that decision in Settings, System, Security.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -269,33 +249,16 @@ out the guard and unwires this project's hooks from it.
 | Declare topology | Lets your team assert cross-service structure, which services exist, how they connect, and over what protocol, and merges it into the same map. | Available |
 | Open from where you stand | Views the map at any altitude, from the whole-system topology down to a single service's internals, and stays consistent across sessions. | Available |
 | Share the map with your AI | Emits a portable, git-friendly, always-honest map any AI assistant can read, so it answers questions about the system faster and more correctly. | Available |
-| Ask the map questions | Query the structure directly: what calls this, what connects to that, where these routes live. | In progress |
-| Stay live | Keeps the map current as you edit, and pulls in work items and pipeline status from GitHub, GitLab and Slack. | Planned |
+| Ask the map questions | Query the structure directly: what calls this, what connects to that, where these routes live. | Available |
+| Stay live | Keeps the map current as you edit, and pulls in work items and pipeline status from GitHub, GitLab and Slack. | Available |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## CLI reference
 
-The `jensen` CLI is one entry point for all of it. Run `jensen` with no arguments for the command
-list, and `jensen help <command>` for one command's flags and examples.
-
-| Command | What it does |
-| --- | --- |
-| `jensen setup [path]` | Turn Jensen on for this machine and project. |
-| `jensen setup --status` | Report what is wired. Writes nothing. |
-| `jensen <path>`, `jensen open [path]` | Open the app on a directory, the way `code .` does. |
-| `jensen assistant` | Inspect or choose the default AI assistant. |
-| `jensen view <path>` | Print the file and import graph. |
-| `jensen query <path> <q>` | Ask the map a question. |
-| `jensen gen <path>` | Write the full map to disk. |
-| `jensen watch <path>` | Keep the map current as you edit. |
-| `jensen ingest <path> <doc>` | Add a documentation source. |
-| `jensen knowledge` | Inspect, compact or export what Jensen knows. |
-| `jensen learn` | Record, browse and reuse learned skills. |
-| `jensen worktree` | Isolated worktrees for parallel tasks. |
-| `jensen bridge <path>` | The context server your assistant connects to. It launches this for you. |
-| `jensen doctor` | What is working and what is not. |
-| `jensen ping` | Check that the daemon is running. |
+Run `jensen` with no arguments for the command list, and `jensen help <command>` for one command's
+flags and examples. Every command is documented at
+[CLI reference](https://jensen-org.github.io/releases/reference/cli/).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -307,8 +270,26 @@ description of the system instead of the whole repository.
 
 Two properties make those files dependable. They are git-friendly, so the map lives in version
 control next to the code it describes and its changes show up in review. And they are
-deterministic, the same codebase always produces the same map, so diffs stay clean and honest, and
-a change in the map means a real change in the code.
+deterministic, so the same codebase always produces the same map, diffs stay clean, and a change in
+the map means a real change in the code.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Documentation
+
+The full documentation is at
+[jensen-org.github.io/releases](https://jensen-org.github.io/releases/). It is written for the
+desktop application, and shows the equivalent command where one exists.
+
+| If you want | Read |
+| --- | --- |
+| The pitch, and how the app and the CLI relate | [What is Jensen](https://jensen-org.github.io/releases/start/what-is-jensen/) |
+| To get running, in order | [Install](https://jensen-org.github.io/releases/start/install/), [Open a project](https://jensen-org.github.io/releases/start/open-a-project/), [Turn Jensen on](https://jensen-org.github.io/releases/start/turn-jensen-on/) |
+| One run from end to end | [Your first session](https://jensen-org.github.io/releases/start/your-first-session/) |
+| The views and the keyboard map | [Getting around](https://jensen-org.github.io/releases/app/getting-around/) |
+| What your assistant can call | [Assistant tool reference](https://jensen-org.github.io/releases/reference/assistant-tools/) |
+| To never open the app | [Working outside the app](https://jensen-org.github.io/releases/assistant/working-outside-the-app/) |
+| Something to be broken | [Troubleshooting](https://jensen-org.github.io/releases/reference/troubleshooting/) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -336,7 +317,6 @@ distribution, reseller, or hosting licenses, open a
 It publishes every Jensen build, serves the
 [documentation](https://jensen-org.github.io/releases/), and holds the source of the download page
 for the macOS and Linux builds. The documentation site lives in `docs-site/` and is built and
-deployed to GitHub Pages by `.github/workflows/docs.yml`. How the download page is put together, the ring, the motion,
-the type and the theme flip, is written up in [docs/download-page.md](docs/download-page.md).
+deployed to GitHub Pages by `.github/workflows/docs.yml`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
