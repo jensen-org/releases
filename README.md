@@ -316,7 +316,5 @@ distribution, reseller, or hosting licenses, open a
 
 It publishes every Jensen build, serves the
 [documentation](https://jensen-org.github.io/releases/), and holds the source of the download page
-for the macOS and Linux builds. The documentation site lives in `docs-site/` and is built and
-deployed to GitHub Pages by `.github/workflows/docs.yml`.
-
+for the macOS and Linux builds.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
