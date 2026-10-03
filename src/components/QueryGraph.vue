@@ -13,6 +13,7 @@ const KIND_PREFIX = { '-1': '− ', '0': '  ', '1': '+ ' } as const
 const root = ref<HTMLElement | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
 const stack = ref<HTMLElement | null>(null)
+const query = ref<HTMLElement | null>(null)
 const question = ref<HTMLElement | null>(null)
 const caret = ref<HTMLElement | null>(null)
 const status = ref<HTMLElement | null>(null)
@@ -45,6 +46,7 @@ function setOpacity(element: HTMLElement | null, value: number) {
 }
 
 function applyCard(frame: CardFrame) {
+  if (query.value && query.value.classList.contains('query-minimal') !== frame.minimal) query.value.classList.toggle('query-minimal', frame.minimal)
   setText(question.value, frame.question)
   setOpacity(caret.value, frame.caret ? 1 : 0)
   setText(status.value, frame.status)
@@ -158,7 +160,7 @@ onBeforeUnmount(() => {
 
     <div class="stage">
       <div ref="stack" class="stack">
-        <div class="query">
+        <div ref="query" class="query">
           <span class="query-label">⌘K · ASK JENSEN</span>
           <span class="query-text"><span ref="question" /><span ref="caret" class="caret" /></span>
           <div class="chips">

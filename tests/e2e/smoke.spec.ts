@@ -93,8 +93,10 @@ test('the graph draws and the card plays the first question', async ({ page }, i
     await expect(page.locator('.diff-file')).toHaveText('payments/retry.ts')
     await expect(page.locator('.query-text')).toHaveText('Why does checkout retry twice?')
   } else {
-    await expect(page.locator('.query-text')).toHaveText('Where is the session token refreshed?', { timeout: 6000 })
-    await expect(page.locator('.query-status')).toContainText('7 matches', { timeout: 8000 })
+    await expect(page.locator('.query-text')).toHaveText('Who owns the billing webhooks?', { timeout: 6000 })
+    await expect(page.locator('.query-status')).toHaveText('5 files · 2 services · 0.1s', { timeout: 8000 })
+    await expect(page.locator('.query')).toHaveClass(/query-minimal/)
+    await expect(page.locator('.chip').first()).toBeHidden()
   }
 })
 

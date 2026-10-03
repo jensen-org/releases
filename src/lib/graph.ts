@@ -1,5 +1,4 @@
 export const SCENE_SECONDS = 11
-export const STILL_SECONDS = 18
 export const DESIGN_SIZE = 640
 
 const GROUPS = 4
@@ -13,6 +12,7 @@ export type DiffRow = { kind: -1 | 0 | 1; text: string }
 
 type Scenario = {
   kind: 'search' | 'fix' | 'blast'
+  minimal?: boolean
   question: string
   files: [string, string, string]
   count: number
@@ -22,6 +22,7 @@ type Scenario = {
 }
 
 export const SCENARIOS: Scenario[] = [
+  { kind: 'search', minimal: true, question: 'Who owns the billing webhooks?', files: ['billing/webhook.ts', 'lib/limits.ts', 'infra/redis.ts'], count: 5, read: '', summary: '5 files · 2 services · 0.1s' },
   { kind: 'search', question: 'Where is the session token refreshed?', files: ['auth/session.ts', 'apps/web/client.ts', 'api/middleware.ts'], count: 7, read: 'Searching graph · ', summary: '7 matches · 3 packages · 0.2s' },
   {
     kind: 'fix', question: 'Why does checkout retry twice?', files: ['payments/retry.ts', 'api/checkout.ts', 'lib/queue.ts'], count: 7, read: 'Reading context · ', summary: 'Context · 7 files · 3 packages',
@@ -53,6 +54,7 @@ export const SCENARIOS: Scenario[] = [
 ]
 
 export const LOOP_SECONDS = SCENARIOS.length * SCENE_SECONDS
+export const STILL_SECONDS = SCENARIOS.findIndex((scenario) => scenario.diff) * SCENE_SECONDS + 7
 
 const hash = (x: number, y: number) => {
   const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453
@@ -191,6 +193,7 @@ export type CardFrame = {
   done: boolean
   diff: { file: string; stat: string; note: string; rows: DiffRow[] } | null
   diffVisible: boolean
+  minimal: boolean
   visible: boolean
   blink: boolean
 }
@@ -204,7 +207,7 @@ export function cardFrame(t: number): CardFrame {
   const done = lt >= 5
   const typing = lt > 0.5 && lt < 2.9
   const status = lt < 3.2
-    ? 'Enter to ask'
+    ? scenario.minimal ? '' : 'Enter to ask'
     : reading
       ? `${scenario.read}${Math.max(1, Math.ceil((scenario.count * (lt - 3.2)) / 1.8))}${scenario.kind === 'blast' ? '' : ' files'}`
       : scenario.summary
@@ -218,6 +221,7 @@ export function cardFrame(t: number): CardFrame {
     done,
     diff: scenario.diff ?? null,
     diffVisible: scenario.diff !== undefined && lt > 5.4,
+    minimal: scenario.minimal === true,
     visible: lt <= 10.3,
     blink: reading && Math.floor(lt * 5) % 2 === 0,
   }

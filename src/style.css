@@ -307,6 +307,9 @@ button { font: inherit; color: inherit; }
   font: 400 11px/1.5 var(--mono);
 }
 
+.query-minimal .chips,
+.query-minimal .query-dot { display: none; }
+
 .query-label { font-size: 10px; letter-spacing: 0.1em; color: var(--muted-4); }
 
 .query-text { min-height: 20px; font: 500 14px/1.4 var(--sans); color: var(--ink); }
