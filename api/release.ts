@@ -6,7 +6,6 @@ export type UnavailableRelease = { status: 'unavailable'; releaseUrl: string }
 export type ErrorRelease = { status: 'error'; code: 'RATE_LIMITED' | 'UPSTREAM_UNAVAILABLE' | 'MALFORMED_RESPONSE' | 'METHOD_NOT_ALLOWED'; releaseUrl: string }
 export type ReleaseResponse = AvailableRelease | UnavailableRelease | ErrorRelease
 export const MAX_BUILDS = 4
-export const PLATFORMS: Platform[] = ['macos', 'linux']
 type Asset = { name?: unknown; size?: unknown; browser_download_url?: unknown; digest?: unknown }
 type GitRelease = { draft?: unknown; tag_name?: unknown; published_at?: unknown; html_url?: unknown; assets?: unknown }
 const repo = 'jensen-org/releases'

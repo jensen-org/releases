@@ -1,14 +1,9 @@
 import { mount } from '@vue/test-utils'
 import { h } from 'vue'
-import PrimeVue from 'primevue/config'
-import Card from 'primevue/card'
-import Button from 'primevue/button'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import App from '../src/App.vue'
-import { preset } from '../src/theme'
 
-vi.mock('../src/components/SignalRing.vue', () => ({ default: { render: () => h('canvas', { 'aria-label': 'Jensen signal ring' }) } }))
-vi.mock('../src/components/OrbitField.vue', () => ({ default: { render: () => h('svg', { class: 'orbit-field' }) } }))
+vi.mock('../src/components/QueryGraph.vue', () => ({ default: { render: () => h('div', { class: 'figure' }) } }))
 
 const response = (body: unknown) => Promise.resolve({ json: () => Promise.resolve(body) })
 
@@ -18,9 +13,7 @@ const rpm = (version: string, byteSize: number) => ({ platform: 'linux', format:
 
 const agent = (value: string) => Object.defineProperty(navigator, 'userAgent', { value, configurable: true })
 
-globalThis.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} } as unknown as typeof ResizeObserver
-
-const mountApp = () => mount(App, { global: { plugins: [[PrimeVue, { ripple: false, theme: { preset, options: { darkModeSelector: false } } }]], components: { Card, Button } } })
+const mountApp = () => mount(App)
 
 const tabs = (wrapper: ReturnType<typeof mountApp>) => wrapper.findAll('.shelf-tab')
 const active = (wrapper: ReturnType<typeof mountApp>) => tabs(wrapper).find((tab) => tab.attributes('aria-selected') === 'true')
@@ -72,13 +65,29 @@ describe('release card', () => {
     expect(wrapper.find('.releases-link').attributes('href')).toContain('jensen-org/releases/releases')
   })
 
-  it('leads with the product headline and keeps the card title beneath it', () => {
+  it('leads with the product headline', () => {
     globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
     const wrapper = mountApp()
     expect(wrapper.find('h1').text()).toBe('An AI-first IDE for large, complex codebases')
-    expect(wrapper.find('.hero-headline').element.tagName).toBe('H1')
-    expect(wrapper.find('.shelf-title').text()).toBe('Download Jensen')
-    expect(wrapper.find('.shelf-title').element.tagName).toBe('H2')
+    expect(wrapper.findAll('h1')).toHaveLength(1)
+  })
+
+  it('names the beta and the newest version in the status pill', async () => {
+    globalThis.fetch = vi.fn(() => response({ status: 'available', releaseUrl: 'https://github.com/r', builds: [mac('v1.4.0', 26004684), mac('v1.3.2', 25781043)] })) as unknown as typeof fetch
+    const wrapper = mountApp()
+    expect(wrapper.find('.pill').text()).toBe('Public beta')
+    await vi.waitFor(() => expect(wrapper.find('.pill').text()).toBe('Public beta · v1.4.0'))
+  })
+
+  it('sends the header and footer to the documentation instead of a demo', () => {
+    globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
+    const wrapper = mountApp()
+    expect(wrapper.find('.nav-docs').text()).toBe('Documentation')
+    expect(wrapper.find('.nav-docs').attributes('href')).toBe('https://jensen-org.github.io/releases/')
+    expect(wrapper.find('.nav-link').attributes('href')).toBe('https://github.com/jensen-org/releases/releases')
+    expect(wrapper.find('.baseline-learn').attributes('href')).toBe('https://jensen-org.github.io/releases/')
+    expect(wrapper.text()).not.toMatch(/demo/i)
+    expect(wrapper.find('video').exists()).toBe(false)
   })
 
   it('says what Jensen is under the headline', () => {
@@ -87,8 +96,6 @@ describe('release card', () => {
     const sub = wrapper.find('.hero-sub')
     expect(sub.text()).toContain('Jensen integrates with your codebase and cuts the cognitive debt')
     expect(sub.text()).toContain('less for your agents to guess')
-    expect(wrapper.find('.hero-learn').attributes('href')).toBe('https://jensen-org.github.io/releases/')
-    expect(wrapper.find('.hero-learn').text()).toContain('Learn more')
   })
 
   it('closes the page with the build status and the licence', () => {
@@ -126,13 +133,13 @@ describe('platform tabs', () => {
     await vi.waitFor(() => expect(wrapper.find('a[download]').exists()).toBe(true))
     expect(active(wrapper)!.text()).toBe('macOS')
     expect(wrapper.find('.shelf-arch').text()).toBe('Apple Silicon')
-    expect(wrapper.text()).toContain('24.8 MB')
+    expect(wrapper.text()).toContain('v1.4.0 · 24.8 MB')
 
     await tabs(wrapper)[1].trigger('click')
     expect(active(wrapper)!.text()).toBe('Linux')
     expect(wrapper.find('.shelf-arch').text()).toBe('x86_64')
-    expect(wrapper.text()).toContain('Download .deb')
-    expect(wrapper.text()).toContain('30.0 MB')
+    expect(wrapper.text()).toContain('Download for Linux')
+    expect(wrapper.text()).toContain('v1.4.0 · .deb · 30.0 MB')
     expect(wrapper.find('.shelf-body a[download]').attributes('aria-label')).toBe('Download Jensen for Linux v1.4.0, .deb package')
   })
 
@@ -178,8 +185,8 @@ describe('platform tabs', () => {
     const wrapper = mountApp()
     await vi.waitFor(() => expect(wrapper.text()).not.toContain('Checking latest release'))
     await tabs(wrapper)[1].trigger('click')
-    expect(wrapper.text()).toContain('Download .rpm')
-    expect(wrapper.text()).toContain('v1.4.0')
+    expect(wrapper.text()).toContain('Download for Linux')
+    expect(wrapper.text()).toContain('v1.4.0 · .rpm')
     expect(wrapper.find('.shelf-links a[download]').exists()).toBe(false)
   })
 
@@ -187,7 +194,7 @@ describe('platform tabs', () => {
     globalThis.fetch = vi.fn(() => response(both)) as unknown as typeof fetch
     const wrapper = mountApp()
     await vi.waitFor(() => expect(wrapper.find('a[download]').exists()).toBe(true))
-    expect(wrapper.find('[role="tablist"]').attributes('aria-labelledby')).toBe('shelf-title')
+    expect(wrapper.find('[role="tablist"]').attributes('aria-label')).toBe('Platform')
     expect(tabs(wrapper).map((tab) => tab.attributes('tabindex'))).toEqual(['0', '-1'])
     expect(wrapper.find('[role="tabpanel"]').attributes('aria-labelledby')).toBe('tab-macos')
     expect(wrapper.find('[role="tabpanel"]').attributes('id')).toBe('panel-macos')

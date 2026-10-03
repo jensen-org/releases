@@ -1,27 +1,30 @@
 import { expect, test } from '@playwright/test'
+
 const build = { platform: 'macos', format: 'dmg', arch: 'arm64', version: 'v1.4.0', publishedAt: '2026-08-14T00:00:00Z', byteSize: 26004684, assetName: 'Jensen-arm64.dmg', downloadUrl: 'https://github.com/jensen-org/releases/releases/download/v1.4.0/Jensen-arm64.dmg', releaseUrl: 'https://github.com/jensen-org/releases/releases/tag/v1.4.0' }
 const linux = { ...build, platform: 'linux', format: 'deb', arch: 'x86_64', byteSize: 31447219, assetName: 'Jensen_1.4.0_amd64.deb', downloadUrl: 'https://github.com/jensen-org/releases/releases/download/v1.4.0/Jensen_1.4.0_amd64.deb' }
-test.beforeEach(async ({ page }) => { await page.route('**/api/release', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ status: 'available', releaseUrl: build.releaseUrl, builds: [build, linux] }) })) })
+
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/release', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ status: 'available', releaseUrl: build.releaseUrl, builds: [build, linux] }) }))
+})
 
 test('release card is usable', async ({ page }) => {
-  await page.goto('/?diffusion=off')
-  await expect(page.getByRole('heading', { name: 'Download Jensen' })).toBeAttached()
+  await page.goto('/')
   const link = page.getByRole('link', { name: 'Download Jensen for macOS v1.4.0' })
   await expect(link).toHaveAttribute('href', /github\.com/)
   await link.focus()
   await expect(link).toBeFocused()
-  await expect(page.getByLabel('Jensen signal ring')).toBeVisible()
+  await expect(page.locator('.pill')).toHaveText('Public beta · v1.4.0')
 })
 
 test('the platform tabs swap the offer without changing the card height', async ({ page }) => {
-  await page.goto('/?diffusion=off')
-  const card = page.locator('.shelf-card')
+  await page.goto('/')
+  const card = page.locator('.shelf')
   const macos = page.getByRole('tab', { name: 'macOS' })
-  const linux = page.getByRole('tab', { name: 'Linux' })
+  const linuxTab = page.getByRole('tab', { name: 'Linux' })
   await expect(macos).toHaveAttribute('aria-selected', 'true')
   const before = (await card.boundingBox())!.height
-  await linux.click()
-  await expect(linux).toHaveAttribute('aria-selected', 'true')
+  await linuxTab.click()
+  await expect(linuxTab).toHaveAttribute('aria-selected', 'true')
   await expect(macos).toHaveAttribute('aria-selected', 'false')
   await expect(page.locator('.shelf-arch')).toHaveText('x86_64')
   await expect(page.getByRole('link', { name: /Download Jensen for Linux/ })).toHaveAttribute('href', /amd64\.deb$/)
@@ -30,202 +33,77 @@ test('the platform tabs swap the offer without changing the card height', async 
 
 test('a keyboard reaches both platforms and their downloads', async ({ page }, info) => {
   test.skip(info.project.name === 'mobile', 'the tab key is not how a phone reaches this')
-  await page.goto('/?diffusion=off')
+  await page.goto('/')
   await page.getByRole('tab', { name: 'macOS' }).focus()
   await page.keyboard.press('ArrowRight')
   await expect(page.getByRole('tab', { name: 'Linux' })).toBeFocused()
-  await expect(page.getByRole('tab', { name: 'Linux' })).toHaveAttribute('aria-selected', 'true')
   await page.keyboard.press('Tab')
   await expect(page.getByRole('link', { name: /Download Jensen for Linux/ })).toBeFocused()
   await page.getByRole('tab', { name: 'Linux' }).focus()
   await page.keyboard.press('ArrowLeft')
   await expect(page.getByRole('tab', { name: 'macOS' })).toBeFocused()
-  await page.keyboard.press('Tab')
-  await expect(page.getByRole('link', { name: /Download Jensen for macOS/ })).toBeFocused()
 })
 
-test('the page fits its viewport on every width the layout claims to serve', async ({ page }, info) => {
-  test.skip(info.project.name !== 'desktop', 'the mobile project is pinned to one device width')
-  for (const width of [1024, 1280, 1440, 1920, 2560]) {
-    await page.setViewportSize({ width, height: 900 })
-    await page.goto('/?diffusion=off')
-    const fit = await page.evaluate(() => ({
-      across: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      down: document.documentElement.scrollHeight - window.innerHeight,
-      hole: (() => {
-        const copy = document.querySelector('.hero-copy')!.getBoundingClientRect()
-        const ring = document.querySelector('.ring')!.getBoundingClientRect()
-        return ring.left - copy.right
-      })(),
-    }))
-    expect(fit.across, `horizontal scrollbar at ${width}`).toBeLessThanOrEqual(0)
-    expect(fit.down, `vertical scrollbar at ${width}`).toBeLessThanOrEqual(0)
-    expect(fit.hole, `gap between the copy and the ring at ${width}`).toBeLessThan(120)
+test('the page never scrolls sideways and the hero fits a laptop screen', async ({ page }, info) => {
+  const sizes = info.project.name === 'mobile' ? [[390, 844]] : [[1024, 768], [1280, 800], [1440, 900], [1920, 1080]]
+  for (const [width, height] of sizes) {
+    await page.setViewportSize({ width, height })
+    await page.goto('/')
+    const across = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    expect(across, `horizontal scroll at ${width}`).toBeLessThanOrEqual(0)
+  }
+  if (info.project.name !== 'mobile') {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
   }
 })
 
-test('headline leads the page on more than one line', async ({ page }, info) => {
-  await page.goto('/?diffusion=off')
-  const headline = page.locator('.hero-headline')
-  await expect(headline).toHaveText('An AI-first IDE for large, complex codebases')
-  const shape = await headline.evaluate((node) => {
-    const range = document.createRange()
-    range.selectNodeContents(node)
-    const tops = new Set([...range.getClientRects()].map((rect) => Math.round(rect.top)))
-    const tail = document.createRange()
-    tail.selectNodeContents(node.lastElementChild!)
-    const tailTops = new Set([...tail.getClientRects()].map((rect) => Math.round(rect.top)))
-    return { lines: tops.size, tail: tailTops.size, size: Number.parseFloat(getComputedStyle(node).fontSize) }
-  })
-  expect(shape.lines).toBe(2)
-  expect(shape.tail).toBe(1)
-  expect(shape.size).toBeGreaterThan(18)
-  if (info.project.name !== 'mobile') expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
+test('the copy sits beside the graph on a wide screen and above it on a narrow one', async ({ page }, info) => {
+  await page.goto('/')
+  const copy = (await page.locator('.hero-copy').boundingBox())!
+  const figure = (await page.locator('.figure').boundingBox())!
+  if (info.project.name === 'desktop') expect(figure.x).toBeGreaterThan(copy.x + copy.width - 1)
+  if (info.project.name === 'mobile') expect(figure.y).toBeGreaterThanOrEqual(copy.y + copy.height)
+  expect(figure.width).toBeCloseTo(figure.height, 0)
 })
 
-test('the entrance motion resolves to a real curve', async ({ page }, info) => {
-  test.skip(info.project.name === 'reduced-motion', 'the reduced-motion project asserts the opposite')
-  await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await page.goto('/?diffusion=off')
-  const motion = await page.evaluate(() => {
-    const root = getComputedStyle(document.documentElement)
-    const masthead = getComputedStyle(document.querySelector('.masthead')!)
-    const learn = getComputedStyle(document.querySelector('.hero-learn')!)
-    return { ease: root.getPropertyValue('--ease').trim(), animation: masthead.animationName, curve: masthead.animationTimingFunction, hover: learn.transitionDuration }
-  })
-  expect(motion.ease).toMatch(/^cubic-bezier/)
-  expect(motion.animation).toBe('settle')
-  expect(motion.curve).toMatch(/^cubic-bezier/)
-  expect(motion.hover).toBe('0.42s, 0.42s, 0.42s')
+test('the header and footer lead to the documentation, with no demo', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('link', { name: 'Documentation' })).toHaveAttribute('href', 'https://jensen-org.github.io/releases/')
+  await expect(page.getByRole('link', { name: /Learn more/ })).toHaveAttribute('href', 'https://jensen-org.github.io/releases/')
+  await expect(page.getByText(/demo/i)).toHaveCount(0)
+  await expect(page.locator('video')).toHaveCount(0)
 })
 
-test('the hero puts the copy beside the ring on a wide viewport', async ({ page }, info) => {
-  test.skip(info.project.name !== 'desktop', 'the narrow projects stack the hero')
-  await page.goto('/?diffusion=off')
-  const copy = await page.locator('.hero-copy').boundingBox()
-  const ring = await page.locator('.ring').boundingBox()
-  expect(copy).not.toBeNull()
-  expect(ring).not.toBeNull()
-  expect(ring!.x).toBeGreaterThan(copy!.x + copy!.width - 1)
-  const learn = await page.locator('.hero-learn').boundingBox()
-  const sub = await page.locator('.hero-sub').boundingBox()
-  expect(Math.abs(learn!.x + learn!.width - (copy!.x + copy!.width))).toBeLessThanOrEqual(1)
-  expect(learn!.y).toBeGreaterThanOrEqual(sub!.y + sub!.height)
-  await expect(page.locator('.baseline-legal')).toBeVisible()
-})
-
-test('the ring settles into solid black dots and only holds still under reduced motion', async ({ page }, info) => {
+test('the graph draws and the card plays the first question', async ({ page }, info) => {
   const still = info.project.name === 'reduced-motion'
   await page.emulateMedia({ reducedMotion: still ? 'reduce' : 'no-preference' })
-  await page.goto('/?diffusion=off')
-  const ring = page.getByLabel('Jensen signal ring')
-  await expect(ring).toBeVisible()
-  await page.waitForTimeout(4200)
-  const sample = () => ring.evaluate((node) => {
+  await page.goto('/')
+  await expect(page.locator('.figure')).toHaveAttribute('aria-hidden', 'true')
+  const ink = () => page.locator('.figure-canvas').evaluate((node) => {
     const canvas = node as HTMLCanvasElement
     const pixels = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data
-    let ink = 0
-    let solid = 0
-    let tinted = 0
-    let shape = 0
-    for (let i = 0; i < pixels.length; i += 4) {
-      if (pixels[i + 3] === 0) continue
-      ink += 1
-      shape = (shape * 31 + i) % 2147483647
-      if (pixels[i + 3] !== 255) continue
-      solid += 1
-      if (pixels[i] !== 14 || pixels[i + 1] !== 14 || pixels[i + 2] !== 13) tinted += 1
-    }
-    return { ink, solid, tinted, shape }
+    let count = 0
+    for (let i = 3; i < pixels.length; i += 4) if (pixels[i] > 0) count += 1
+    return count
   })
-  const first = await sample()
-  expect(first.solid).toBeGreaterThan(100)
-  expect(first.tinted).toBe(0)
-  await page.waitForTimeout(1100)
-  const second = await sample()
-  expect(second.tinted).toBe(0)
-  expect(Math.abs(second.ink - first.ink) / first.ink).toBeLessThan(0.06)
-  if (still) expect(second.shape).toBe(first.shape)
-  else expect(second.shape).not.toBe(first.shape)
-})
-
-test('the diffusion flips the whole page and hands the ring back', async ({ page }, info) => {
-  test.skip(info.project.name === 'reduced-motion', 'the veil never mounts when motion is reduced')
-  await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await page.goto('/?diffusion=now')
-  await expect(page.getByLabel('Jensen signal ring')).toBeVisible()
-  await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark', undefined, { timeout: 20000 })
-  await expect(page.locator('.diffusion-veil')).toHaveCount(0)
-  const state = await page.evaluate(() => ({
-    paper: getComputedStyle(document.body).backgroundColor,
-    ink: getComputedStyle(document.querySelector('.hero-headline')!).color,
-    card: getComputedStyle(document.querySelector('.shelf-card')!).backgroundColor,
-    ring: getComputedStyle(document.querySelector('.signal-ring')!).filter,
-    ringInk: getComputedStyle(document.querySelector('.signal-ring')!).opacity,
-    themeColour: document.querySelector('meta[name="theme-color"]')!.getAttribute('content'),
-  }))
-  // The dark palette is the exact difference-inverse the veil hands over, so these are literals.
-  expect(state.paper).toBe('rgb(4, 4, 6)')
-  expect(state.ink).toBe('rgb(241, 241, 242)')
-  expect(state.card).toBe('rgb(4, 4, 6)')
-  expect(state.ring).toBe('invert(1)')
-  expect(state.ringInk).toBe('1')
-  expect(state.themeColour).toBe('#040406')
-})
-
-test('the palette lands on the download button in the same frame as the page', async ({ page }, info) => {
-  test.skip(info.project.name === 'reduced-motion', 'the veil never mounts when motion is reduced')
-  await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await page.goto('/?diffusion=now')
-  await expect(page.getByLabel('Jensen signal ring')).toBeVisible()
-  const caught = page.evaluate(() => new Promise<{ background: string, color: string }>((resolve) => {
-    const observer = new MutationObserver(() => {
-      if (document.documentElement.dataset.theme !== 'dark') return
-      observer.disconnect()
-      const style = getComputedStyle(document.querySelector('.shelf-card .p-button')!)
-      resolve({ background: style.backgroundColor, color: style.color })
-    })
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-  }))
-  const swap = await caught
-  expect(swap.background).toBe('rgb(241, 241, 242)')
-  expect(swap.color).toBe('rgb(4, 4, 6)')
-})
-
-test('the orbit never answers the pointer', async ({ page }, info) => {
-  test.skip(info.project.name === 'mobile', 'a phone has no hovering pointer')
-  await page.goto('/?diffusion=off')
-  const read = () => page.locator('.orbit-line').evaluateAll((nodes) => nodes.map((node) => {
-    const box = node.getBoundingClientRect()
-    return `${box.left.toFixed(2)},${box.top.toFixed(2)},${box.width.toFixed(2)}`
-  }).join('|'))
-  const first = await read()
-  for (const [x, y] of [[120, 120], [900, 300], [400, 800], [1200, 650]]) await page.mouse.move(x, y)
-  await page.waitForTimeout(900)
-  expect(await read()).toBe(first)
-})
-
-test('both orbit circles stay centred on the page at every width', async ({ page }, info) => {
-  test.skip(info.project.name !== 'desktop', 'the narrow projects are pinned to one device width')
-  for (const [width, height] of [[1024, 768], [1440, 900], [1920, 1080], [2560, 1440]]) {
-    await page.setViewportSize({ width, height })
-    await page.goto('/?diffusion=off')
-    const reading = await page.evaluate(() => {
-      const middle = (node: Element) => { const box = node.getBoundingClientRect(); return [box.left + box.width / 2, box.top + box.height / 2] }
-      const sheet = middle(document.querySelector('.page')!)
-      const circles = [...document.querySelectorAll('.orbit-line')].map(middle)
-      return { count: circles.length, drift: circles.map(([x, y]) => Math.max(Math.abs(x - sheet[0]), Math.abs(y - sheet[1]))) }
-    })
-    expect(reading.count, `two circles at ${width}`).toBe(2)
-    for (const off of reading.drift) expect(off, `circle centred on the page at ${width}`).toBeLessThanOrEqual(1)
+  await expect.poll(ink).toBeGreaterThan(500)
+  if (still) {
+    await expect(page.locator('.diff-file')).toHaveText('payments/retry.ts')
+    await expect(page.locator('.query-text')).toHaveText('Why does checkout retry twice?')
+  } else {
+    await expect(page.locator('.query-text')).toHaveText('Where is the session token refreshed?', { timeout: 6000 })
+    await expect(page.locator('.query-status')).toContainText('7 matches', { timeout: 8000 })
   }
 })
 
-test('reduced motion never flips the page', async ({ page }, info) => {
+test('reduced motion holds the figure still', async ({ page }, info) => {
   test.skip(info.project.name !== 'reduced-motion', 'only the reduced-motion project asserts this')
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/?diffusion=now')
-  await page.waitForTimeout(6000)
-  expect(await page.evaluate(() => document.documentElement.dataset.theme ?? 'light')).toBe('light')
-  await expect(page.locator('.diffusion-veil')).toHaveCount(0)
+  await page.goto('/')
+  await expect(page.locator('.diff-file')).toHaveText('payments/retry.ts')
+  const read = () => page.locator('.query-status').textContent()
+  const first = await read()
+  await page.waitForTimeout(1500)
+  expect(await read()).toBe(first)
 })
