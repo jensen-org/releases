@@ -1,5 +1,6 @@
 export const SCENE_SECONDS = 11
 export const STILL_SECONDS = 18
+export const DESIGN_SIZE = 640
 
 const GROUPS = 4
 const PER_GROUP = 34
@@ -71,6 +72,7 @@ export type Scene = {
 
 export type Graph = {
   size: number
+  scale: number
   cx: number
   cy: number
   radius: number
@@ -152,7 +154,7 @@ export function createGraph(size: number): Graph {
     return { focus, blast, hot, hot2, curves, curves2 }
   })
 
-  return { size, cx, cy, radius, nodes, edges, base: edges.map(([a, b]) => curve(nodes[a], nodes[b], cx, cy)), scenes }
+  return { size, scale: size / DESIGN_SIZE, cx, cy, radius, nodes, edges, base: edges.map(([a, b]) => curve(nodes[a], nodes[b], cx, cy)), scenes }
 }
 
 export type GraphFrame = {

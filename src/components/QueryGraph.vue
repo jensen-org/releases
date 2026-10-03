@@ -4,6 +4,7 @@ import { drawGraph } from '../lib/draw'
 import { STILL_SECONDS, cardFrame, createGraph, type CardFrame, type Graph } from '../lib/graph'
 
 const DOM_INTERVAL = 80
+const MIN_CARD_SCALE = 0.7
 const ROWS = 5
 const CHIPS = 3
 const KIND_CLASS = { '-1': 'row-removed', '0': 'row-context', '1': 'row-added' } as const
@@ -107,15 +108,18 @@ function pause() {
 
 function measure() {
   const element = canvas.value
-  if (!element || !root.value) return
-  const size = Math.round(root.value.clientWidth)
-  if (!size || graph?.size === size) return
+  const host = root.value
+  if (!element || !host) return
+  const size = host.getBoundingClientRect().width
+  if (!size || (graph && Math.abs(graph.size - size) < 0.5)) return
   const ratio = window.devicePixelRatio || 1
-  element.width = size * ratio
-  element.height = size * ratio
+  const bitmap = Math.round(size * ratio)
+  element.width = bitmap
+  element.height = bitmap
   ctx = element.getContext('2d')
-  ctx?.scale(ratio, ratio)
+  ctx?.scale(bitmap / size, bitmap / size)
   graph = createGraph(size)
+  host.style.setProperty('--figure-scale', String(Math.min(1, Math.max(MIN_CARD_SCALE, graph.scale))))
   if (still) paint(STILL_SECONDS)
 }
 

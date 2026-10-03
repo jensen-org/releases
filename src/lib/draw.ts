@@ -31,7 +31,7 @@ function trace(ctx: CanvasRenderingContext2D, curves: Curve[], grow: number) {
 
 export function drawGraph(ctx: CanvasRenderingContext2D, graph: Graph, t: number) {
   const { scene, grow, grow2, fade, pulse, ripple } = graphFrame(graph, t)
-  const { nodes, size } = graph
+  const { nodes, size, scale } = graph
 
   ctx.clearRect(0, 0, size, size)
   ctx.strokeStyle = INK
@@ -50,7 +50,7 @@ export function drawGraph(ctx: CanvasRenderingContext2D, graph: Graph, t: number
   if (grow2 > 0) {
     ctx.lineWidth = 0.9
     ctx.globalAlpha = 0.4 * fade
-    ctx.setLineDash([2, 3])
+    ctx.setLineDash([2 * scale, 3 * scale])
     ctx.beginPath()
     trace(ctx, scene.curves2, grow2)
     ctx.stroke()
@@ -65,23 +65,23 @@ export function drawGraph(ctx: CanvasRenderingContext2D, graph: Graph, t: number
       const p = (ripple + k / 3) % 1
       ctx.globalAlpha = (1 - p) * 0.22 * fade
       ctx.beginPath()
-      ctx.arc(focus.x, focus.y, 6 + p * 70, 0, TAU)
+      ctx.arc(focus.x, focus.y, (6 + p * 70) * scale, 0, TAU)
       ctx.stroke()
     }
   }
 
   nodes.forEach((node, i) => {
     const hot = scene.hot.has(i)
-    const radius = 1.6 + Math.min(node.deg, 6) * 0.35
+    const radius = (1.6 + Math.min(node.deg, 6) * 0.35) * scale
     const outer = scene.hot2.has(i) && grow2 > 0.6
     ctx.globalAlpha = hot && grow > 0 ? 0.35 + 0.65 * fade : outer ? 0.35 + 0.35 * fade : 0.35
     ctx.beginPath()
-    ctx.arc(node.x, node.y, hot ? radius + 1 : radius, 0, TAU)
+    ctx.arc(node.x, node.y, hot ? radius + scale : radius, 0, TAU)
     ctx.fill()
     if (i === scene.focus && grow > 0) {
       ctx.globalAlpha = 0.25 * fade
       ctx.beginPath()
-      ctx.arc(node.x, node.y, 8 + pulse * 10, 0, TAU)
+      ctx.arc(node.x, node.y, (8 + pulse * 10) * scale, 0, TAU)
       ctx.stroke()
     }
   })

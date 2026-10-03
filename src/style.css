@@ -283,6 +283,7 @@ button { font: inherit; color: inherit; }
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  transform: scale(var(--figure-scale, 1));
 }
 
 .stack {

@@ -25,6 +25,8 @@ describe('graph geometry', () => {
   it('scales with the container', () => {
     const small = createGraph(320)
     expect(small.radius).toBeCloseTo(graph.radius / 2, 6)
+    expect(small.scale).toBe(0.5)
+    expect(graph.scale).toBe(1)
     expect(small.nodes[5].x).toBeCloseTo(graph.nodes[5].x / 2, 6)
   })
 

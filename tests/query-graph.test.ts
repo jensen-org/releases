@@ -12,7 +12,7 @@ const stubBrowser = (reduced: boolean) => {
   vi.stubGlobal('ResizeObserver', class { disconnect = vi.fn(); observe() {}; constructor() { observers.resize.push(this) } })
   vi.stubGlobal('IntersectionObserver', class { disconnect = vi.fn(); observe() {}; constructor() { observers.visibility.push(this) } })
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context() as unknown as CanvasRenderingContext2D)
-  vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(640)
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 640, height: 640 } as DOMRect)
 }
 
 beforeEach(() => { observers.resize.length = 0; observers.visibility.length = 0 })
