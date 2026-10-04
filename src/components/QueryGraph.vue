@@ -5,6 +5,7 @@ import { STILL_SECONDS, cardFrame, createGraph, type CardFrame, type Graph } fro
 
 const DOM_INTERVAL = 80
 const MIN_CARD_SCALE = 0.7
+const MAX_CARD_SCALE = 1.25
 const ROWS = 5
 const CHIPS = 3
 const KIND_CLASS = { '-1': 'row-removed', '0': 'row-context', '1': 'row-added' } as const
@@ -126,7 +127,7 @@ function measure() {
   ctx = element.getContext('2d')
   ctx?.scale(bitmap / size, bitmap / size)
   graph = createGraph(size)
-  host.style.setProperty('--figure-scale', String(Math.min(1, Math.max(MIN_CARD_SCALE, graph.scale))))
+  host.style.setProperty('--figure-scale', String(Math.min(MAX_CARD_SCALE, Math.max(MIN_CARD_SCALE, graph.scale))))
   if (still) paint(STILL_SECONDS)
 }
 

@@ -120,10 +120,10 @@ button { font: inherit; color: inherit; }
 .hero {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(360px, 42vw, 640px);
+  grid-template-columns: minmax(0, 1fr) clamp(360px, 46vw, 860px);
   align-items: center;
-  gap: 40px;
-  padding: 40px 0;
+  gap: 24px;
+  padding: 24px 0;
 }
 
 .hero-copy {
@@ -136,7 +136,7 @@ button { font: inherit; color: inherit; }
 
 .hero-headline {
   margin: 0;
-  font-size: clamp(40px, 5.2vw, 84px);
+  font-size: clamp(40px, 4.6vw, 76px);
   line-height: 0.98;
   font-weight: 500;
   letter-spacing: -0.045em;
@@ -260,9 +260,9 @@ button { font: inherit; color: inherit; }
 
 .figure {
   position: relative;
-  width: min(640px, 100%);
+  width: min(860px, 100%, calc(100svh - 190px));
   aspect-ratio: 1;
-  justify-self: end;
+  justify-self: center;
 }
 
 .figure-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -407,7 +407,7 @@ button { font: inherit; color: inherit; }
 
 @media (max-width: 959px) {
   .hero { grid-template-columns: minmax(0, 1fr); gap: 56px; }
-  .figure { justify-self: center; }
+  .figure { width: min(640px, 100%); }
 }
 
 @media (max-width: 640px) {
