@@ -1,4 +1,13 @@
-export const SCENE_SECONDS = 11
+export const SCENE_SECONDS = 9
+export const TYPE_START = 0.4
+export const TYPE_END = 2
+export const SUBMIT = 2.3
+export const READ_END = 3.8
+export const DIFF_AT = 4.1
+const CHIP_AT = [2.5, 2.9, 3.3] as const
+const FADE_START = 8.2
+const FADE_END = 9
+const HIDE_AT = 8.3
 export const DESIGN_SIZE = 640
 
 const GROUPS = 4
@@ -54,7 +63,7 @@ export const SCENARIOS: Scenario[] = [
 ]
 
 export const LOOP_SECONDS = SCENARIOS.length * SCENE_SECONDS
-export const STILL_SECONDS = SCENARIOS.findIndex((scenario) => scenario.diff) * SCENE_SECONDS + 7
+export const STILL_SECONDS = SCENARIOS.findIndex((scenario) => scenario.diff) * SCENE_SECONDS + 6
 
 const hash = (x: number, y: number) => {
   const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453
@@ -172,14 +181,14 @@ export function graphFrame(graph: Graph, t: number): GraphFrame {
   const loop = Math.max(0, t) % LOOP_SECONDS
   const scene = graph.scenes[Math.floor(loop / SCENE_SECONDS)]
   const lt = loop % SCENE_SECONDS
-  const grow = scene.blast ? clamp01((lt - 3.2) / 1.2) : clamp01((lt - 3.2) / 1.8)
+  const grow = scene.blast ? clamp01((lt - SUBMIT) / 1) : clamp01((lt - SUBMIT) / 1.5)
   return {
     scene,
     grow,
-    grow2: scene.blast ? clamp01((lt - 4.4) / 1.4) : 0,
-    fade: lt > 10.2 ? clamp01(1 - (lt - 10.2) / 0.8) : 1,
-    pulse: lt < 3.2 ? 0 : ((lt - 3.2) % 2) / 2,
-    ripple: (lt - 3.2) / 2.4,
+    grow2: scene.blast ? clamp01((lt - SUBMIT - 1) / 1.2) : 0,
+    fade: lt > FADE_START ? clamp01(1 - (lt - FADE_START) / (FADE_END - FADE_START)) : 1,
+    pulse: lt < SUBMIT ? 0 : ((lt - SUBMIT) % 2) / 2,
+    ripple: (lt - SUBMIT) / 2,
   }
 }
 
@@ -194,6 +203,7 @@ export type CardFrame = {
   diff: { file: string; stat: string; note: string; rows: DiffRow[] } | null
   diffVisible: boolean
   minimal: boolean
+  expanded: boolean
   visible: boolean
   blink: boolean
 }
@@ -202,27 +212,28 @@ export function cardFrame(t: number): CardFrame {
   const loop = Math.max(0, t) % LOOP_SECONDS
   const scenario = SCENARIOS[Math.floor(loop / SCENE_SECONDS)]
   const lt = loop % SCENE_SECONDS
-  const typed = Math.max(0, Math.min(scenario.question.length, Math.floor(((lt - 0.5) * scenario.question.length) / 2.3)))
-  const reading = lt >= 3.2 && lt < 5
-  const done = lt >= 5
-  const typing = lt > 0.5 && lt < 2.9
-  const status = lt < 3.2
-    ? scenario.minimal ? '' : 'Enter to ask'
+  const typed = Math.max(0, Math.min(scenario.question.length, Math.floor(((lt - TYPE_START) * scenario.question.length) / (TYPE_END - TYPE_START))))
+  const reading = lt >= SUBMIT && lt < READ_END
+  const done = lt >= READ_END
+  const typing = lt > TYPE_START && lt < TYPE_END
+  const status = lt < SUBMIT
+    ? ''
     : reading
-      ? `${scenario.read}${Math.max(1, Math.ceil((scenario.count * (lt - 3.2)) / 1.8))}${scenario.kind === 'blast' ? '' : ' files'}`
+      ? `${scenario.read}${Math.max(1, Math.ceil((scenario.count * (lt - SUBMIT)) / (READ_END - SUBMIT)))}${scenario.kind === 'blast' ? '' : ' files'}`
       : scenario.summary
   return {
     question: scenario.question.slice(0, typed),
-    caret: lt < 3.2 && (typing || Math.floor(lt * 2.5) % 2 === 0),
-    files: [lt > 3.5, lt > 4, lt > 4.5],
+    caret: lt < SUBMIT && (typing || Math.floor(lt * 2.5) % 2 === 0),
+    files: [lt > CHIP_AT[0], lt > CHIP_AT[1], lt > CHIP_AT[2]],
     fileNames: scenario.files,
     status,
     reading,
     done,
     diff: scenario.diff ?? null,
-    diffVisible: scenario.diff !== undefined && lt > 5.4,
+    diffVisible: scenario.diff !== undefined && lt > DIFF_AT,
     minimal: scenario.minimal === true,
-    visible: lt <= 10.3,
+    expanded: lt >= SUBMIT,
+    visible: lt <= HIDE_AT,
     blink: reading && Math.floor(lt * 5) % 2 === 0,
   }
 }

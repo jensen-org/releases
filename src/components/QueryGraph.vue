@@ -40,13 +40,18 @@ function setText(element: HTMLElement | null, value: string) {
   if (element && element.textContent !== value) element.textContent = value
 }
 
+function setClass(element: HTMLElement | null, name: string, on: boolean) {
+  if (element && element.classList.contains(name) !== on) element.classList.toggle(name, on)
+}
+
 function setOpacity(element: HTMLElement | null, value: number) {
   const next = String(value)
   if (element && element.style.opacity !== next) element.style.opacity = next
 }
 
 function applyCard(frame: CardFrame) {
-  if (query.value && query.value.classList.contains('query-minimal') !== frame.minimal) query.value.classList.toggle('query-minimal', frame.minimal)
+  setClass(query.value, 'query-minimal', frame.minimal)
+  setClass(query.value, 'query-expanded', frame.expanded)
   setText(question.value, frame.question)
   setOpacity(caret.value, frame.caret ? 1 : 0)
   setText(status.value, frame.status)
@@ -163,10 +168,16 @@ onBeforeUnmount(() => {
         <div ref="query" class="query">
           <span class="query-label">⌘K · ASK JENSEN</span>
           <span class="query-text"><span ref="question" /><span ref="caret" class="caret" /></span>
-          <div class="chips">
-            <span v-for="i in CHIPS" :key="i" :ref="(el) => { chips[i - 1] = el as HTMLElement }" class="chip" />
+          <div class="query-more">
+            <div class="query-more-clip">
+              <div class="query-more-body">
+                <div class="chips">
+                  <span v-for="i in CHIPS" :key="i" :ref="(el) => { chips[i - 1] = el as HTMLElement }" class="chip" />
+                </div>
+                <span class="query-status"><span ref="dot" class="query-dot" /><span ref="status" /></span>
+              </div>
+            </div>
           </div>
-          <span class="query-status"><span ref="dot" class="query-dot" /><span ref="status" /></span>
         </div>
 
         <div ref="diff" class="diff">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import QueryGraph from './components/QueryGraph.vue'
-import { detectPlatform } from './lib/platform'
+import { detectPlatform, isMobileDevice } from './lib/platform'
 import type { Build, Format, Platform } from '../api/release'
 
 interface Release { status: 'available' | 'unavailable' | 'error'; builds?: Build[] }
@@ -15,6 +15,7 @@ const TABS: { id: Platform; label: string; arch: string; formats: Format[] }[] =
   { id: 'linux', label: 'Linux', arch: 'x86_64', formats: ['deb', 'rpm'] },
 ]
 
+const mobile = isMobileDevice()
 const release = ref<Release | null>(null)
 const loading = ref(true)
 const platform = ref<Platform>('macos')
@@ -60,7 +61,7 @@ const label = computed(() => {
   return `Download Jensen for ${tab.value.label} ${build.version}${platform.value === 'linux' ? `, .${build.format} package` : ''}`
 })
 
-const version = computed(() => release.value?.builds?.[0]?.version ?? null)
+const version = computed(() => release.value?.builds?.[0]?.version.replace(/^v/i, '') ?? null)
 
 const summary = computed(() => {
   const build = primary.value
@@ -74,6 +75,10 @@ const summary = computed(() => {
 })
 
 onMounted(async () => {
+  if (mobile) {
+    loading.value = false
+    return
+  }
   platform.value = detectPlatform()
   try {
     const response = await fetch('/api/release')
@@ -104,8 +109,6 @@ onMounted(async () => {
 
     <main class="hero">
       <div class="hero-copy">
-        <p class="pill"><span class="pill-dot" aria-hidden="true" />{{ version ? `Public beta · ${version}` : 'Public beta' }}</p>
-
         <h1 class="hero-headline">An AI-first IDE for large, complex codebases</h1>
 
         <p class="hero-sub">
@@ -113,7 +116,12 @@ onMounted(async () => {
           head, less for your agents to guess.
         </p>
 
-        <div class="shelf">
+        <section v-if="mobile" class="mobile-note" aria-label="Mobile">
+          <span class="mobile-label">Mobile</span>
+          <p class="mobile-message">Wow mobile version? maybe later ;)</p>
+        </section>
+
+        <div v-else class="shelf">
           <div class="shelf-head">
             <div class="shelf-tabs" role="tablist" aria-label="Platform">
               <button
@@ -162,7 +170,7 @@ onMounted(async () => {
     <footer class="baseline">
       <span class="baseline-status">
         <span class="baseline-dot" aria-hidden="true" />
-        Beta 0.1.0
+        {{ version ? `Beta ${version}` : 'Beta' }}
       </span>
       <a class="baseline-learn" :href="DOCS_URL">Learn more <span aria-hidden="true">↗</span></a>
       <a class="baseline-legal" :href="LICENSE_URL">Jensen EULA 1.0</a>

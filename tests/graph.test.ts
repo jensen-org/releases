@@ -59,22 +59,23 @@ describe('graph frame', () => {
   const graph = createGraph(640)
 
   it('stays dark until the read starts, then grows and fades at the end', () => {
-    expect(graphFrame(graph, at(1, 3)).grow).toBe(0)
-    expect(graphFrame(graph, at(1, 4.1)).grow).toBeCloseTo(0.5, 6)
-    expect(graphFrame(graph, at(1, 6)).grow).toBe(1)
-    expect(graphFrame(graph, at(1, 6)).fade).toBe(1)
-    expect(graphFrame(graph, at(1, 10.6)).fade).toBeCloseTo(0.5, 6)
-    expect(graphFrame(graph, at(1, 11 - 1e-9)).fade).toBeCloseTo(0, 6)
+    expect(graphFrame(graph, at(1, 2)).grow).toBe(0)
+    expect(graphFrame(graph, at(1, 3.05)).grow).toBeCloseTo(0.5, 6)
+    expect(graphFrame(graph, at(1, 4)).grow).toBe(1)
+    expect(graphFrame(graph, at(1, 4)).fade).toBe(1)
+    expect(graphFrame(graph, at(1, 8.6)).fade).toBeCloseTo(0.5, 6)
+    expect(graphFrame(graph, at(1, 9 - 1e-9)).fade).toBeCloseTo(0, 6)
   })
 
   it('reads the blast radius faster and reaches the second ring later', () => {
-    expect(graphFrame(graph, at(3, 4.5)).grow).toBe(1)
-    expect(graphFrame(graph, at(3, 4.4)).grow2).toBeCloseTo(0, 6)
-    expect(graphFrame(graph, at(3, 5.9)).grow2).toBe(1)
-    expect(graphFrame(graph, at(2, 9)).grow2).toBe(0)
+    expect(graphFrame(graph, at(3, 3.3)).grow).toBe(1)
+    expect(graphFrame(graph, at(3, 3.3)).grow2).toBeCloseTo(0, 6)
+    expect(graphFrame(graph, at(3, 4.5)).grow2).toBe(1)
+    expect(graphFrame(graph, at(2, 7)).grow2).toBe(0)
   })
 
-  it('moves to the next scenario every eleven seconds and loops after the last', () => {
+  it('moves to the next scenario every nine seconds and loops after the last', () => {
+    expect(SCENE_SECONDS).toBe(9)
     expect(graphFrame(graph, at(1, 0)).scene).toBe(graph.scenes[1])
     expect(graphFrame(graph, at(4, 5)).scene).toBe(graph.scenes[4])
     expect(graphFrame(graph, LOOP_SECONDS + 1).scene).toBe(graph.scenes[0])
@@ -91,51 +92,59 @@ describe('card frame', () => {
   it('opens on a minimal bar that shows only the question and its result', () => {
     expect(cardFrame(at(0, 0.2)).minimal).toBe(true)
     expect(cardFrame(at(0, 0.2)).status).toBe('')
-    expect(cardFrame(at(0, 1.65)).question.length).toBeGreaterThan(5)
-    expect(cardFrame(at(0, 4.99)).status).toBe('5 files')
-    expect(cardFrame(at(0, 6)).status).toBe('5 files · 2 services · 0.1s')
-    expect(cardFrame(at(0, 8)).diffVisible).toBe(false)
+    expect(cardFrame(at(0, 1.2)).question.length).toBeGreaterThan(5)
+    expect(cardFrame(at(0, 3.79)).status).toBe('5 files')
+    expect(cardFrame(at(0, 5)).status).toBe('5 files · 2 services · 0.1s')
+    expect(cardFrame(at(0, 7)).diffVisible).toBe(false)
     expect(cardFrame(at(1, 0.2)).minimal).toBe(false)
   })
 
-  it('waits for the question, then types it across two and a half seconds', () => {
+  it('waits for the question, then types it in a second and a half', () => {
     const idle = cardFrame(at(1, 0.2))
     expect(idle.question).toBe('')
-    expect(idle.status).toBe('Enter to ask')
+    expect(idle.status).toBe('')
     expect(idle.files).toEqual([false, false, false])
-    const half = cardFrame(at(1, 1.65))
+    const half = cardFrame(at(1, 1.2))
     expect(half.question.length).toBeGreaterThan(5)
     expect(half.question.length).toBeLessThan(SCENARIOS[1].question.length)
-    expect(cardFrame(at(1, 3)).question).toBe(SCENARIOS[1].question)
+    expect(cardFrame(at(1, 2.1)).question).toBe(SCENARIOS[1].question)
+  })
+
+  it('stays a compact bar while typing and expands once the question is submitted', () => {
+    expect(cardFrame(at(1, 0.2)).expanded).toBe(false)
+    expect(cardFrame(at(1, 1.2)).expanded).toBe(false)
+    expect(cardFrame(at(1, 2.2)).expanded).toBe(false)
+    expect(cardFrame(at(1, 2.4)).expanded).toBe(true)
+    expect(cardFrame(at(1, 6)).expanded).toBe(true)
   })
 
   it('counts files while reading and then settles on the summary', () => {
-    expect(cardFrame(at(1, 3.3)).status).toBe('Searching graph · 1 files')
-    expect(cardFrame(at(1, 4.99)).status).toBe('Searching graph · 7 files')
-    expect(cardFrame(at(1, 6)).status).toBe('7 matches · 3 packages · 0.2s')
-    expect(cardFrame(at(3, 4.99)).status).toBe('Tracing callers · 23')
-    expect(cardFrame(at(3, 6)).status).toBe('Blast radius · 23 callers · 2 hops')
+    expect(cardFrame(at(1, 2.4)).status).toBe('Searching graph · 1 files')
+    expect(cardFrame(at(1, 3.79)).status).toBe('Searching graph · 7 files')
+    expect(cardFrame(at(1, 5)).status).toBe('7 matches · 3 packages · 0.2s')
+    expect(cardFrame(at(3, 3.79)).status).toBe('Tracing callers · 23')
+    expect(cardFrame(at(3, 5)).status).toBe('Blast radius · 23 callers · 2 hops')
   })
 
   it('reveals the three files one after another', () => {
-    expect(cardFrame(at(1, 3.6)).files).toEqual([true, false, false])
-    expect(cardFrame(at(1, 4.1)).files).toEqual([true, true, false])
-    expect(cardFrame(at(1, 4.6)).files).toEqual([true, true, true])
+    expect(cardFrame(at(1, 2.6)).files).toEqual([true, false, false])
+    expect(cardFrame(at(1, 3)).files).toEqual([true, true, false])
+    expect(cardFrame(at(1, 3.4)).files).toEqual([true, true, true])
   })
 
   it('shows a diff only for fix scenarios, once the read is done', () => {
-    expect(cardFrame(at(2, 5.3)).diffVisible).toBe(false)
-    expect(cardFrame(at(2, 5.5)).diffVisible).toBe(true)
-    expect(cardFrame(at(2, 6)).diff?.file).toBe('payments/retry.ts')
-    expect(cardFrame(at(2, 6)).status).toBe('Context · 7 files · 3 packages')
-    expect(cardFrame(at(1, 8)).diffVisible).toBe(false)
-    expect(cardFrame(at(3, 8)).diff).toBeNull()
-    expect(cardFrame(at(4, 8)).diff?.stat).toBe('+1 −0')
+    expect(cardFrame(at(2, 4)).diffVisible).toBe(false)
+    expect(cardFrame(at(2, 4.2)).diffVisible).toBe(true)
+    expect(cardFrame(at(2, 5)).diff?.file).toBe('payments/retry.ts')
+    expect(cardFrame(at(2, 5)).status).toBe('Context · 7 files · 3 packages')
+    expect(cardFrame(at(1, 6)).diffVisible).toBe(false)
+    expect(cardFrame(at(3, 6)).diff).toBeNull()
+    expect(cardFrame(at(4, 6)).diff?.stat).toBe('+1 −0')
   })
 
   it('hides the whole card just before the scenario ends', () => {
-    expect(cardFrame(at(2, 10.2)).visible).toBe(true)
-    expect(cardFrame(at(2, 10.5)).visible).toBe(false)
+    expect(cardFrame(at(2, 8.2)).visible).toBe(true)
+    expect(cardFrame(at(2, 8.5)).visible).toBe(false)
   })
 
   it('holds the diff on the still frame used for reduced motion', () => {

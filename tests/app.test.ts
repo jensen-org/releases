@@ -72,11 +72,12 @@ describe('release card', () => {
     expect(wrapper.findAll('h1')).toHaveLength(1)
   })
 
-  it('names the beta and the newest version in the status pill', async () => {
+  it('has no status pill and names the newest release in the footer', async () => {
     globalThis.fetch = vi.fn(() => response({ status: 'available', releaseUrl: 'https://github.com/r', builds: [mac('v1.4.0', 26004684), mac('v1.3.2', 25781043)] })) as unknown as typeof fetch
     const wrapper = mountApp()
-    expect(wrapper.find('.pill').text()).toBe('Public beta')
-    await vi.waitFor(() => expect(wrapper.find('.pill').text()).toBe('Public beta · v1.4.0'))
+    expect(wrapper.find('.pill').exists()).toBe(false)
+    expect(wrapper.find('.baseline-status').text()).toBe('Beta')
+    await vi.waitFor(() => expect(wrapper.find('.baseline-status').text()).toBe('Beta 1.4.0'))
   })
 
   it('sends the header and footer to the documentation instead of a demo', () => {
@@ -101,7 +102,7 @@ describe('release card', () => {
   it('closes the page with the build status and the licence', () => {
     globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
     const wrapper = mountApp()
-    expect(wrapper.find('.baseline-status').text()).toContain('Beta 0.1.0')
+    expect(wrapper.find('.baseline-status').text()).toBe('Beta')
     expect(wrapper.find('.baseline-legal').attributes('href')).toContain('jensen-org/releases/blob/main/LICENSE.md')
   })
 })
@@ -119,12 +120,20 @@ describe('platform tabs', () => {
     expect(wrapper.find('a[download]').attributes('href')).toContain('amd64.deb')
   })
 
-  it('treats an Android browser as macOS rather than Linux', async () => {
-    agent('Mozilla/5.0 (Linux; Android 14; Pixel 8)')
-    globalThis.fetch = vi.fn(() => response(both)) as unknown as typeof fetch
+  it.each([
+    ['an Android phone', 'Mozilla/5.0 (Linux; Android 14; Pixel 8)'],
+    ['an iPhone', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile/15E148'],
+  ])('shows the mobile note and nothing to download on %s', async (_name, ua) => {
+    agent(ua)
+    const fetchSpy = vi.fn(() => response(both))
+    globalThis.fetch = fetchSpy as unknown as typeof fetch
     const wrapper = mountApp()
-    await vi.waitFor(() => expect(wrapper.find('a[download]').exists()).toBe(true))
-    expect(active(wrapper)!.text()).toBe('macOS')
+    await Promise.resolve()
+    expect(wrapper.find('.mobile-note').text()).toContain('Wow mobile version? maybe later ;)')
+    expect(wrapper.find('.shelf').exists()).toBe(false)
+    expect(tabs(wrapper)).toHaveLength(0)
+    expect(wrapper.findAll('a[download]')).toHaveLength(0)
+    expect(fetchSpy).not.toHaveBeenCalled()
   })
 
   it('swaps the button, the architecture and the version line when a tab is chosen', async () => {

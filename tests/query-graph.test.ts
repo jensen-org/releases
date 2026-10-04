@@ -45,6 +45,7 @@ describe('query graph figure', () => {
     expect(wrapper.findAll('.row-added')).toHaveLength(2)
     expect((wrapper.find('.diff').element as HTMLElement).style.opacity).toBe('1')
     expect((wrapper.find('.stack').element as HTMLElement).style.transform).toBe('translateY(0px)')
+    expect(wrapper.find('.query').classes()).toContain('query-expanded')
     expect(wrapper.findAll('.chip').map((chip) => chip.text())).toEqual(['payments/retry.ts', 'api/checkout.ts', 'lib/queue.ts'])
     wrapper.unmount()
   })

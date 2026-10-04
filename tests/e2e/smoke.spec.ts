@@ -7,16 +7,27 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/release', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ status: 'available', releaseUrl: build.releaseUrl, builds: [build, linux] }) }))
 })
 
-test('release card is usable', async ({ page }) => {
+test('release card is usable', async ({ page }, info) => {
+  test.skip(info.project.name === 'mobile', 'phones get the mobile note instead')
   await page.goto('/')
   const link = page.getByRole('link', { name: 'Download Jensen for macOS v1.4.0' })
   await expect(link).toHaveAttribute('href', /github\.com/)
   await link.focus()
   await expect(link).toBeFocused()
-  await expect(page.locator('.pill')).toHaveText('Public beta · v1.4.0')
+  await expect(page.locator('.pill')).toHaveCount(0)
+  await expect(page.locator('.baseline-status')).toHaveText('Beta 1.4.0')
 })
 
-test('the platform tabs swap the offer without changing the card height', async ({ page }) => {
+test('a phone gets the mobile note and nothing to download', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mobile', 'only the mobile project asserts this')
+  await page.goto('/')
+  await expect(page.locator('.mobile-note')).toContainText('Wow mobile version? maybe later ;)')
+  await expect(page.locator('a[download]')).toHaveCount(0)
+  await expect(page.getByRole('tab')).toHaveCount(0)
+})
+
+test('the platform tabs swap the offer without changing the card height', async ({ page }, info) => {
+  test.skip(info.project.name === 'mobile', 'phones get the mobile note instead')
   await page.goto('/')
   const card = page.locator('.shelf')
   const macos = page.getByRole('tab', { name: 'macOS' })
@@ -57,6 +68,15 @@ test('the page never scrolls sideways and the hero fits a laptop screen', async 
     await page.goto('/')
     expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0)
   }
+})
+
+test('the copy still sits beside the graph on a small laptop window', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'only the desktop project asserts this')
+  await page.setViewportSize({ width: 1024, height: 768 })
+  await page.goto('/')
+  const copy = (await page.locator('.hero-copy').boundingBox())!
+  const figure = (await page.locator('.figure').boundingBox())!
+  expect(figure.x).toBeGreaterThan(copy.x + copy.width - 1)
 })
 
 test('the copy sits beside the graph on a wide screen and above it on a narrow one', async ({ page }, info) => {
