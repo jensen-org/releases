@@ -88,10 +88,11 @@ test('the copy sits beside the graph on a wide screen and above it on a narrow o
   expect(figure.width).toBeCloseTo(figure.height, 0)
 })
 
-test('the header and footer lead to the documentation, with no demo', async ({ page }) => {
+test('the header and footer lead to the documentation, with no demo', async ({ page }, info) => {
   await page.goto('/')
+  if (info.project.name === 'mobile') await expect(page.locator('.baseline-learn')).toBeHidden()
   await expect(page.getByRole('link', { name: 'Documentation' })).toHaveAttribute('href', 'https://jensen-org.github.io/releases/')
-  await expect(page.getByRole('link', { name: /Learn more/ })).toHaveAttribute('href', 'https://jensen-org.github.io/releases/')
+  await expect(page.locator('.baseline-learn')).toHaveAttribute('href', 'https://jensen-org.github.io/releases/')
   await expect(page.getByText(/demo/i)).toHaveCount(0)
   await expect(page.locator('video')).toHaveCount(0)
 })
