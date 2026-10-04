@@ -160,22 +160,6 @@ button { font: inherit; color: inherit; }
   box-shadow: 0 1px 0 rgba(17, 17, 16, 0.03), 0 12px 32px -16px rgba(17, 17, 16, 0.12);
 }
 
-.mobile-note {
-  max-width: 560px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 20px 22px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 1px 0 rgba(17, 17, 16, 0.03), 0 12px 32px -16px rgba(17, 17, 16, 0.12);
-}
-
-.mobile-label { font: 500 12px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-4); }
-
-.mobile-message { margin: 0; font-size: 17px; line-height: 1.4; letter-spacing: -0.01em; }
-
 .shelf-head {
   display: flex;
   align-items: center;
@@ -209,6 +193,8 @@ button { font: inherit; color: inherit; }
   gap: 16px;
   padding: 20px 22px;
 }
+
+.mobile-message { margin: 0; padding: 15px 0; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
 
 .cta {
   all: unset;

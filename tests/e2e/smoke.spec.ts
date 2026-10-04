@@ -21,9 +21,9 @@ test('release card is usable', async ({ page }, info) => {
 test('a phone gets the mobile note and nothing to download', async ({ page }, info) => {
   test.skip(info.project.name !== 'mobile', 'only the mobile project asserts this')
   await page.goto('/')
-  await expect(page.locator('.mobile-note')).toContainText('Wow mobile version? maybe later ;)')
+  await expect(page.locator('.shelf-body')).toContainText('Wow mobile version? maybe later ;)')
   await expect(page.locator('a[download]')).toHaveCount(0)
-  await expect(page.getByRole('tab')).toHaveCount(0)
+  await expect(page.getByRole('tab')).toHaveText(['Mobile'])
 })
 
 test('the platform tabs swap the offer without changing the card height', async ({ page }, info) => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import QueryGraph from './components/QueryGraph.vue'
 import { MOBILE_QUERY, detectPlatform, isMobileDevice } from './lib/platform'
 import type { Build, Format, Platform } from '../api/release'
@@ -10,28 +10,33 @@ const RELEASES_URL = 'https://github.com/jensen-org/releases/releases'
 const DOCS_URL = 'https://jensen-org.github.io/releases/'
 const LICENSE_URL = 'https://github.com/jensen-org/releases/blob/main/LICENSE.md'
 
-const TABS: { id: Platform; label: string; arch: string; formats: Format[] }[] = [
+type TabId = Platform | 'mobile'
+
+const DESKTOP_TABS: { id: TabId; label: string; arch: string; formats: Format[] }[] = [
   { id: 'macos', label: 'macOS', arch: 'Apple Silicon', formats: ['dmg'] },
   { id: 'linux', label: 'Linux', arch: 'x86_64', formats: ['deb', 'rpm'] },
 ]
+const MOBILE_TABS: typeof DESKTOP_TABS = [{ id: 'mobile', label: 'Mobile', arch: '', formats: [] }]
 
 const mobile = ref(isMobileDevice())
 const release = ref<Release | null>(null)
 const loading = ref(true)
-const platform = ref<Platform>(detectPlatform())
+const platform = ref<TabId>(mobile.value ? 'mobile' : detectPlatform())
+const tabs = computed(() => (mobile.value ? MOBILE_TABS : DESKTOP_TABS))
+watch(mobile, (value) => { platform.value = value ? 'mobile' : detectPlatform() })
 const tabEls = ref<HTMLButtonElement[]>([])
 
 function reachTab(event: KeyboardEvent, index: number) {
-  const steps: Record<string, number> = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: TABS.length - 1 }
+  const steps: Record<string, number> = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tabs.value.length - 1 }
   const step = steps[event.key]
   if (step === undefined) return
   event.preventDefault()
-  const next = (step + TABS.length) % TABS.length
-  platform.value = TABS[next].id
+  const next = (step + tabs.value.length) % tabs.value.length
+  platform.value = tabs.value[next].id
   tabEls.value[next]?.focus()
 }
 
-const tab = computed(() => TABS.find((entry) => entry.id === platform.value) ?? TABS[0])
+const tab = computed(() => tabs.value.find((entry) => entry.id === platform.value) ?? tabs.value[0])
 
 const offered = computed(() => (release.value?.builds ?? []).filter((build) => build.platform === platform.value))
 
@@ -124,16 +129,11 @@ onMounted(async () => {
           head, less for your agents to guess.
         </p>
 
-        <section v-if="mobile" class="mobile-note" aria-label="Mobile">
-          <span class="mobile-label">Mobile</span>
-          <p class="mobile-message">Wow mobile version? maybe later ;)</p>
-        </section>
-
-        <div v-else class="shelf">
+        <div class="shelf">
           <div class="shelf-head">
             <div class="shelf-tabs" role="tablist" aria-label="Platform">
               <button
-                v-for="(entry, index) in TABS"
+                v-for="(entry, index) in tabs"
                 :id="`tab-${entry.id}`"
                 :key="entry.id"
                 :ref="(el) => { if (el) tabEls[index] = el as HTMLButtonElement }"
@@ -150,18 +150,19 @@ onMounted(async () => {
               </button>
             </div>
 
-            <span class="shelf-arch">{{ tab.arch }}</span>
+            <span v-if="tab.arch" class="shelf-arch">{{ tab.arch }}</span>
           </div>
 
           <div :id="`panel-${platform}`" class="shelf-body" role="tabpanel" :aria-labelledby="`tab-${platform}`">
-            <a v-if="primary" class="cta" :href="primary.downloadUrl" :aria-label="label" download>
+            <p v-if="mobile" class="mobile-message">Wow mobile version? maybe later ;)</p>
+            <a v-else-if="primary" class="cta" :href="primary.downloadUrl" :aria-label="label" download>
               {{ action }}<span class="cta-arrow" aria-hidden="true">↓</span>
             </a>
             <button v-else class="cta" type="button" disabled>
               {{ action }}<span class="cta-arrow" aria-hidden="true">↓</span>
             </button>
 
-            <div class="shelf-facts">
+            <div v-if="!mobile" class="shelf-facts">
               <p class="shelf-summary">{{ summary }}</p>
               <span class="shelf-links">
                 <a v-if="alternate" class="releases-link" :href="alternate.downloadUrl" download>.{{ alternate.format }} package</a>

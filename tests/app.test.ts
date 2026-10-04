@@ -130,9 +130,10 @@ describe('platform tabs', () => {
     globalThis.fetch = fetchSpy as unknown as typeof fetch
     const wrapper = mountApp()
     await Promise.resolve()
-    expect(wrapper.find('.mobile-note').text()).toContain('Wow mobile version? maybe later ;)')
-    expect(wrapper.find('.shelf').exists()).toBe(false)
-    expect(tabs(wrapper)).toHaveLength(0)
+    expect(wrapper.find('.shelf-body').text()).toContain('Wow mobile version? maybe later ;)')
+    expect(tabs(wrapper).map((tab) => tab.text())).toEqual(['Mobile'])
+    expect(active(wrapper)!.text()).toBe('Mobile')
+    expect(wrapper.find('.cta').exists()).toBe(false)
     expect(wrapper.findAll('a[download]')).toHaveLength(0)
     expect(fetchSpy).not.toHaveBeenCalled()
   })
@@ -143,7 +144,7 @@ describe('platform tabs', () => {
     globalThis.fetch = fetchSpy as unknown as typeof fetch
     const wrapper = mountApp()
     await Promise.resolve()
-    expect(wrapper.find('.mobile-note').exists()).toBe(true)
+    expect(active(wrapper)!.text()).toBe('Mobile')
     expect(wrapper.findAll('a[download]')).toHaveLength(0)
     expect(fetchSpy).not.toHaveBeenCalled()
     vi.unstubAllGlobals()
