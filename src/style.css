@@ -407,7 +407,9 @@ button { font: inherit; color: inherit; }
   .shelf-facts { align-items: flex-start; }
   .shelf-summary { white-space: normal; }
   .shelf-links { justify-content: flex-start; }
-  .tag-left, .tag-right { display: none; }
+  .tag-left, .tag-right { font-size: 9.5px; writing-mode: vertical-rl; }
+  .tag-left { left: 4px; transform: translateY(-50%) rotate(180deg); }
+  .tag-right { right: 4px; }
   .baseline-learn { display: none; }
 }
 
