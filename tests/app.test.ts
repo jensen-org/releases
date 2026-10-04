@@ -114,6 +114,7 @@ describe('platform tabs', () => {
     agent('Mozilla/5.0 (X11; Linux x86_64)')
     globalThis.fetch = vi.fn(() => response(both)) as unknown as typeof fetch
     const wrapper = mountApp()
+    expect(active(wrapper)!.text()).toBe('Linux')
     await vi.waitFor(() => expect(wrapper.find('a[download]').exists()).toBe(true))
     expect(active(wrapper)!.text()).toBe('Linux')
     expect(wrapper.find('.shelf-arch').text()).toBe('x86_64')
@@ -134,6 +135,18 @@ describe('platform tabs', () => {
     expect(tabs(wrapper)).toHaveLength(0)
     expect(wrapper.findAll('a[download]')).toHaveLength(0)
     expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('treats a narrow or touch only screen as mobile even with a desktop user agent', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }))
+    const fetchSpy = vi.fn(() => response(both))
+    globalThis.fetch = fetchSpy as unknown as typeof fetch
+    const wrapper = mountApp()
+    await Promise.resolve()
+    expect(wrapper.find('.mobile-note').exists()).toBe(true)
+    expect(wrapper.findAll('a[download]')).toHaveLength(0)
+    expect(fetchSpy).not.toHaveBeenCalled()
+    vi.unstubAllGlobals()
   })
 
   it('swaps the button, the architecture and the version line when a tab is chosen', async () => {

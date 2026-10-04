@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import QueryGraph from './components/QueryGraph.vue'
-import { detectPlatform, isMobileDevice } from './lib/platform'
+import { MOBILE_QUERY, detectPlatform, isMobileDevice } from './lib/platform'
 import type { Build, Format, Platform } from '../api/release'
 
 interface Release { status: 'available' | 'unavailable' | 'error'; builds?: Build[] }
@@ -15,10 +15,10 @@ const TABS: { id: Platform; label: string; arch: string; formats: Format[] }[] =
   { id: 'linux', label: 'Linux', arch: 'x86_64', formats: ['deb', 'rpm'] },
 ]
 
-const mobile = isMobileDevice()
+const mobile = ref(isMobileDevice())
 const release = ref<Release | null>(null)
 const loading = ref(true)
-const platform = ref<Platform>('macos')
+const platform = ref<Platform>(detectPlatform())
 const tabEls = ref<HTMLButtonElement[]>([])
 
 function reachTab(event: KeyboardEvent, index: number) {
@@ -74,12 +74,20 @@ const summary = computed(() => {
   return `${tab.value.label} build coming soon`
 })
 
+let mobileQuery: MediaQueryList | undefined
+const syncMobile = () => { mobile.value = isMobileDevice() }
+
+onBeforeUnmount(() => mobileQuery?.removeEventListener('change', syncMobile))
+
 onMounted(async () => {
-  if (mobile) {
+  if (typeof window.matchMedia === 'function') {
+    mobileQuery = window.matchMedia(MOBILE_QUERY)
+    mobileQuery.addEventListener('change', syncMobile)
+  }
+  if (mobile.value) {
     loading.value = false
     return
   }
-  platform.value = detectPlatform()
   try {
     const response = await fetch('/api/release')
     release.value = await response.json()
