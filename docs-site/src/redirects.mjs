@@ -1,6 +1,4 @@
-const base = '/releases'
-
-const moved = {
+export const redirects = {
   '/start/download-and-install/': '/start/install/',
   '/start/verify-a-download/': '/start/install/#verify-what-you-downloaded',
   '/start/first-run/': '/start/turn-jensen-on/',
@@ -16,7 +14,3 @@ const moved = {
   '/ai/trust-approvals-and-permissions/': '/safety/trust-and-permissions/',
   '/safety/findings-and-screening/': '/knowledge/findings/',
 }
-
-export const redirects = Object.fromEntries(
-  Object.entries(moved).map(([from, to]) => [from, base + to]),
-)

@@ -13,7 +13,7 @@
     <br />
     <a href="#download">Download</a>
     ·
-    <a href="https://jensen-org.github.io/releases/">Documentation</a>
+    <a href="https://docs.jensen-ide.com/">Documentation</a>
     ·
     <a href="https://github.com/jensen-org/releases/issues">Report a bug</a>
   </p>
@@ -194,8 +194,8 @@ jensen .                 # open a project, the way code . does
 
 Restart your shell first, or source your profile, so the new link is found.
 
-Full walkthrough: [Turn Jensen on](https://jensen-org.github.io/releases/start/turn-jensen-on/) and
-[Your first session](https://jensen-org.github.io/releases/start/your-first-session/).
+Full walkthrough: [Turn Jensen on](https://docs.jensen-ide.com/start/turn-jensen-on/) and
+[Your first session](https://docs.jensen-ide.com/start/your-first-session/).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -258,7 +258,7 @@ out the guard and unwires this project's hooks from it.
 
 Run `jensen` with no arguments for the command list, and `jensen help <command>` for one command's
 flags and examples. Every command is documented at
-[CLI reference](https://jensen-org.github.io/releases/reference/cli/).
+[CLI reference](https://docs.jensen-ide.com/reference/cli/).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -278,18 +278,18 @@ the map means a real change in the code.
 ## Documentation
 
 The full documentation is at
-[jensen-org.github.io/releases](https://jensen-org.github.io/releases/). It is written for the
+[docs.jensen-ide.com](https://docs.jensen-ide.com/). It is written for the
 desktop application, and shows the equivalent command where one exists.
 
 | If you want | Read |
 | --- | --- |
-| The pitch, and how the app and the CLI relate | [What is Jensen](https://jensen-org.github.io/releases/start/what-is-jensen/) |
-| To get running, in order | [Install](https://jensen-org.github.io/releases/start/install/), [Open a project](https://jensen-org.github.io/releases/start/open-a-project/), [Turn Jensen on](https://jensen-org.github.io/releases/start/turn-jensen-on/) |
-| One run from end to end | [Your first session](https://jensen-org.github.io/releases/start/your-first-session/) |
-| The views and the keyboard map | [Getting around](https://jensen-org.github.io/releases/app/getting-around/) |
-| What your assistant can call | [Assistant tool reference](https://jensen-org.github.io/releases/reference/assistant-tools/) |
-| To never open the app | [Working outside the app](https://jensen-org.github.io/releases/assistant/working-outside-the-app/) |
-| Something to be broken | [Troubleshooting](https://jensen-org.github.io/releases/reference/troubleshooting/) |
+| The pitch, and how the app and the CLI relate | [What is Jensen](https://docs.jensen-ide.com/start/what-is-jensen/) |
+| To get running, in order | [Install](https://docs.jensen-ide.com/start/install/), [Open a project](https://docs.jensen-ide.com/start/open-a-project/), [Turn Jensen on](https://docs.jensen-ide.com/start/turn-jensen-on/) |
+| One run from end to end | [Your first session](https://docs.jensen-ide.com/start/your-first-session/) |
+| The views and the keyboard map | [Getting around](https://docs.jensen-ide.com/app/getting-around/) |
+| What your assistant can call | [Assistant tool reference](https://docs.jensen-ide.com/reference/assistant-tools/) |
+| To never open the app | [Working outside the app](https://docs.jensen-ide.com/assistant/working-outside-the-app/) |
+| Something to be broken | [Troubleshooting](https://docs.jensen-ide.com/reference/troubleshooting/) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -315,6 +315,6 @@ distribution, reseller, or hosting licenses, open a
 ## This repository
 
 It publishes every Jensen build, serves the
-[documentation](https://jensen-org.github.io/releases/), and holds the source of the download page
+[documentation](https://docs.jensen-ide.com/), and holds the source of the download page
 for the macOS and Linux builds.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

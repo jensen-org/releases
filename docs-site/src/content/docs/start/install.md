@@ -18,6 +18,8 @@ offers the newest one. Every build ever published, with its checksums and signat
 | Debian, Ubuntu | x86_64 | `.deb` |
 | Fedora, RHEL, openSUSE | x86_64 | `.rpm` |
 
+Windows is coming, with no date yet.
+
 Beta builds are published as prereleases, so GitHub does not expose them through the `latest`
 release URL. Take them from the releases page itself.
 

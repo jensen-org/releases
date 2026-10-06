@@ -84,9 +84,9 @@ describe('release card', () => {
     globalThis.fetch = vi.fn(() => response({ status: 'unavailable', releaseUrl: 'https://github.com/r' })) as unknown as typeof fetch
     const wrapper = mountApp()
     expect(wrapper.find('.nav-docs').text()).toBe('Documentation')
-    expect(wrapper.find('.nav-docs').attributes('href')).toBe('https://jensen-org.github.io/releases/')
+    expect(wrapper.find('.nav-docs').attributes('href')).toBe('https://docs.jensen-ide.com/')
     expect(wrapper.find('.nav-link').attributes('href')).toBe('https://github.com/jensen-org/releases/releases')
-    expect(wrapper.find('.baseline-learn').attributes('href')).toBe('https://jensen-org.github.io/releases/')
+    expect(wrapper.find('.baseline-learn').attributes('href')).toBe('https://docs.jensen-ide.com/')
     expect(wrapper.text()).not.toMatch(/demo/i)
     expect(wrapper.find('video').exists()).toBe(false)
   })

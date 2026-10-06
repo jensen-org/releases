@@ -7,7 +7,7 @@ import type { Build, Format, Platform } from '../api/release'
 interface Release { status: 'available' | 'unavailable' | 'error'; builds?: Build[] }
 
 const RELEASES_URL = 'https://github.com/jensen-org/releases/releases'
-const DOCS_URL = 'https://jensen-org.github.io/releases/'
+const DOCS_URL = 'https://docs.jensen-ide.com/'
 const LICENSE_URL = 'https://github.com/jensen-org/releases/blob/main/LICENSE.md'
 
 type TabId = Platform | 'mobile'

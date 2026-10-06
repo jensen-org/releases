@@ -1,6 +1,6 @@
 # Jensen documentation
 
-The public documentation site, served at <https://jensen-org.github.io/releases/>.
+The public documentation site, served at <https://docs.jensen-ide.com/>.
 
 ```bash
 bun install

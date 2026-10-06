@@ -48,8 +48,7 @@ const monochrome = (name, type, c) => ({
 })
 
 export default defineConfig({
-  site: 'https://jensen-org.github.io',
-  base: '/releases',
+  site: 'https://docs.jensen-ide.com',
   trailingSlash: 'always',
   redirects,
   integrations: [
@@ -69,7 +68,12 @@ export default defineConfig({
       ],
       head: [
         { tag: 'meta', attrs: { name: 'theme-color', content: '#fbfbf9' } },
-        { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/releases/apple-touch-icon.png' } },
+        { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
+        { tag: 'meta', attrs: { property: 'og:image', content: 'https://docs.jensen-ide.com/og.png' } },
+        { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+        { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+        { tag: 'meta', attrs: { property: 'og:image:alt', content: 'Jensen, a free AI IDE for large, complex codebases' } },
+        { tag: 'meta', attrs: { name: 'twitter:image', content: 'https://docs.jensen-ide.com/og.png' } },
       ],
       expressiveCode: {
         themes: [monochrome('jensen-dark', 'dark', shade), monochrome('jensen-light', 'light', ink)],

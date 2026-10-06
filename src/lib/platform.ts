@@ -2,6 +2,8 @@ import type { Platform } from '../../api/release'
 
 type UserAgentData = { platform?: string; mobile?: boolean }
 
+const inBrowser = () => typeof navigator !== 'undefined' && typeof window !== 'undefined'
+
 const agentData = () => (navigator as Navigator & { userAgentData?: UserAgentData }).userAgentData
 
 export const MOBILE_QUERY = '(max-width: 640px), (hover: none) and (pointer: coarse)'
@@ -9,6 +11,7 @@ export const MOBILE_QUERY = '(max-width: 640px), (hover: none) and (pointer: coa
 const matches = (query: string) => typeof window.matchMedia === 'function' && window.matchMedia(query).matches
 
 export function isMobileDevice(): boolean {
+  if (!inBrowser()) return false
   if (agentData()?.mobile === true) return true
   const agent = navigator.userAgent
   if (/android|iphone|ipad|ipod|mobile/i.test(agent)) return true
@@ -17,6 +20,7 @@ export function isMobileDevice(): boolean {
 }
 
 export function detectPlatform(): Platform {
+  if (!inBrowser()) return 'macos'
   const source = `${agentData()?.platform ?? ''} ${navigator.userAgent}`
   if (/linux|x11|cros|ubuntu|fedora/i.test(source)) return 'linux'
   return 'macos'
