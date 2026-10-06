@@ -20,42 +20,45 @@ hero:
 
 import { Card, CardGrid } from '@astrojs/starlight/components'
 
-Jensen is a desktop application, with a `jensen` command beside it, for codebases too large to hold
-in your head. It maps your project and hands that same map to the AI assistant you already use.
+Jensen is a desktop app, with a `jensen` command beside it, for codebases too large to hold in your
+head. It maps your project, gives that map to the AI assistant you already use, and runs the work
+through one flow: plan, approve, build on a task branch, land.
 
 ---
 
 <CardGrid>
   <Card title="The map">
-    A navigable picture of the real structure: services, the calls between them, the routes they
-    expose. Open it at whatever altitude you need.
+    Your real structure as a graph: services, the calls between them, the routes they expose. Drill in
+    by altitude, not by folder.
 
-    [Project, the map](/app/project/)
+    [Project graph](/app/project-graph/)
+  </Card>
+
+  <Card title="One flow">
+    Your assistant writes a plan. You approve it. Jensen cuts a task branch, the assistant builds
+    there, and Jensen lands the result.
+
+    [How a change flows](/flow/plans/)
   </Card>
 
   <Card title="Your assistant">
-    Jensen supplies the context, not the model. It works with the assistant already on your machine.
+    Jensen supplies context, not a model. It works with the assistant already on your machine.
 
     [How it works](/assistant/how-it-works/)
   </Card>
 
   <Card title="The guard">
-    A commit carrying a secret or junk is refused where you type it, whoever typed it.
+    Agents never touch protected branches. A commit with a secret or junk is refused, whoever typed
+    it.
 
     [The git guard](/safety/git-guard/)
-  </Card>
-
-  <Card title="Try it end to end">
-    One run from reading the map to approving a plan to putting a change back.
-
-    [Your first session](/start/your-first-session/)
   </Card>
 </CardGrid>
 
 ## Honest by design
 
-Jensen never guesses. Everything on the map was either observed in your source or declared by your
-team, and the two stay distinguishable.
+Jensen never guesses. Everything on the map was observed in your source or confirmed by you, and
+the two stay distinguishable.
 
 [Read the guarantee](/start/honest-by-design/)
 
@@ -67,6 +70,5 @@ team, and the two stay distinguishable.
 4. [Turn Jensen on](/start/turn-jensen-on/)
 5. [Your first session](/start/your-first-session/)
 
-Already running it: [the four views and the keyboard map](/app/getting-around/), the
-[assistant tool reference](/reference/assistant-tools/), or the
-[CLI reference](/reference/cli/).
+Already running it? Try [Getting around](/app/getting-around/), the
+[assistant tool reference](/reference/assistant-tools/), or the [CLI reference](/reference/cli/).

@@ -1,61 +1,68 @@
 ---
 title: Skills
-description: Evidence-backed procedures an assistant records once and reuses, held pending your approval before any of them can run.
+description: Procedures an assistant records once and reuses, how they reach your assistant, and which ones wait for your approval.
 ---
 
-A skill is a procedure that worked, recorded once so the next session does not derive it again from
-scratch.
+A skill is a procedure that worked, recorded once so the next session does not work it out again.
 
-## Browsing the store
+## Browse the store
 
-**Settings, AI, Skills** browses the shared skill store, described there as *discover trusted
-procedures from the shared skill store*, with **Search skills**, a filter by provider, and **Use
-skill**.
+**Settings, AI, Skills** shows the shared skill store: *Discover trusted procedures from the shared
+skill store.* Use **Search skills**, switch between all, installed and pending, filter by provider,
+and choose **Use skill** on a card.
 
-Every skill carries a **Trust and audit** block showing its **License**, its **Content hash** and
-the list of files in the package, so you can see exactly what you are about to trust. When the
-catalog is unreachable it says so and serves what it has, reading *showing cached results while the
-catalog is offline*.
+Sources are `jensen`, `skills_sh` and `github`. Each card shows its name, description, provider and
+whether it is installed, cached or available.
+
+Open a card for **Skill details**: **License**, **Trust and audit**, **Content hash**, any findings
+and the list of files in the package. You see what you are about to trust. When the catalog is
+unreachable, Jensen says **Showing cached results while the catalog is offline**.
 
 ## Where skills come from
 
-An assistant that works something out worth keeping stages the skill as **pending human approval**.
-It does not become usable by writing itself into the store.
+An assistant that works out something worth keeping stages it as a skill with `skill_stage`. Staged
+skills sit in **Artifacts**, under **Staged skills**, in the session pane.
 
-You can also record one yourself. A recorded skill can carry a version, tags, a body file and named
-reference files.
+What happens next depends on who wrote it.
+
+- **A normal session.** Its staged skills become project skills when the session retires.
+- **A specialist.** Its skills stay inside its scope. After two successful sessions a skill becomes
+  ready for your approval, and it never activates on its own. See
+  [Specialists](/automation/specialists/).
+
+You can record one yourself:
 
 :::tip[From the terminal]
 ```bash frame="none"
 jensen learn record . --name deploy-preview --description "Ship a preview environment"
+jensen learn list .
+jensen learn search . "preview"
+jensen learn use . deploy-preview
 ```
 :::
 
-## Why approval matters
+`record` also takes `--version`, `--tag`, `--body-file` and `--ref <name>=<path>`.
 
-A skill will be replayed, so an unreviewed one is a way for a mistake to become a convention.
-Nothing an assistant stages is available until you approve it.
+## Why a skill is not an install
 
-Beyond that, a skill's script runs only with explicit permission, and only along a path confined to
-that skill's own package. A skill cannot become a way to run arbitrary code by being approved as
-documentation.
+A skill will be replayed, so a mistake in one becomes a habit. A skill's script runs only with explicit
+permission, and only along a path confined to that skill's own package. Approving a skill as
+documentation never lets it run arbitrary code.
 
-## How an assistant reaches them
+## How an assistant finds them
 
-Through the context server an assistant can search approved skills, list them, deliver a complete
-approved package, read an archived reference file belonging to one, and record that it used it.
-Usage is recorded, so a skill nobody uses is visible as such. See the
-[Assistant tool reference](../../reference/assistant-tools/#skills-and-hooks).
+Before the first edit, Jensen nudges the assistant to check `skill_list`. A search hit that is a skill
+tells it how to open it, and `skill_use` delivers the whole package. Use is recorded, so a skill nobody
+uses shows up as unused. See the [Assistant tool reference](/reference/assistant-tools/).
 
 ## Skills, memory and context
 
-Three different things, kept separate on purpose.
+Three different things, kept apart on purpose.
 
 | | Holds | Answers |
 | --- | --- | --- |
-| [Project context](../project-context/) | Decisions | How work is done here |
-| [Memory](../memory-and-search/) | Facts | What is true about this project |
+| [Project context](/knowledge/project-context/) | Decisions | How work is done here |
+| [Memory](/knowledge/memory-and-search/) | Facts | What is true about this project |
 | Skills | Procedures | How to do this specific thing |
 
-All three are searched by the same query, so an assistant does not have to know which one holds the
-answer.
+One query searches all three, so an assistant need not know which holds the answer.

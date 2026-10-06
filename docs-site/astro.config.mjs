@@ -54,7 +54,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Jensen',
-      plugins: [starlightLinksValidator({ errorOnRelativeLinks: false })],
+      plugins: [starlightLinksValidator({ errorOnRelativeLinks: true })],
       sidebar,
       description:
         'Documentation for Jensen, an AI-first IDE for large, complex codebases. Understand the codebase before you change it.',

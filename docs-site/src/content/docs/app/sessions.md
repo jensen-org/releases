@@ -1,104 +1,131 @@
 ---
 title: Sessions
-description: Terminals and agents, each in its own isolated checkout, with the artifacts and approvals a run produces.
+description: The session rail, starting a session, the session pane and its tabs, and what needs your attention.
 ---
 
-A session is one piece of work with an assistant. Press `Cmd 2` to reach the view.
+A session is one piece of work with an assistant. Press `Cmd 1`, or `Alt 1` on Linux and Windows.
 
-Every session runs in its own git worktree, so parallel tasks never collide on a shared index. See
-[Worktrees for parallel work](../../safety/worktrees/).
+Each session works in its own task checkout, so parallel work never collides. See
+[Worktrees](/safety/worktrees/).
 
-Open a project with no sessions and it says **Open a terminal**, with the subtitle *Open a terminal
-in its own git worktree, then run claude, codex, or anything else.*
+## The rail
 
-## The tab strip
+The sidebar lists every session in the project. With none running it reads **Nothing is running yet**.
 
-Sessions run as tabs. Each tab carries its own worktree, and its own context menu:
+Each card shows a status: **Needs input**, **Blocked**, **Working**, **Idle** or **Finished**. It also
+shows the plan status, the branch, a linked issue such as `issue #12`, plan progress such as `3/8
+steps`, and tokens and cost for finished work. Chips flag **checkout left behind** and **outside
+Jensen**.
 
-| Action | What it does |
+Jensen sorts a session to the top when it needs you: it asked a question, a plan awaits approval, its
+process died, or it finished and left a checkout behind. Filter the rail by typing, and press `Esc` to
+clear the filter.
+
+The card menu, **Session actions**, offers **Settings**, **Open the plan**, **Inspect the trace**,
+**Server logs**, **Open a shell here**, **Remove from the canvas** and **Delete**.
+
+Above the cards sit **Handoffs**, which lists branches handed back by workers, and one card per
+specialist. See [Specialists](/automation/specialists/).
+
+## Start a session
+
+Choose **New session** at the foot of the rail, or press `Cmd N`.
+
+- **Runtime** is the coding agent that does the work. Runtimes that are not ready are disabled with a
+  reason, such as **Not installed** or **Needs an upgrade**.
+- **Tag** labels the session.
+
+Open **Advanced** for more.
+
+| Field | What it does |
 | --- | --- |
-| **Open shell here** | A plain shell in that session's worktree. |
-| **Inspect trace** | The session timeline, and the restore points on it. |
-| **Tab color** | Default, or a colour you choose. |
-| **Discard worktree** | Throw away the isolated checkout. |
-| **Close session** | Close the tab. |
+| **Start from** | **Prompt**, **Issue** or **Plan**. Pick an issue assigned to you or a plan that is waiting. |
+| **What this session is for** | The first line names the session and the rest is context. |
+| **Model** | Override the runtime's default model. |
+| **Work as a specialist** | Create a specialist that owns a scope. |
+| **Servers** | Commands to run for this session, each with an optional port. |
 
-A tab badges the plan it is bound to, and a specialist session is marked with a sparkle.
+Choose **Start**. With no runtime installed, Jensen offers to install one or pick another.
 
-Sessions you start outside the app are adopted, not ignored. They appear as **External session**, described as *Ongoing session started out of Jensen*, with **View in terminal**.
+The caret beside **New session** opens **Import agents…** and **Export agents…** for moving agent
+definitions between machines.
 
-## Two ways to run
+## The session pane
 
-Which one you get depends on how your AI connection is configured. See
-[Models and providers](../../assistant/models-and-providers/).
+A session opens as a pane. Tabs appear only when they apply.
 
-### The assistant flow
+| Tab | Shown when | What it holds |
+| --- | --- | --- |
+| **Chat** | Jensen can drive the runtime | The conversation, tool calls, diffs and permission cards. |
+| **Terminal** | Jensen started a terminal for it | The real terminal. |
+| **Plan** | The session has a plan | The plan, with the review bar and **Mark done**. |
+| **Issues** | It is linked to issues | The issue inspector. |
+| **Nodes** | It delegated to subagents | A graph of subagent and tool calls. Click a node for its input and output. |
+| **Trace** | A trace exists | Calls, errors and duration. See [Undo and the session trace](/safety/undo-and-the-session-trace/). |
+| **Artifacts** | Skills are staged | **Staged skills**, promoted into the project once the session retires. |
 
-The default. A real terminal running your assistant's own command-line tool, with Jensen's context
-server, tools and conventions already wired into it. Nothing about your assistant changes. It knows
-the project.
+The pane menu, **More actions**, has **Settings**, **Open the plan beside this session**, **Inspect the
+trace beside this session**, **Open background tasks**, **New chat**, **Open a shell here**, **Delete
+this session** and **Close this pane**. Deleting removes the conversation. Its checkout and commits
+stay.
 
-### The chat flow
+### How a runtime connects
 
-Jensen calls a model directly and gives you a chat pane instead of a terminal. It opens on **Work
-with your codebase** with three starters, **Explain architecture**, **Find risks** and **Plan a
-change**, and a prompt that reads *Ask a question or describe a change.*
+A runtime runs one of three ways, and the pane says which.
 
-Alongside the conversation it carries:
+- **Over the agent protocol.** Jensen drives it and shows the conversation in **Chat**.
+- **In a terminal Jensen started.** You see the real terminal.
+- **Outside Jensen.** Jensen watches but cannot drive it. There is no **Chat** tab, and the pane offers
+  **Bring it forward** and **Inspect the trace**.
 
-- **Context** chips showing exactly what has been attached.
-- **Standing constraints**, the rules that apply for the whole objective rather than one message.
-- **Checkpoints**, with **Keep**, **Discard** and **Revert step**.
-- **Canvases**, a workspace where a longer piece of work can be laid out and revisited.
+### The composer
 
-## The workflow canvas
+Type under **Message** and press `Enter`. `Shift Enter` adds a line. `Cmd Option Enter` sends to every
+running session.
 
-When a change needs a full run rather than a conversation, the planner proposes a workflow and it
-renders here as a node graph with a run bar and a per-node inspector. It says what it is going to do
-before anything starts:
+- Pick a mode: **Plan**, **Ask** or **Auto**. `Shift Tab` cycles them. Plan mode asks your assistant to
+  write a [plan](/flow/plans/) before it edits.
+- Attach images up to 5 MB and files up to 25 MB by pasting, dragging or giving a path.
+- Type `/` for the commands the runtime offers. `/review` uses your reviewer model.
+- **Agent options** sets effort and speed where the runtime has them.
+- **Stop this turn** halts the agent.
 
-> **No workflow yet.** Describe a change in the chat. The planner picks a workflow, proposes it here,
-> and waits for you to start it.
+A read only specialist locks the mode.
 
-See [Workflows](../../automation/workflows/).
+## What needs you
 
-## Session artifacts
+A banner at the top of a pane tells you what is waiting.
 
-The panel beside the assistant collects what the session produced: **Artifact views** and **Spec
-views**, the bound **Plan and Issue** with the plan's current status, and the actions that move it
-forward, **Analyze** and **Approve**.
+- **Plan approval** shows **Approve**, **Request changes** and **Open plan**. See
+  [Approval and task branches](/flow/approval-and-task-branches/).
+- **This session finished and left its checkout behind** offers **Land**, **Push**, **Merge** and
+  **Delete**. See [Landing and cleanup](/flow/landing-and-cleanup/).
+- **This session has its own branch** offers **Land**.
+- **This session is over** means its checkout is gone. **Delete** clears it.
+- **Waiting on you in its terminal** means the runtime has no protocol adapter, so the prompt is in
+  the terminal below.
+- A permission request shows the runtime's own options. A count says how many more are waiting.
 
-Where a project's managed setup has drifted, the same panel offers a repair flow: **Preview repair**
-shows exactly what would change, and **Apply selected repair** applies only what you tick. When
-downstream artifacts fall behind their source it says so and offers **Sync files**.
+If a plan has no tracking issue because **Create issues** is off, a notice offers **Open permissions**.
 
-The session inspector on the right opens one artifact beside the assistant, so you can read a spec
-while the work referring to it is still running.
+## Specialists
 
-## Specialized sessions
+A specialist is a narrower agent that owns a scope and can run on a schedule. See
+[Specialists](/automation/specialists/).
 
-Some work wants a narrower agent than your default. **Create a specialized session** asks for a
-**Purpose**, for example *Security reviewer*, and a description such as *Review authentication
-changes for risks*. Jensen drafts a specialization summary from that, you review it, then **Prepare
-specialist** and **Start session**.
+## Background tasks
 
-Longer-lived specialists, with their own schedules and expiry, are missions. See
-[Agent profiles and missions](../../automation/profiles-and-missions/).
+**Background tasks** is a pane in the **Activity** group. It lists long work such as documentation
+indexing and workflow runs. Pause, **Cancel**, **Approve requirements**, **Approve execution**,
+**Resume** or **Collect** from its detail view. **Clear finished** tidies it. See
+[Workflows](/flow/workflows/).
 
-## Plans in a session
+## The terminal
 
-The plan switcher shows which plan the session is bound to, or **No plan open**, with plans grouped
-into **Today** and **Earlier**. From it you can **Create issue** for the plan, **Delete plan**, or
-**Clean up** finished ones.
+`Cmd Shift J` opens a **Terminal** pane running a login shell in the project root. Open as many as you
+like. **Open a shell here** starts one in a session's directory.
 
-See [Plans and objectives](../../automation/plans-and-objectives/).
+## Servers
 
-## Background tasks and approvals
-
-Work that outlives the immediate conversation reports into the **Background Tasks** centre. That
-covers documentation indexing, and the gates a mutating run stops at, **Approve requirements** and
-**Approve execution**. Results are taken with **Collect** or thrown away with **Discard**.
-
-With the background service stopped the view says so: *The workflow daemon is unavailable. Workflow
-controls will be available when it starts.* See
-[The background service](../../reference/troubleshooting/#the-background-service).
+Per card, the play button starts a session's servers. **Server logs** opens the output. For project
+wide services, see [Code](/app/code/#run-your-project).

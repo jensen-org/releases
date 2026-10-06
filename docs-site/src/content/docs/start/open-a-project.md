@@ -1,10 +1,12 @@
 ---
 title: Open a project
-description: Open a directory in Jensen, what happens the first time, and the two things Jensen deliberately leaves for you to decide.
+description: Open a directory in Jensen, what happens the first time, and the two things Jensen leaves for you to decide.
 ---
 
-The space switcher at the top left is where projects live. It offers **Recent Projects**, **Open
-New**, **New Sandbox** and **Remove project**. Any directory works.
+Projects live in the project card at the top of the sidebar. Open the **Projects** list to switch, or
+choose **New project** to open another directory. `Cmd O` does the same. Any directory works.
+
+One project is open at a time. Switching closes the previous one.
 
 :::tip[From the terminal]
 ```bash frame="none"
@@ -15,34 +17,31 @@ jensen ~/code/acme
 
 ## What happens the first time
 
-Jensen indexes a project it has not seen before. An overlay on the map reads **Scanning project**,
-then **Indexing graph**. On a large repository this can take a while. `jensen setup --no-scan` skips
-it if you would rather index later.
+Jensen indexes a project it has not seen. On a large repository this takes a while. Skip it and index
+later with `jensen setup --no-scan`.
 
 ## Two things are left to you
 
-Neither of these happens automatically, and both are deliberate.
+Jensen does neither on its own.
 
-- **The project is not trusted yet.** A new repository stays restricted until you approve it. You can
-  browse and edit a restricted workspace, but it cannot run project commands, local toolchains,
-  debug adapters or plan acceptance checks. See
-  [Trust and permissions](../../safety/trust-and-permissions/).
-- **No assistant is chosen**, unless exactly one is available. Jensen asks instead of picking. See
-  [Choosing an assistant](../../assistant/choosing-an-assistant/).
+- **Trust the project.** A new repository stays restricted until you approve it. You can browse and
+  edit it, but it cannot run project commands, local toolchains, debug adapters or plan acceptance
+  checks. See [Trust and permissions](/safety/trust-and-permissions/).
+- **Choose an assistant.** If only one is available, Jensen uses it. Otherwise it asks. See
+  [Choosing an assistant](/assistant/choosing-an-assistant/).
 
-Both are settled in the setup wizard, which is the next page.
+Both are settled in the setup wizard on the next page.
 
 ## Sandboxes
 
-**New Sandbox** creates a throwaway workspace, for trying something without adding a project you
-will have to clean up later. It carries a dismissible notice saying what it is, and closes with
-**Close Sandbox**.
+**Open sandbox** gives you a throwaway workspace for trying something without adding a project to
+clean up later. It carries a notice saying what it is. Leave with **Close Sandbox**.
 
 ## Removing a project
 
-**Remove project** takes it out of the switcher. Stores for projects that no longer exist on disk
-are reclaimed separately, and workspaces holding traces, sessions or automation state are never
-removed.
+**Remove** in the **Projects** list takes a project out of the list. Your files are not deleted.
+Stores for projects no longer on disk are reclaimed separately, and workspaces holding traces,
+sessions or automation state are never removed.
 
 :::tip[From the terminal]
 ```bash frame="none"
@@ -51,4 +50,4 @@ jensen gc              # reclaim it
 ```
 :::
 
-See [Storage and cleanup](../../reference/troubleshooting/#storage-and-cleanup).
+See [Storage and cleanup](/reference/troubleshooting/#storage-and-cleanup).

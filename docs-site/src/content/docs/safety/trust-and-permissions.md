@@ -1,74 +1,95 @@
 ---
 title: Trust and permissions
-description: Three separate gates, workspace trust, integration permissions and per-action approval, and what each one actually stops.
+description: Which folders Jensen may read, which projects may run their own tools, and which outbound actions you allow.
 ---
 
-Jensen has three gates, kept separate on purpose. Each answers a different question, and none of
-them is granted from the command line.
+Jensen separates three questions, and answers each with its own control.
 
-## Workspace trust
+| Question | Control | Where |
+| --- | --- | --- |
+| Which folders may Jensen read and index? | **Scope** | **Settings, System, Security** |
+| Which projects may run the hooks, tools and interpreters their repository ships? | **Trusted folders** | **Settings, System, Security** |
+| Which outbound actions may Jensen take on your behalf? | **Permissions** | **Settings, Extensions, Integrations** |
 
-May this repository run code on my machine?
+Plan approval is separate. Only you can approve a plan, and no agent can do it for you. See
+[Plans](/flow/plans/).
 
-A new repository stays **restricted** until you approve it. A restricted workspace can be browsed and
-edited, but it cannot:
+## Scope
 
-- run project commands,
-- run local toolchains,
-- run debug adapters,
-- run plan acceptance checks,
-- have its own tool manifest read, because a tool entry decides which program gets executed.
+**Scope** lists the folders Jensen may read and index. Jensen refuses to open a project outside them.
+Sandboxes and Jensen's own state are always available.
 
-Review or revoke the decision in **Settings, System, Security**, with **Trust workspace** and
-**Revoke trust**.
+Use **Add a folder** and **Remove**. With no folder in scope, no project can be opened.
 
-Trust is one decision, not a set of them. Trusting a workspace to run its development server also
-trusts it to run its git hooks on push, and there is no finer split today.
+## Trusted folders
+
+Opening a project lets Jensen read it. It does not let Jensen run what the repository ships. That is a
+separate decision, because a hook or tool entry decides which program executes.
+
+The first time you open a project, Jensen asks **Trust {name}?** and offers:
+
+- **Trust this project**
+- **Trust every project in {parent}**
+- **Stay restricted**
+
+Until you trust it, a project is restricted. You can browse and edit it, but it cannot:
+
+- Run hooks, tools or interpreters its repository ships, so formatters, linters and language servers
+  stay off.
+- Open a terminal.
+- Run git hooks on push.
+- Run plan acceptance checks.
+
+When something is withheld, Jensen says so and points here, for example "this workspace is not
+trusted", with a **Trust this workspace** action in the tool advisor.
+
+Manage the list under **Settings, System, Security, Trusted folders**. A folder is trusted, restricted
+or undecided. The deepest folder that covers a project wins, and a tie goes to restricted. A trusted
+folder must sit inside the scope, and your home directory is too broad to trust.
 
 ## Integration permissions
 
-May anything here write to my tracker, my merge requests, or Slack?
+Every write to GitHub, GitLab or Slack is blocked until you allow it. Open **Settings, Extensions,
+Integrations**, pick a provider, and use its **Permissions** card. Each row shows **Allowed** or **Ask
+first**, with **Allow** or **Revoke**.
 
-Reads are never gated. Every outbound write is, individually, under **Settings, Extensions,
-Integrations, Permissions**.
-
-| Permission | What it allows |
+| Group | Permissions |
 | --- | --- |
-| Create issues | Open issues from plans and triage. |
-| Comment on issues | Post comments to the tracker. |
-| Change issue labels | Add or remove issue labels. |
-| Close or reopen issues | Mark issues done or reopen them. |
-| Assign yourself to issues | Take or drop issues and bugs. |
-| Change issue fields | Set type, priority and parent. |
-| Schedule work items | Set milestone, dates, weight and health. |
-| Create merge requests | Open draft merge requests from sessions. |
-| Comment on merge requests | Post reviews and notes. |
-| Approve merge requests | Approve merge requests and pull requests. |
-| Send Slack messages | Post to Slack channels. |
+| **Issues** | Create issues, Comment on issues, Change issue labels, Close or reopen issues, Assign yourself to issues, Change issue fields, Schedule work items |
+| **Merge requests** | Create merge requests, Comment on merge requests, Approve merge requests |
+| **Messaging** | Send Slack messages |
 
-These apply the same whether you clicked the button or your assistant did. An action you have not
-enabled names the exact permission that unblocks it instead of failing silently.
+When an action needs a permission you have not given, Jensen asks with **Approve action**. Choose
+**Deny** or **Allow**. Allowing saves it, and you can revoke it here at any time.
 
-## Per-action approval
+Several steps of the [one flow](/start/what-is-jensen/#the-one-flow) lean on these. Approving a plan
+opens its issue and needs **Create issues**. Landing through a merge request needs **Create merge
+requests**. Without a permission the work still happens, and the outbound step waits for you.
 
-May this specific thing happen, now?
+**Verify repository** checks the repository a provider points at. **Revoke** removes it.
 
-Even with a permission enabled, an action that reaches outside the project raises an **Allow this
-integration action?** approval. Agent runs stop at their own gates too, **Approve requirements** and
-**Approve execution**, which surface in the Background Tasks centre.
+## Agent hook access
 
-A separate gate covers agent hooks that open a session and edit files: **Let agent hooks start
-assistants**, with **Allow** and **Revoke**. See [Agent hooks](../../automation/agent-hooks/).
+Hooks that start an assistant can open a session and edit files in an isolated worktree, so they need
+your say. **Settings, AI, Agent Hooks, Agent hook access** has **Let agent hooks start assistants**,
+shown as **Allowed** or **Ask first**. See [Agent hooks](/automation/agent-hooks/).
 
-## Where enforcement happens
+## Command policy
 
-Two of these are rules rather than requests, which is the whole difference.
+Jensen decides whether a command may run with one of three answers: allow, ask or deny. The default
+is ask. A repository can tighten the policy but never loosen it.
 
-- A profile's tool allowlist is enforced by Jensen, and not by the assistant asked to respect it.
-- An architecture an assistant inferred is stored as inferred and stays out of the map until you
-  confirm it. An assistant cannot confirm its own inference on your behalf.
+:::tip[From the terminal]
+```bash frame="none"
+jensen guard git commit
+```
+Prints `guard: allow`, `deny` or `ask`, and exits 0, 1 or 2. The git guard calls this before a
+commit.
+:::
 
-## What is not a gate
+No grant is made from the command line. Trust, scope and permissions are set in the app.
 
-Choosing an assistant is not a permission. It decides which model answers, not what it may do. See
-[Choosing an assistant](../../assistant/choosing-an-assistant/).
+## Check where you stand
+
+**Settings, System, Health** reports whether a folder is inside Jensen's scope. `jensen doctor` reports
+workspace trust from a terminal.

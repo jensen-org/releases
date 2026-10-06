@@ -1,79 +1,97 @@
 ---
 title: Plugins and themes
-description: What a plugin can contribute, the permissions it must be granted, how to install and scope one, and how themes work.
+description: What a plugin can do, the permissions you grant, how to install and publish one, and how themes work.
 ---
 
-A **plugin** adds behaviour. A **theme** changes how Jensen looks.
+A **plugin** adds behavior. A **theme** changes how Jensen looks. A theme is delivered by a plugin.
 
-## What a plugin can contribute
+## What a plugin can do
 
-| Contribution | Where it appears |
-| --- | --- |
-| **Commands** | The command palette, alongside the built-in ones. |
-| **Panels** | The right panel, as their own tab. |
-| **Whole views** | The view switcher, alongside Project, Sessions, Work and Code. |
-| **Themes** | The theme picker. |
-| **Tools for your assistant** | The catalogue your connected assistant sees. |
+A plugin is a single `main.js` that registers what it needs when it loads. It can add panes, commands,
+settings and themes. A plugin can also extend the tools your assistant sees, so it changes what your
+assistant can do in the project, not only what you can see.
 
-The last one matters: a plugin can extend what your AI assistant is able to do in this
-project, not just what you can see.
+## Permissions
 
-## Plugins have no ambient authority
-
-A plugin runs sandboxed. It cannot reach anything by default, and it reaches what it needs only
-through capabilities you grant. Installing one shows a permission sheet, and its own wording is the
-rule: *grant only what you trust. The kernel blocks anything not granted here.*
-
-Permissions are declared per plugin and granted individually:
+A plugin has no authority by default. It reaches only what you grant. Enabling one that declares
+capabilities shows a sheet titled **{name} wants access**: *Grant only what you trust. The kernel
+blocks anything not granted here.* It shows a risk level, low, medium or high.
 
 | Permission | What it opens |
 | --- | --- |
-| Code graph | Read the map. |
-| Knowledge | Search and ingest project knowledge. |
-| Git | Read history and semantic diffs. |
-| Filesystem | Named paths inside the project. **Empty means no access.** |
-| Network | Named hosts only, guarded against server-side request forgery. **Empty means no network.** |
+| **Read the code graph** | Read the map. |
+| **Knowledge base** | Search and ingest project knowledge. |
+| **Git history** | Read history and semantic diffs. |
+| **Panes and layout** | Add and arrange panes. |
+| **Read your code editor**, **Edit your code** | Read or change open files. |
+| **Theme** | Switch the active theme and add new ones. |
+| **Jensen settings** | Read and write settings. |
+| **Project files** | Named paths inside the project. Empty means no access. |
+| **Network** | Named hosts only. Empty means no network. |
 
-Two of those defaults matter more than the rest: a plugin with no filesystem paths listed gets no
-filesystem, and one with no hosts listed gets no network. Access is something you add, never
-something you take away.
+Two defaults matter most. A plugin listing no paths gets no filesystem, and one listing no hosts gets
+no network. You add access, you never take it away. Choose **Enable plugin** to grant, or **Cancel**.
 
-Plugin integrity is checked against a checksum.
+## Install and manage
 
-## Installing and scoping
+Open **Settings, Extensions, Plugins**.
 
-**Settings, Extensions, Plugins** carries **Browse plugins**, **Search plugins**, a filter by category, and each
-plugin's README. From there, **Install**, **Remove**, **Enable** and **Disable**.
+- **Enable community plugins** is the master switch. Off, Jensen contacts no registry, blocks new
+  downloads and stops every installed plugin.
+- **Browse plugins** lists the catalog. Use **Search plugins**, **Filter by category** and
+  **Refresh**. Cards read **Unverified** until a plugin is checked, with **Asks for** listing its
+  permissions.
+- **Install** and **Remove** manage each one.
+- **Install from a GitHub release** takes a **Repository** such as `owner/name`, a **Release tag**
+  and a **Manifest sha256**, so you can pin an exact build.
+- **Private registry URL** points at your own `index.json` over HTTPS. Its plugins show beside the
+  public ones and win on a conflicting id.
 
-For a plugin that is not in the public catalog, set a **Private registry URL**. **Refresh plugins**
-re-reads whichever registry you are pointed at.
+## Build one
 
-## Publishing
+Plugins speak protocol version 1. Build with `jensen-plugin-sdk`, which writes a manifest with
+`"apiVersion": 1`. Jensen refuses a plugin that:
 
-**Publish** in the same panel generates the plugin manifest and registry entry. No forms, no
-prompts.
+- Has no `apiVersion`. It was built for the retired plugin system, so rebuild it.
+- Uses `activationEvents`. Every enabled plugin loads at startup.
+- Ships WebAssembly or a separate UI entry.
+- Declares `contributes`. Register panes, commands, settings and themes at runtime from `main.js`.
+
+A manifest holds `id`, `name`, `version`, `minAppVersion`, `apiVersion`, `description`, `author`,
+`entry.main` and `permissions`. Permissions are `graph`, `knowledge`, `git`, `workspace`, `theme`,
+`settings`, `editor` (`none`, `read` or `write`), `fs` and `network`. An id uses lowercase letters,
+digits, `.` and `-`.
+
+## Publish
+
+**Publish** in the plugins panel walks you through it: **Choose folder…**, then it assembles your
+release and shows the **Registry entry** to **Copy**. Create a GitHub release, then open a pull
+request on the registry.
 
 :::tip[From the terminal]
 ```bash frame="none"
 jensen publish .
 ```
+It needs a built `main.js`, reads the `jensen` block of your `package.json`, and writes `manifest.json`,
+`README.md` and `main.js` to `release/`. No forms, no prompts.
 :::
-
-It generates the plugin manifest and the registry entry. No forms, no prompts.
 
 ## Themes
 
-A theme is a single document with three blocks:
+A theme is one document with three blocks:
 
-| Block | What it colours |
+| Block | What it colors |
 | --- | --- |
 | `ui` | The workbench chrome. |
 | `syntax` | The editor. |
 | `ansi` | The sixteen terminal slots. |
 
-Jensen derives only state variants and elevation from what you supply. **It never guesses a palette
-from a handful of anchor colours**, which is why a Jensen theme looks the way its author intended
-rather than approximately like it.
+Jensen derives only state variants and elevation from what you supply. It never guesses a palette
+from a few anchor colors, so a theme looks as its author intended.
 
-Themes are validated at publish and again at install. Pick one in **Settings, Workspace, General**, which also
-carries **Search themes** and the interface size.
+A theme plugin asks for the **Theme** permission and registers its document at runtime. It can also
+list, set and remove themes.
+
+Pick one in **Settings, Workspace, General, Appearance, Theme**. Bundled themes include Catppuccin
+(Latte, Frappe, Macchiato, Mocha), Dracula, Gotham, Nord, Rose Pine, Rose Pine Dawn and Tokyo Night.
+Plugin themes appear in the same list while the plugin is enabled.

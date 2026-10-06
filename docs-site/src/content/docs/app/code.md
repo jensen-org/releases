@@ -1,95 +1,114 @@
 ---
 title: Code
-description: The editor, its bottom dock, the AI that works inline, the finder, language tooling and the debugger.
+description: The editor, the problems and output pane, AI actions, the finder, language tooling, servers and the debugger.
 ---
 
-The Code view is a conventional editor workbench, with the map and the assistant a keystroke away.
-Press `Cmd 4` to reach it.
+Code is an editor workbench with the map and your assistant a keystroke away. Press `Cmd 2`, or `Alt 2`
+on Linux and Windows.
 
-With no project open it reads **Understand any codebase**.
+With no project open it reads **Understand any codebase**, with a **New scratch file** button.
 
 ## The workbench
 
-A file **Explorer** on the left, a tab bar, split and mosaic tiles, breadcrumbs, and a status bar.
-Beyond plain text files it has specialised viewers for diffs, images, tables and markdown preview.
+The sidebar holds the file **Explorer**. Beside it are tabs, split views, breadcrumbs and a status bar.
+Beyond text it has viewers for diffs, images, tables and markdown preview.
 
-Merge conflicts get a dedicated editor with **Current (ours)** and **Incoming (theirs)** side by
-side, **Next conflict** and **Previous conflict** to move between them, and **Complete merge** when
-you are done.
+Explorer actions include **New File**, **New Folder**, **Collapse All** and **Select files**.
+Selection mode lets you **Ask AI to** review, refactor, document or delete the selected files.
 
-## The bottom dock
+Tabs have **Pin**, **Close Others**, **Close to the Right**, **Reopen Closed Tab** and **Split Right**.
 
-Three tabs.
+If a file changes on disk under you, a bar offers **Compare**, **Reload**, **Keep mine** and
+**Overwrite disk**.
 
-### Problems
+### Merge conflicts
 
-Diagnostics from whatever language servers and linters your project resolves to. Scope it to
-**Current file** or the whole **Project**, filter by severity, **Copy problems**, or hand one to the
-assistant with **Fix with Agent**. Clean, it says **No problems detected**.
+Conflicts open a merge editor with **Current (ours)**, **Incoming (theirs)** and **Result**. Each
+conflict has **Accept Current**, **Accept Incoming** and **Accept Both**. Move with **Prev** and
+**Next**. When it reads **All conflicts resolved**, choose **Complete merge**.
 
-### Output
+## Problems and output
 
-Per-run output from the tools Jensen ran, with **Rerun**, **Restart**, **Open log**, **Clear
-output**, **Copy output**, **Wrap output**, and **Fix with Agent**.
+Open **Problems and output** from **Open a pane**, in the **Code** group. It has four tabs.
 
-### TODO
-
-Everything marked in the project, with **Rescan**. Empty, it says **Nothing marked in this project**.
+- **Problems** shows diagnostics from the language servers and linters your project resolves to. Scope
+  to **Current file** or **Project**, filter by severity, **Copy problems**, or hand one to your
+  assistant with **Fix with Agent**. Clean, it says **No problems detected**.
+- **Output** shows each run of a tool Jensen started, with **Copy output**, **Wrap output**, **Open
+  log**, **Clear output** and **Fix with Agent**.
+- **TODO** lists everything marked in the project, with **Rescan**.
+- **Debug** carries the debugger.
 
 ## AI in the editor
 
-Four surfaces, all of them optional and none of them modal.
-
 | Surface | What it does |
 | --- | --- |
-| **Jensen Assist** | An inline prompt on the current selection, *Describe the change*, answered as a diff you **Accept**, **Reject** or **Dismiss**. **Open Agent** escalates it to a full session. |
-| **Jensen Actions** | A quick-action menu, *Filter actions, or describe a change*. When no code action matches what you typed, it falls through to **Ask Jensen**. |
-| **Explain** | An overlay that reads the code and explains it, with **Show in Graph** to jump to the same symbol on the map. |
-| **Symbol popover** | What a symbol is, without leaving the line you are on. |
+| **Jensen Actions** (`Cmd .`) | A menu of fixes, refactors, navigation and project actions. Includes **Rename Symbol**, **Find Usages**, **Show Recent Changes** and **Ask Agent about this**. |
+| **Assistant** section in the editor menu | **Summarize This File**. With a selection, **Ask the Assistant** to explain, refactor, write tests or add docs. |
+| **Show in Graph** | Opens the project graph pane. |
 
-Navigation carries the same idea: **Go to line** accepts *line* or *line:column*, and **Go to symbol**
-searches the project's symbols rather than its text.
+Both menus work from the right-click menu on a symbol or selection.
 
-## Finding things
+## Find things
 
-The finder takes three kinds of query from one box, *Search files, text, or ask in words*:
+Press `Cmd P` for **Go to File**, `Cmd E` for the **Fuzzy Finder**, or `Cmd Shift F` for **Find in
+Files**. One box takes files, text or a question in words: *Search files, text, or ask in words*.
 
-- **Text**, with **Match case**, **Whole word** and **Regular expression**.
 - **Files**, by name.
-- **Semantic**, which searches by meaning rather than by string, over what Jensen has indexed.
+- **Text**, with **Match case**, **Whole word** and **Regular expression**.
+- **Semantic**, which searches by meaning over what Jensen has indexed.
 
-**Replace in files** applies a change across the matches, and reports how many files it will touch
-before it does.
+**Replace in Files** applies a change across the matches and says how many files it will touch first.
 
-## Language tools
+`Ctrl G` goes to a line, and `Cmd T` searches symbols across the project.
 
-Jensen never bundles a language server, formatter, linter or debugger. It discovers what the machine
-already has, and installs what you ask it to from a public catalog into its own directory.
+## Language tooling
 
-Selection follows the project, and not a fixed preference order. A tool your repository configured,
-by checking in its own configuration file, beats a higher-priority rival. A binary beside the
-project beats a global one. Both are searched from the edited file upward, so a package inside a
-monorepo gets its own answer instead of the repository's.
+Jensen bundles no language server, formatter, linter or debugger. It uses what your machine has and
+installs what you ask for from a public catalog into its own directory.
 
-Settings shows what each language actually resolves to, marks the ones the repository chose, names
-what is declared but not installed, and installs it. You can override any of it:
+Selection follows the project, not a fixed order. A tool your repository configures beats a
+higher ranked rival. A binary beside the project beats a global one. Both are searched from the edited
+file upward, so a package in a monorepo gets its own answer.
 
-| Scope | File |
-| --- | --- |
-| Every project on this machine | `~/.config/jensen/tools/tools.json` |
-| One project | `.jensen/tools.json` |
+Open **Settings, Extensions, LSP**. The **Language tooling** view lists what each language resolves
+to, marks the tools your repository chose, names what is declared but not installed, and installs it.
+Filter by **Servers**, **Formatters**, **Linters** or **Debuggers**.
 
-A project's own manifest is read only once you trust the workspace, because a tool entry decides
-which program gets executed. See [Trust and permissions](../../safety/trust-and-permissions/).
+To override a choice, use **Edit for this project** or **Edit for every project**. Both edit a single
+`tools.yaml` in your Jensen config folder, and project overrides live in their own section of it.
+Jensen reads a project's override only once you trust the workspace, because a tool entry decides which
+program runs. See [Trust and permissions](/safety/trust-and-permissions/).
+
+## Run your project
+
+**Run** in the file view header detects the services in your repository and starts them. It becomes
+**Stop** while they run. Its menu opens the run panel.
+
+The **Run** drawer has:
+
+- **Run all**, **Stop all** and **Re-detect services**.
+- A box to run a make target, a script or any command.
+- Per service **Open**, **Stop**, **Restart** and **Run**, with live logs and an unseen error marker.
+- **Edit servers.yaml** to correct what Jensen detected.
+
+With nothing found it says **No services detected**, with a **Detect services** button. With nothing
+running it says **Nothing is running**. Services that answer on a port but did not start from Jensen
+show under **Started outside Jensen**, without logs.
+
+Running project commands needs a trusted workspace. See
+[Trust and permissions](/safety/trust-and-permissions/).
 
 ## Debugging
 
-The debug toolbar carries **Start debugging**, **Continue**, **Pause**, **Step over**, **Step into**,
-**Step out** and **Stop debugging**. The panel shows the **Call stack**, **Variables** and a
-**Console** you can evaluate in, plus watch expressions you add and remove.
+The toolbar has **Start debugging** (`F5`), **Continue**, **Pause**, **Step over** (`F10`), **Step into**
+(`F11`), **Step out** (`Shift F11`) and **Stop** (`Shift F5`). The debug view shows the call stack,
+variables and a console you can evaluate in, plus watch expressions.
 
-Debug adapters are discovered and installed the same way as every other tool, and like project
-commands they require a trusted workspace.
+Debug adapters are found and installed like every other tool, and need a trusted workspace. Your
+assistant can drive the same debugger instead of guessing from a stack trace. See
+[the assistant tool reference](/reference/assistant-tools/#run-and-debug).
 
-Your assistant can drive the same debugger rather than guessing from a stack trace. See
-[What your assistant can do](../../reference/assistant-tools/#debugging).
+## Vim mode
+
+Use **Enable Vim Mode** in the command palette. The status bar then shows `VIM`.

@@ -51,8 +51,8 @@ navigable picture of how its components fit together, and hands that same map to
 so you both work from a shared understanding.
 
 Installing it gives you two things from the same package: a desktop application, and a `jensen`
-command. The application is where you read the map, run sessions and approve what an agent asks
-for. The command line reaches the same map, the same knowledge and the same guard with the app
+command. The application is where you read the map, run sessions, approve plans and grant what an
+agent asks for. The command line reaches the same map, the same knowledge and the same guard with the app
 closed.
 
 Big multi-service codebases are hard to hold in your head. When you are new to a repo, you spend
@@ -68,10 +68,10 @@ assistant you already use.
 ## Honest by design
 
 A map is only worth leaning on if you can trust every line of it. Jensen's core rule is that it
-never guesses. Everything it shows you is one of two things, something it observed directly in
-your source or something your team declared on purpose, and the two stay distinguishable, each
-carrying the evidence behind it. What Jensen does not know is marked unknown until someone tells
-it.
+never guesses. Everything it shows you is one of two things: something it observed in your
+source, or something an assistant proposed and you confirmed. The two stay distinguishable, each
+carrying the evidence behind it. What Jensen does not know is marked unknown until someone says
+otherwise.
 
 That single guarantee is what makes the map safe for a human to rely on and safe for an AI to
 build on. When the map says two services are connected, they are.
@@ -83,32 +83,35 @@ build on. When the map says two services are connected, they are.
 ```mermaid
 flowchart TD
     A["Your codebase"]
-    B["Declared topology\n(optional, from your team)"]
+    B["Plan, approve, task branch, land\n(the one flow)"]
     C["Jensen\nmaps the project"]
     D["A navigable map\nopen from where you stand"]
     E["You\nexplore and understand"]
     F["Your AI assistant\nworks from the same map"]
 
     A --> C
-    B --> C
     C --> D
     D --> E
     D --> F
+    F --> B
+    E --> B
 ```
 
 Point Jensen at your project and it builds the map from what is really there: services, calls,
-routes, files, symbols and project knowledge. If your team wants to describe cross-service
-topology that no single repo can show on its own, which services exist and how they connect, you
-declare it and Jensen folds it into the same picture. From there you open the map at whatever
-altitude you need, the whole system at a glance or one service drilled down to its internals. Your
-assistant reads that same map, so you are never explaining the architecture to it from scratch.
+routes, files, symbols and project knowledge. You open the map at whatever altitude you need, the
+whole system at a glance or one folder drilled down to its files. Your assistant reads that same
+map, so you are never explaining the architecture to it from scratch.
+
+Every change then follows one flow. Your assistant writes a plan and you approve it. Jensen cuts a
+task branch and its own worktree, the assistant builds there, and Jensen lands the branch by your
+branch policy and cleans up. Agents never merge, push to a protected branch or delete a branch.
 
 <!--
 Screenshots. Drop the files at these paths and remove this comment to publish them.
 
 | | |
 | --- | --- |
-| ![The graph](docs/images/graph.png) | ![Infrastructure view](docs/images/infrastructure.png) |
+| ![The graph](docs/images/graph.png) | ![A plan](docs/images/plan.png) |
 | ![A session](docs/images/session.png) | ![The editor](docs/images/editor.png) |
 -->
 
@@ -208,16 +211,17 @@ from the terminal:
 
 ```bash
 jensen assistant list
-jensen assistant set codex   # claude, codex, gemini, antigravity, or automatic
+jensen assistant set codex   # automatic, claude, codex, gemini, hermes or antigravity
 ```
 
-Automatic selection is deliberately conservative. Jensen chooses for you only when exactly one
-assistant is available. When several are configured it asks instead of silently preferring one,
+Automatic selection is conservative. Jensen chooses for you only when one assistant is available.
+When several are configured it asks instead of preferring one,
 and an explicit choice never falls back to a different provider when its CLI is missing.
 
 Workspace trust is a separate gate. A new repository stays restricted until you approve it. A
 restricted workspace can be browsed and edited, but cannot run project commands, local toolchains,
-debug adapters or plan acceptance checks. Review or revoke that decision in Settings, System, Security.
+debug adapters or plan acceptance checks. Review or revoke that decision under Trusted folders in
+Settings, System, Security.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -236,7 +240,8 @@ Remove them, or accept a finding in Jensen. To bypass once: git commit --no-veri
 
 It recognises `.env` files, private keys, provider tokens, dependency and build directories, and
 other common leaks. A push that would discard commits the remote already has is refused the same
-way. To remove it, run `jensen setup --only git-shim --only git-hooks --uninstall`, which takes
+way. Agents get two more layers: they cannot write on a protected branch, and they cannot move or
+delete a branch or worktree. To remove it, run `jensen setup --only git-shim --only git-hooks --uninstall`, which takes
 out the guard and unwires this project's hooks from it.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -246,8 +251,9 @@ out the guard and unwires this project's hooks from it.
 | Capability | What it does | Status |
 | --- | --- | --- |
 | Map a codebase | Builds a navigable graph of the real structure: services, calls between symbols, and the routes they expose. | Available |
-| Declare topology | Lets your team assert cross-service structure, which services exist, how they connect, and over what protocol, and merges it into the same map. | Available |
-| Open from where you stand | Views the map at any altitude, from the whole-system topology down to a single service's internals, and stays consistent across sessions. | Available |
+| Confirm architecture | An assistant proposes structure, you confirm it, and it joins the map. | Available |
+| One flow for every change | Plan, approve, task branch, land and cleanup, by your branch policy. | Available |
+| Open from where you stand | Views the map at any altitude, from the whole project down to one folder, and stays consistent across sessions. | Available |
 | Share the map with your AI | Emits a portable, git-friendly, always-honest map any AI assistant can read, so it answers questions about the system faster and more correctly. | Available |
 | Ask the map questions | Query the structure directly: what calls this, what connects to that, where these routes live. | Available |
 | Stay live | Keeps the map current as you edit, and pulls in work items and pipeline status from GitHub, GitLab and Slack. | Available |
@@ -286,7 +292,8 @@ desktop application, and shows the equivalent command where one exists.
 | The pitch, and how the app and the CLI relate | [What is Jensen](https://docs.jensen-ide.com/start/what-is-jensen/) |
 | To get running, in order | [Install](https://docs.jensen-ide.com/start/install/), [Open a project](https://docs.jensen-ide.com/start/open-a-project/), [Turn Jensen on](https://docs.jensen-ide.com/start/turn-jensen-on/) |
 | One run from end to end | [Your first session](https://docs.jensen-ide.com/start/your-first-session/) |
-| The views and the keyboard map | [Getting around](https://docs.jensen-ide.com/app/getting-around/) |
+| How a change flows | [Plans](https://docs.jensen-ide.com/flow/plans/), [Approval and task branches](https://docs.jensen-ide.com/flow/approval-and-task-branches/), [Landing and cleanup](https://docs.jensen-ide.com/flow/landing-and-cleanup/) |
+| The pages, panes and the keyboard map | [Getting around](https://docs.jensen-ide.com/app/getting-around/) |
 | What your assistant can call | [Assistant tool reference](https://docs.jensen-ide.com/reference/assistant-tools/) |
 | To never open the app | [Working outside the app](https://docs.jensen-ide.com/assistant/working-outside-the-app/) |
 | Something to be broken | [Troubleshooting](https://docs.jensen-ide.com/reference/troubleshooting/) |

@@ -14,10 +14,21 @@ export const sidebar = [
     label: 'The app',
     items: [
       { label: 'Getting around', slug: 'app/getting-around' },
-      { label: 'Project, the map', slug: 'app/project' },
       { label: 'Sessions', slug: 'app/sessions' },
-      { label: 'Work', slug: 'app/work' },
       { label: 'Code', slug: 'app/code' },
+      { label: 'Notes', slug: 'app/notes' },
+      { label: 'Source control', slug: 'app/source-control' },
+      { label: 'Project graph and overview', slug: 'app/project-graph' },
+    ],
+  },
+  {
+    label: 'The one flow',
+    items: [
+      { label: 'Plans', slug: 'flow/plans' },
+      { label: 'Approval and task branches', slug: 'flow/approval-and-task-branches' },
+      { label: 'Landing and cleanup', slug: 'flow/landing-and-cleanup' },
+      { label: 'Branch policy', slug: 'flow/branch-policy' },
+      { label: 'Workflows', slug: 'flow/workflows' },
     ],
   },
   {
@@ -41,17 +52,15 @@ export const sidebar = [
   {
     label: 'Automate the work',
     items: [
-      { label: 'Plans and objectives', slug: 'automation/plans-and-objectives' },
-      { label: 'Workflows', slug: 'automation/workflows' },
       { label: 'Agent hooks', slug: 'automation/agent-hooks' },
-      { label: 'Agent profiles and missions', slug: 'automation/profiles-and-missions' },
+      { label: 'Specialists', slug: 'automation/specialists' },
     ],
   },
   {
     label: 'Safety and recovery',
     items: [
       { label: 'Trust and permissions', slug: 'safety/trust-and-permissions' },
-      { label: 'Worktrees for parallel work', slug: 'safety/worktrees' },
+      { label: 'Worktrees', slug: 'safety/worktrees' },
       { label: 'The git guard', slug: 'safety/git-guard' },
       { label: 'Undo and the session trace', slug: 'safety/undo-and-the-session-trace' },
     ],

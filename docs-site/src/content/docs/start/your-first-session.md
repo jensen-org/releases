@@ -1,87 +1,93 @@
 ---
 title: Your first session
-description: One run from end to end. Read the map, ask your assistant a question only the map can answer, approve a plan, undo a change, and meet the git guard.
+description: One change from start to finish. Ask your map a question, write and approve a plan, watch the task branch work, land it, and meet the git guard.
 ---
 
-Everything up to here was setup. This page is one piece of work from start to finish, so you meet
-the map, a session, a plan, the trace and the git guard as one thing rather than five topics.
+Setup is done. This page follows one change from start to finish, so you meet the map, a session, a
+plan, a task branch, landing and the guard as one thing instead of five topics.
 
-It takes about fifteen minutes on a repository you already know.
+It takes about fifteen minutes on a repository you know.
 
 ## Before you start
 
-You need a project that is open, indexed and trusted, with an assistant chosen. If any of that is
-missing, [Turn Jensen on](../turn-jensen-on/) covers it.
+You need a project that is open, indexed and trusted, with an assistant chosen. If anything is
+missing, see [Turn Jensen on](/start/turn-jensen-on/).
 
-## Read the map first
+## Read the map
 
-Press `Cmd 1` for Project, `Alt 1` on Linux and Windows. The map opens at the top altitude, one
-node per service.
+Press `Cmd 1` for Sessions, or `Alt 1` on Linux and Windows. With nothing running, Jensen lays out the
+**Project graph** on the right and the **Project overview** below it.
 
-Drill into one service and follow an edge to something it calls. Every edge you see was read out of
-your source. Nothing on the map was guessed, which is what makes the next step worth doing. See
-[Honest by design](../honest-by-design/).
+Click a folder to drill in, then click a file to open it. Every file and import you see was read from
+your source. Nothing was guessed. See [Honest by design](/start/honest-by-design/).
+
+Choose **Ask Jensen** in the graph toolbar and ask something you would normally grep for:
+
+> Where is the session token refreshed?
+
+Jensen shows matches as file chips. Click one to open it.
 
 ## Start a session
 
-Press `Cmd 2` for Sessions, then **Open a terminal**. Jensen creates a git worktree for the session
-and starts your assistant inside it, so this work cannot collide with anything else in the
-repository.
-
-The worktree is named after the task and lives in `.jensen/worktrees/`. See
-[Worktrees for parallel work](../../safety/worktrees/).
+Choose **New session**, pick a **Runtime**, then **Start**. Choose **Plan** in the composer, so your
+assistant plans before it edits.
 
 :::tip[From the terminal]
 ```bash frame="none"
-jensen worktree list .
+jensen assistant list
 ```
 :::
 
-## Ask it something only the map can answer
-
-Ask your assistant a question that would normally mean grepping the tree:
-
-> Which services call `authenticate`, and where are the routes it protects?
-
-What good looks like: it answers from the map and cites files, without re-scanning the repository
-first. If it starts listing directories instead, the context server is not connected. Check
-**Settings, System, Health**.
-
 ## Ask for a change
 
-Now ask for something small and real, a rename or a guard clause. Your assistant writes a plan to
-`.jensen/plans/` before it edits anything, and the plan opens in its own inspector.
+Ask for something small and real, such as a rename or a guard clause. Your assistant recalls what the
+project knows, then writes a plan to `.jensen/plans/` and it opens beside the session. See
+[Plans](/flow/plans/).
 
-Read it, then **Approve**. Approving opens the tracking issue, links it in the plan, and assigns it
-to you. See [Plans and objectives](../../automation/plans-and-objectives/).
+Read it. Select text and choose **Comment** to push back, then **Request changes** to send your
+comments to the agent. When it is right, choose **Approve**.
 
-## Watch the work land
+## Watch it work
 
-Press `Cmd J` to open the right panel and pick **Trace**. Each net file change your assistant makes
-becomes a point on the timeline, and it stays there for 30 days.
+Approving makes Jensen cut a task branch and a worktree for the plan, open its tracking issue, and
+tell the assistant where to work. See [Approval and task branches](/flow/approval-and-task-branches/).
 
-## Put one change back
+Your protected branches are untouched. The assistant builds in the checkout, ticks **Steps** as work
+lands, and records each change. Open the **Trace** tab to see its calls and edits as they happen.
 
-Pick a change on the trace and use **Restore before this change**. The file returns to its earlier
-state. This is not git, so nothing was committed, no refs were created, and a later push cannot
-undo it. See [Undo and the session trace](../../safety/undo-and-the-session-trace/).
+## Land it
+
+When the work is done, the assistant hands the branch back. Jensen runs your checks if your policy
+asks for them, merges the branch into your development branch, and removes the checkout.
+
+If you would rather do it yourself, the session pane shows **This session finished and left its
+checkout behind**. Choose **Land**, confirm, and look for **Branch landed**. See
+[Landing and cleanup](/flow/landing-and-cleanup/).
+
+Open **Source control** and **Commit history** to see the commit on your branch.
+
+## Take it back
+
+If you do not want the change, use **Revert** on its commit in **Commit history**. Reverting adds a
+commit that undoes it and keeps history intact. See
+[Undo and the session trace](/safety/undo-and-the-session-trace/).
 
 ## Meet the guard
 
-Put a fake credential in a file, stage it, and commit. The commit is refused, from the terminal and
-from the app alike, because the guard runs from the project's own git hooks.
+Put a fake credential in a file, stage it and commit. The commit is refused from the terminal and from
+the app, because the guard runs from the project's git hooks.
 
-Open the right panel on **Git**, then **Versioning**. The commit box reads `Commit blocked` and
-lists a row per finding. If a match is a false positive, a test fixture or a documented example
-key, **Accept** clears that one finding for future commits and leaves every other rule in force.
+Open **Source control**. The commit box reads **Commit blocked** and lists a row per finding. If a
+match is a false positive, a test fixture or a documented example key, **Accept** clears that one
+finding for future commits and leaves every other rule in force.
 
-Delete the fake credential and commit again. See [The git guard](../../safety/git-guard/).
+Delete the fake credential and commit again. Try asking your assistant to commit to `main` too. Jensen
+refuses it and points it at the task branch. See [The git guard](/safety/git-guard/).
 
 ## Where to go next
 
-- To understand a codebase, read [Project, the map](../../app/project/) and
-  [Memory and knowledge search](../../knowledge/memory-and-search/).
-- To hand more work to an agent, read [Workflows](../../automation/workflows/) and
-  [Agent hooks](../../automation/agent-hooks/).
-- To decide what an agent is allowed to do, read
-  [Trust and permissions](../../safety/trust-and-permissions/).
+- Understand a codebase: [Project graph and overview](/app/project-graph/) and
+  [Memory and knowledge search](/knowledge/memory-and-search/).
+- Hand more work to agents: [Branch policy](/flow/branch-policy/), [Workflows](/flow/workflows/) and
+  [Agent hooks](/automation/agent-hooks/).
+- Decide what an agent may do: [Trust and permissions](/safety/trust-and-permissions/).

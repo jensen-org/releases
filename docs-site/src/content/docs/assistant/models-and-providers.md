@@ -1,62 +1,69 @@
 ---
 title: Models and providers
-description: How Jensen reaches a model, the three quality tiers you configure, and what a run records about the model that answered.
+description: How Jensen reaches a model directly, how sources and roles work, and where credentials live.
 ---
 
-Jensen embeds no model. Beyond driving an assistant's own tool, it can also call a provider directly
-for the chat flow and for the work a workflow node does.
+Jensen embeds no model. Besides driving your assistant's own tool, it can call a provider itself for
+chat and for the work a workflow node does.
 
-## Two flows
+## Two modes
 
-| Flow | What it is |
+| Mode | What it is |
 | --- | --- |
-| **Assistant** | The default. Your assistant's own command-line tool runs in a session terminal, with Jensen's context server wired into it. |
-| **API** | Jensen calls a model directly, which is what gives you the chat pane, canvases and inline answers on the documentation graph. |
+| **Assistant** | The default. Your assistant's own command line tool runs in a session, with Jensen's context server wired in. |
+| **API** | Jensen calls a model itself, for its own chat, background work and workflow nodes. |
 
-Configure this under **Settings, AI, AI assistant**, where **Show API configuration** reveals the second.
+Open **Settings, AI, AI assistant** and turn on **API mode** to reveal the second. API mode does not
+replace sign in for your external assistant.
 
-## Provider profiles are machine-local
+## Sources
 
-Endpoints and concrete model identifiers never leave the machine and are never committed. Jensen
-supports direct profiles for OpenAI, Anthropic and Gemini, and any OpenAI-compatible endpoint through
-a LiteLLM profile.
+A source is a provider you can call. Choose **Add source** and pick a **Kind**: **Anthropic**,
+**OpenAI**, **Gemini** or **Gateway**, for any OpenAI compatible endpoint, including LiteLLM.
 
-A profile takes its credential from an environment variable you name, or from a vault entry. Nothing
-asks you to paste a key into a field that gets stored in the project.
+Each source takes a **Name**, a **Base URL** (needed for a gateway), an optional **Model listing path**,
+and a **Default model**, which is what **Test** sends and what the source falls back to.
 
-Custom endpoints require HTTPS, with one exception. A loopback LiteLLM URL is allowed, because there
-is no network hop to protect.
+Per source you can **Refresh models**, **Test**, **Make default**, turn it off, or delete it.
 
-## Three tiers
+Custom endpoints need HTTPS. A loopback address may use HTTP, because there is no network hop to
+protect. A gateway also asks how it authenticates: **x-api-key** or **Authorization Bearer**. You can
+store a separate listing key that may only read the gateway's model list.
 
-You configure three aliases, and never pick a model per action.
+## Credentials
 
-| Alias | For |
-| --- | --- |
-| **Economy** | High-volume, low-stakes work. |
-| **Balanced** | The default. |
-| **Quality** | Work where being wrong is expensive. |
+Choose **Stored key** or **Environment variable**.
 
-Each workflow node requests a tier, and your configuration decides what that resolves to. Changing
-provider is then one edit, not a sweep through every workflow.
+- **Stored key** lives in your OS keychain, one item per secret, readable only by Jensen's
+  background service. macOS asks once. Choose Always Allow.
+- **Environment variable** names a variable Jensen reads. Nothing is stored.
+
+Endpoints and keys stay on your machine and never enter the project.
+
+## Roles
+
+A workflow node asks for a role, not a model. Under **Workflow roles** assign a model to each role:
+
+**planner**, **coder**, **documenter**, **reviewer** and **fast**.
+
+Leave a role on Auto and Jensen picks a model by capability. Changing provider is then one edit, not a
+sweep through every workflow.
+
+## The catalogue
+
+**Catalogue** lists every model your sources report, with its context size and capabilities: **tools**,
+**streaming**, **vision**, **reasoning**, **json mode** and **caching**. Filter by capability to find
+what fits.
+
+## File edits
+
+**Behaviour, File edits** is off by default and remembered per project. Turn it on and the assistant
+can edit files in the project. You review each result as a git diff.
 
 ## What a run records
 
-For each call, the run records:
+For every call a run records the requested role, the resolved endpoint and model, usage, an estimated
+cost and why that model was chosen. Resolved credentials are never saved. You can see which model
+answered, and why, instead of trusting that you got the one you asked for.
 
-- the **requested tier**,
-- the **resolved endpoint and model**,
-- **usage**,
-- an **estimated cost**,
-- the **routing reason**, why that tier resolved to that model.
-
-Resolved credentials are not persisted.
-
-That record is what makes a run auditable afterwards. You can see which model answered and why,
-instead of trusting that the tier you asked for is the tier you got.
-
-## Where it shows up
-
-The tier and its resolution appear on the workflow node in the Sessions view, alongside the node's
-own status. See [Sessions](../../app/sessions/#the-workflow-canvas) and
-[Workflows](../../automation/workflows/).
+See [Workflows](/flow/workflows/).

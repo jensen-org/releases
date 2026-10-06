@@ -1,91 +1,92 @@
 ---
 title: How Jensen reaches your assistant
-description: Jensen supplies the context, not the model. What your assistant gets when it connects, where to see that the connection is live, and what Jensen will not do.
+description: Jensen supplies context, not a model. What your assistant gets when it connects, where to check the connection, and what Jensen will not do.
 ---
 
-Jensen embeds no AI model. It works with the assistant already on your machine, and what it adds is
-everything around the model.
+Jensen embeds no AI model. It works with the assistant on your machine and adds what surrounds the
+model.
 
-Pointed at raw source, an assistant burns effort re-scanning files and then describes an
-architecture that was never there. Both failures have the same cause. It has no trustworthy
-description of the system, so it improvises one.
+Pointed at raw source, an assistant burns effort re-scanning files and describes an architecture that
+was never there. Both failures share a cause: it has no trustworthy description of the system, so it
+improvises one.
 
 ## What Jensen supplies
 
 | | |
 | --- | --- |
 | **The map** | A compact, honest description of the real structure, in place of the whole repository. |
-| **Project knowledge** | Confirmed facts, decisions, conventions and prior investigations, so the same ground is not rediscovered every session. |
-| **Conventions** | The plan format, the parallel-work rules and the navigation habits, written into the project so every assistant follows them. |
+| **Project knowledge** | Confirmed facts, decisions, conventions and past investigations, so no session rediscovers old ground. |
+| **Conventions** | The plan format, the branch rules and the habits of recall and navigation. |
 | **Tools** | Ways to ask the map a question instead of grepping the tree. |
-| **Rails** | Approvals, permissions, workspace trust and the git guard, enforced by Jensen and not requested of the model. |
-| **A record** | A session timeline where every net file change is a reversible point. |
+| **Rails** | Approvals, permissions, workspace trust and the git guard. Jensen enforces them, the model is never asked to. |
+| **A record** | A session timeline where every net file change is a point you can restore. |
 
-## Where to see that it is connected
+## Check the connection
 
-**Settings, System, Health** runs every check, explains what each one covers, and offers
-**Re-check** and **Copy as Markdown** when you need to paste the result into an issue.
+**Settings, System, Health** runs every check, explains what each covers, and offers **Re-check** and
+**Copy as Markdown** for pasting into an issue.
 
-**Settings, AI, AI assistant** shows which assistants Jensen found on this machine and which one is
-the default.
+**Settings, AI, AI assistant** shows the assistants Jensen found and which is the default.
 
-During setup, the **Connect** step reports how many of the checks are wired and offers **Fix all**.
-The same checks run from the **Project checks** card in the project overview.
+During setup, the **Connect** step reports how many checks are wired and offers **Fix all**.
 
 :::tip[From the terminal]
 ```bash frame="none"
-jensen setup --status    # what is and is not wired, writes nothing
-jensen doctor            # what is working and what is not
+jensen setup --status    # what is wired, writes nothing
+jensen doctor            # what works and what does not
 ```
 :::
 
 ## What your assistant gets on connect
 
-Setup registers a context server once at user scope with every supported assistant it finds on your
-`PATH`, so you approve it a single time and not once per project.
+Setup registers the context server once, at user scope, with each supported assistant on your `PATH`.
+You approve it one time, not once per project.
 
-When your assistant connects, three things arrive before it has asked for anything.
+On connect, three things arrive before the assistant asks for anything.
 
-1. **Whether Jensen is active here.** In a project that was never set up, the only thing offered is
-   a way to activate it. An empty answer there means the project was never indexed, and not that
-   the code is empty.
-2. **The project's conventions.** How to write a plan, how to work in parallel, how to record what
-   changed, and when to ask the map instead of the filesystem.
-3. **The tool catalogue.** Everything the assistant can call, with a description of each. See the
-   [Assistant tool reference](../../reference/assistant-tools/).
+1. **Whether Jensen is active here.** In a project never set up, the only thing offered is a way to
+   activate it. An empty answer there means the project was never indexed, not that the code is
+   empty.
+2. **The rules for this project.** A short brief: which branches are protected, how to plan, which
+   workflows exist, whether the project is onboarded, and what the project already knows. Anything
+   longer sits behind a `guide` topic the assistant opens when it needs it.
+3. **A short tool list.** A handful of core tools, plus `find_tools` and `use_tool` to reach the rest.
+   See the [Assistant tool reference](/reference/assistant-tools/).
 
-Setup also wires each assistant's own session lifecycle hooks. Those are what let Jensen hold the
-plan format, capture recoverable file versions as work proceeds, give feedback on a plan while the
-session is still running, and save what the session learned at the end. It installs a
-`/jensen-debrief` command for that last step.
+Setup also wires each assistant's session hooks. They let Jensen nudge recall before the first edit,
+keep the plan format, capture file versions as work proceeds, answer a plan while its session runs,
+and prompt a debrief when a session ends having saved nothing. Setup installs `/jensen-debrief` for
+that last step.
 
 ## The conventions every assistant follows
 
-- **Plans.** The canonical format is a contract. A plan left open after its work has landed reads to
-  you as unfinished. See [Plans and objectives](../../automation/plans-and-objectives/).
-- **Navigation.** Recall before guessing, navigate the map instead of re-reading files, and check
-  existing findings before starting bug work.
-- **Parallel work.** One worktree per task. See
-  [Worktrees for parallel work](../../safety/worktrees/).
-- **Recording.** Every edit lands on the session timeline, which is what makes it reversible. See
-  [Undo and the session trace](../../safety/undo-and-the-session-trace/).
+- **Plans.** Every change starts as a plan, and nothing is built before you approve it. See
+  [Plans](/flow/plans/).
+- **Branches.** Jensen cuts the task branch and checkout and lands the work. The assistant never
+  merges, pushes to a protected branch, or deletes anything. See
+  [Approval and task branches](/flow/approval-and-task-branches/).
+- **Recall first.** Search project knowledge and skills before guessing, and check existing findings
+  before bug work.
+- **Recording.** Each edit is recorded on the plan and the session timeline. See
+  [Undo and the session trace](/safety/undo-and-the-session-trace/).
+- **Learning.** Save what a future session could not recover. See
+  [Memory and knowledge search](/knowledge/memory-and-search/).
 
-## It does not matter where you start
+## Where you start does not matter
 
-An assistant you launch in a plain shell gets the same context server, the same tools and the same
-conventions as one running inside the app. See
-[Working outside the app](../working-outside-the-app/).
+An assistant launched in a plain shell gets the same context server, tools and rules as one inside
+the app. See [Working outside the app](/assistant/working-outside-the-app/).
 
-## What it will not do
+## What Jensen will not do
 
-- It will not choose a model for you when several assistants are available. It asks.
-- It will not let an assistant confirm its own inference about your architecture. That is your call.
-- It will not let an assistant write to your tracker, your merge requests or Slack unless you have
-  enabled that specific permission.
-- It will not run project commands or toolchains in a workspace you have not trusted.
+- Choose a model for you when several assistants are available. It asks.
+- Let an assistant confirm its own inference about your architecture. That is your call.
+- Let an assistant write to your tracker, merge requests or Slack without that permission.
+- Run project commands or toolchains in a workspace you have not trusted.
+- Let an assistant create its own worktree. Jensen provisions every checkout.
 
 ## Where to go next
 
-- [Choosing an assistant](../choosing-an-assistant/), if you have more than one installed.
-- [Assistant tool reference](../../reference/assistant-tools/), for what it can call.
-- [Trust and permissions](../../safety/trust-and-permissions/), for the rails.
+- [Choosing an assistant](/assistant/choosing-an-assistant/), if you have more than one installed.
+- [Assistant tool reference](/reference/assistant-tools/), for what it can call.
+- [Trust and permissions](/safety/trust-and-permissions/), for the rails.

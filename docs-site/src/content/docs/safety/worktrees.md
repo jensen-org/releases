@@ -1,72 +1,62 @@
 ---
-title: Worktrees for parallel work
-description: One isolated checkout per task, so two agents never collide on a shared index or bundle each other's files into a commit.
+title: Worktrees
+description: One isolated checkout per task, created and removed by Jensen, so no two writers share an index.
 ---
 
-If two agents, or an agent and you, work the same repository at once, they collide on the git index
-and bundle unrelated files into each other's commits. Jensen's answer is that nobody shares a
-working tree.
+Two agents, or an agent and you, working one repository at the same time collide on the git index and
+bundle unrelated files into each other's commits. Jensen's answer: nobody shares a working tree.
 
 ## The rule
 
-One worktree per task. That applies to a session you started, to an agent run, and to work fanned
-out across several agents.
+One worktree per task. Jensen creates it when you approve a plan, or when an agent writes to a
+protected branch without one. See [Approval and task branches](/flow/approval-and-task-branches/).
 
-Worktrees live at `.jensen/worktrees/<name>`, each on a branch also called `<name>`, based on the
-integration branch from **Settings, Workspace, Git**.
+Agents never create worktrees themselves. If an assistant or subagent asks its runtime for one, Jensen
+refuses and provisions the checkout instead.
 
-## Create one
+The task branch starts from your development branch. By default the worktree is at
+`.jensen/worktrees/<name>`.
 
-Open the right panel with `Cmd J`, pick **Git**, then **Worktrees**, then **Create**. It asks for a
-task name and optionally a base ref. Starting a session creates one for you, so most of the time you
-never open this panel at all.
+## Choose where they go
+
+Open **Settings, AI, AI assistant, Worktrees** and pick:
+
+- **Jensen folder (.jensen/worktrees)**, the default.
+- **Claude folder (.claude/worktrees)**.
+
+## What is in a fresh checkout
+
+Source, and nothing else. Dependency directories such as `node_modules`, `target` and virtual
+environments are not copied, so install and build in the worktree before trusting its checks. Jensen
+tells the agent this when it approves a plan.
+
+## The Worktrees pane
+
+Open **Worktrees** from **Open a pane**, in the **Git** group.
+
+- **New** asks for a **Task name (branch)** and a **Base ref**, then **Create**. Starting a session
+  does this for you, so you rarely need it.
+- **Push** publishes the branch for review.
+- **Delete** removes a worktree you are finished with. Check it holds no uncommitted work first.
 
 :::tip[From the terminal]
 ```bash frame="none"
 jensen worktree list .
 jensen worktree create . fix-login
-```
-:::
-
-## Work in it
-
-**Resume session** picks the task back up where you left it. A worktree kept beyond its session is
-marked **Long-lived (survives closing its session)**.
-
-Dependency directories, `node_modules`, build target directories and virtual environments, are
-symlinked to the primary checkout, so run the project's checks directly. Never reinstall or rebuild
-them in a worktree. If something you need is still missing, link it from the primary checkout
-instead of installing a second copy. Reinstalling is what turns a worktree from free into a
-five-minute cost nobody pays.
-
-## Hand it back
-
-A worktree is only useful if you can collect it. **Merge into primary** lands the work locally,
-**Push** publishes the branch for review.
-
-:::tip[From the terminal]
-```bash frame="none"
-git -C <repo-root> merge <name>                        # land it locally
-git -C .jensen/worktrees/<name> push -u origin <name>  # publish it for review
-```
-:::
-
-## Remove it
-
-**Delete**, once the branch is merged or pushed. Never remove one holding uncommitted work.
-
-:::tip[From the terminal]
-```bash frame="none"
 jensen worktree remove . fix-login
 ```
 :::
 
-## In an agent run
+Agents cannot run `jensen worktree remove`. Jensen removes their checkouts itself.
 
-Agent runs only ever execute in dedicated worktrees, and a mutating workflow ends by integrating any
-child worktrees, pushing, and cleaning up locally. A run whose preflight fails, for a missing
-credential or an invalid target, stops before a worktree is created, so there is nothing to clean
-up.
+## Landing and cleanup
 
-When a plan drives the task, the branch is recorded in the plan so the next agent picks up where the
-last one left off. See [Plans and objectives](../../automation/plans-and-objectives/).
+When an agent finishes, Jensen lands the branch and removes the checkout. See
+[Landing and cleanup](/flow/landing-and-cleanup/). A session that retires with unpushed commits or
+uncommitted changes keeps its worktree until you decide what to do.
+
+## Parallel work
+
+Give each writer its own approved plan, and each gets its own checkout. Sessions can edit the same
+files at once. Their changes meet when Jensen integrates them. A coordinating session can land its
+workers' branches into its own branch. See [Landing and cleanup](/flow/landing-and-cleanup/).

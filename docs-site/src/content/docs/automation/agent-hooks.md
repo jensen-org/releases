@@ -1,75 +1,81 @@
 ---
 title: Agent hooks
-description: Rules that run something when something happens in the project, the built-in catalogue, and how to write your own.
+description: Rules that run a check, an action or an assistant when something happens, and the built-in hooks behind the plan flow.
 ---
 
-An agent hook is a rule: when this happens in the project, do that. The plan-lifecycle hooks are on
-by default and keep your tracker in step with your plans. Everything else is opt-in.
+An agent hook runs when an event fires: a file saves, you commit, a plan is approved, a pipeline
+fails. Jensen ships hooks that drive the [one flow](/start/what-is-jensen/#the-one-flow), and you can
+add your own.
 
-Configured in **Settings, AI, Agent Hooks**.
+Open **Settings, AI, Agent Hooks**.
 
-## The built-in catalogue
+## The list
 
-### Plan lifecycle, enabled by default
+The header reads **Run a check or an assistant automatically when files change or you commit.** The
+master toggle **Built-in agent hooks** shows how many are active, such as **6 of 17 active**.
 
-| Hook | What it does |
+Hooks sit in four groups: **Plan lifecycle**, **Code quality**, **Delivery and integrations** and
+**Custom rules**. Each row shows a state: **Default**, **Customized**, **Custom**, **Paused** or
+**Permission blocked**. Use **Reset agent hook** to restore a built-in and **Delete agent hook** to
+remove a custom one.
+
+## Plan lifecycle, on by default
+
+These move your plan, issue and checkout together.
+
+| Hook | When | What it does |
+| --- | --- | --- |
+| **Plan first change** | The first change is recorded | Sets the plan to in progress. |
+| **Plan approved** | You approve | Prepares issue tracking and the worktree, opens the issue and clears the in progress label. |
+| **Plan in progress** | The plan moves to in progress | Opens the issue and adds the in progress label. |
+| **Plan blocked** | The plan is blocked | Keeps the issue open and labeled. |
+| **Plan decision recorded** | An agent records a departure | Comments the outcome on the issue. |
+| **Plan implemented** | The plan is done | Comments the outcome, clears the label and closes the issue. |
+
+Issue steps need their [permissions](/safety/trust-and-permissions/).
+
+## Code quality, off by default
+
+| Hook | When |
 | --- | --- |
-| Plan first change | Sets the plan in progress the first time a change lands against it. |
-| Plan approved | Opens and links the tracking issue, prepares a worktree, reopens the issue, clears the in-progress label. |
-| Plan in progress | Keeps the issue's state in step. |
-| Plan blocked | Marks the plan and its issue blocked. |
-| Plan decision recorded | Posts an outcome digest to the issue. |
-| Plan implemented | Posts the digest, clears the label, closes the issue. |
-| Add merge closing links | Links a merge request to the issue it closes. |
+| **Format on save** | A file saves |
+| **Lint on save** | A file saves |
+| **Scan secrets before commit** | You commit |
+| **Review proactive findings** | A file saves |
+| **Analyze change impact** | A file saves |
+| **Update tests** | A file saves, runs an assistant |
 
-### Code quality, opt-in
+## Delivery and integrations
 
-Format on save · Lint on save · Scan secrets before commit · Review proactive findings · Analyze
-change impact · Update tests.
+| Hook | When | Default |
+| --- | --- | --- |
+| **Add merge closing links** | A merge request is being created | On |
+| **Create draft merge request after push** | You push, runs an assistant | Off |
+| **Review merge requests** | A merge request updates | Off |
+| **Fix failed pipelines** | A pipeline fails | Off |
+| **Work newly assigned issues** | An issue is assigned to you | Off |
 
-### Delivery integrations, opt-in
+## Write your own
 
-Create draft merge request after push · Review merge requests · Fix failed pipelines · Work newly
-assigned issues.
+Choose **New agent hook**. A hook is a trigger plus an action.
 
-**All four start an assistant session.** That is why they are separate, and why they are behind their
-own permission.
+**Triggers** include session start and end, prompt submit, before and after a tool, a permission
+request, file save and delete, commit, push, pipeline failure and success, merge request updated,
+issue assigned, and each plan transition.
 
-## Letting a hook start an assistant
+**Actions** are **Format**, **Lint**, **Scan secrets**, **Findings**, **Impact analysis**, or an
+assistant that works on the event. Each action has a policy: **Allow**, **Ask first** or **Block**.
 
-A hook that opens a session and edits files is a different proposition from one that sets a label, so
-it has its own gate: **Let agent hooks start assistants**, with **Allow** and **Revoke**. Its own
-description is the warning: *assistant agent hooks can open a session and edit files in an isolated
-worktree.*
+Custom hooks are YAML files in your Jensen config folder, under `projects/<key>/hooks/<id>.yaml`.
+Files Jensen cannot use are listed under **Agent hook files that cannot be used**.
 
-Review is required before built-in agent hooks run.
+## Let hooks start assistants
 
-## Writing your own
+A hook that runs an assistant can open a session and edit files in an isolated worktree. That needs your
+say. Under **Agent hook access**, turn on **Let agent hooks start assistants**. It reads **Allowed** or
+**Ask first**, with **Allow** and **Revoke**.
 
-Custom hooks live at `.jensen/hooks/<id>.yaml`. **New agent hook** creates one, and any of them can
-be disabled or deleted.
+## Empty
 
-### Triggers
-
-| Trigger | Fires when |
-| --- | --- |
-| `file.save`, `file.create`, `file.delete` | A file changes. |
-| `git.commit`, `git.push` | You commit or push. |
-| `pipeline.failed`, `pipeline.success` | A pipeline finishes. |
-| `merge_request.creating`, `merge_request.updated` | A merge request is opened or changed. |
-| `issue.assigned` | An issue is assigned. |
-| The plan events | A plan changes status or records a decision. |
-
-### Narrowing it
-
-A hook that fires on everything is a hook you will turn off. Scope it by file glob, for example
-`**/*.rs`, and leave it blank to match every file. Scope it further by branch, target branch, labels,
-authors, and whether a merge request is a draft.
-
-Two more controls keep a noisy trigger sane: a debounce in milliseconds, and a maximum number of
-attempts.
-
-## What these are called
-
-The project conventions written into a repository sometimes call these automations. The app calls
-them **Agent Hooks**, and that is the name to look for in Settings.
+With no hooks the list reads **No agent hooks yet**. Format code, scan for secrets, or ask an
+assistant, when you save or commit.

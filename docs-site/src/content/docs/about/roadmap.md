@@ -1,67 +1,64 @@
 ---
 title: Roadmap
-description: Where Jensen is going, organised by its five product pillars. Direction, not a commitment.
+description: Where Jensen is going, organized by its five product pillars. Direction, not a commitment.
 ---
 
-Nothing on this page is a commitment. There are no dates, and anything here can change. It exists so
-you can see the shape of the product, which the feature pages cannot show because they describe only
-what ships today.
+Nothing here is a commitment. There are no dates, and anything can change. This page shows the shape
+of the product, which the feature pages cannot, because they describe only what ships today.
 
 ## Published status
 
 | Capability | What it does | Status |
 | --- | --- | --- |
-| Map a codebase | Builds a navigable graph of the real structure: services, calls between symbols, and the routes they expose. | Available |
-| Declare topology | Lets your team assert cross-service structure, which services exist, how they connect, and over what protocol, and merges it into the same map. | Available |
-| Open from where you stand | Views the map at any altitude, from the whole-system topology down to a single service's internals. | Available |
-| Share the map with your AI | Emits a portable, git-friendly, always-honest map any AI assistant can read. | Available |
-| Ask the map questions | Query the structure directly: what calls this, what connects to that, where these routes live. | Available |
-| Stay live | Keeps the map current as you edit, and pulls in work items and pipeline status from GitHub, GitLab and Slack. | Available |
+| Map a codebase | Builds a navigable graph of the real structure: files, imports, services, symbols and routes. | Available |
+| Confirm architecture | An assistant proposes structure, you confirm it, and it joins the map. | Available |
+| Share the map with your AI | Writes a portable, git friendly map any assistant can read. | Available |
+| Ask the map questions | Asks what calls this, what connects to that, and what a change reaches. | Available |
+| One flow for every change | Plan, approve, task branch, land and cleanup, by your branch policy. | Available |
+| Stay live | Keeps the map current as you edit, and pulls in issues and pipelines from GitHub, GitLab and Slack. | Available |
 
 ## The five pillars
 
-Jensen organises its direction into five pillars. Each one already has something shipping in it.
+Each pillar already has something shipping.
 
 ### Understand
 
-Helping both you and your assistant understand the codebase. The map, the architecture explorer,
-dependency mapping, and recorded architectural intent, so the map carries not only what exists but
-why.
+Helping you and your assistant understand the codebase: the map, the graph, impact analysis and
+confirmed architecture, so the map carries what exists and why.
 
-Ahead: knowledge shared across repositories, which matters for monorepos, microservice estates and
-platform teams.
+Ahead: knowledge shared across repositories, for monorepos, microservice estates and platform teams.
 
 ### Learn
 
-Letting an assistant improve its understanding of the project over time rather than rediscovering it.
-Project memory, skills and the five-document contract are the shipping parts.
+Letting an assistant improve its understanding over time. Project memory, skills, recall before the
+first edit, a debrief when work ends, and five context documents ship today.
 
-Ahead: a clearer picture of where understanding is thin, so you can see which parts of the project an
-assistant knows well and which it is guessing at.
+Ahead: a clearer picture of where understanding is thin, so you see what an assistant knows well and
+what it guesses.
 
 ### Execute
 
-Autonomous work that stays predictable. Issue workspaces, isolated worktrees, deterministic
-workflows, checkpointed recovery, and a guard that refuses a bad commit where it is typed.
+Autonomous work that stays predictable. Plans, task branches and worktrees, landing by branch policy,
+deterministic workflows and a guard that refuses a bad commit where it is typed.
 
-Ahead: deeper coordination between several agents working one feature.
+Ahead: deeper coordination between several agents on one feature.
 
 ### Observe
 
-Making an assistant's work transparent. The session trace, the reversible timeline, and impact
-analysis before a change is approved.
+Making an assistant's work transparent: the session trace, recorded changes and impact analysis before
+a plan is approved.
 
 Ahead: replaying a session end to end, and clearer confidence signals on what an assistant produced.
 
 ### Govern
 
-Stopping an autonomous agent damaging the project. Workspace trust, per-permission integration
-writes, approval gates, tool allowlists enforced by Jensen rather than requested of the model, and an
-independent review step in every mutating workflow.
+Stopping an autonomous agent damaging the project. Trusted folders, per permission integration writes,
+approval gates, branches agents can never move or delete, and an independent review step in every
+workflow that changes code.
 
-Ahead: architectural constraints defined independently of prompts and checked on every change.
+Ahead: architectural constraints defined apart from prompts and checked on every change.
 
-## Deliberately out of scope
+## Out of scope
 
-Jensen integrates with the tools you already use. It is not becoming a hosted IDE, a CI system, a
-package registry or a project management tool.
+Jensen works with the tools you already use. It is not becoming a hosted IDE, a CI system, a package
+registry or a project management tool.

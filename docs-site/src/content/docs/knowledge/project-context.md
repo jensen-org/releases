@@ -1,56 +1,58 @@
 ---
 title: Project context
-description: The five-document contract that tells every assistant what this project is, how it is built and how work gets done here.
+description: Five documents that tell every assistant what this project is, how it is built and how work gets done here, and how onboarding writes them.
 ---
 
-Project context answers a question every assistant asks and most of them guess at. What kind of
-project is this, and how do people work in it?
+Every assistant needs to know what kind of project it is in and how people work there. Most guess.
+Project context removes the guessing.
 
-It is a five-document contract, reviewed by you, stored locally in `.jensen/steering`, and delivered
-to every assistant that connects.
+It is five documents. You review them, Jensen stores them locally in `.jensen/steering`, and every
+assistant that connects reads them.
 
 ## The five documents
 
 | Document | What it settles |
 | --- | --- |
-| **Constitution** | The rules that are not up for negotiation. |
-| **Product** | What this project is, who it is for, and the outcomes that matter. |
+| **Constitution** | Rules that are not up for negotiation. |
+| **Product** | What the project is, who it is for, and the outcomes that matter. |
 | **Architecture** | How the code is laid out and who owns what. |
 | **Engineering** | The stack, how to build, run and test, and the conventions to follow. |
-| **Workflow** | How work moves, from an idea to something merged. |
+| **Workflow** | How work moves from an idea to something merged. |
 
-Kept separately from project memory and from skills, because these are decisions and not
-observations. See [Skills](../skills/#skills-memory-and-context).
+They live apart from project memory and skills because they record decisions, not observations. See
+[Skills](/knowledge/skills/).
 
-## How it gets written
+## Onboarding writes them
 
-Onboarding seeds an interview. Your assistant asks you each question in its own words, you review the
-answers, and the reviewed result is saved. From then on it is versioned: the contract carries a
-revision, and a refresh is applied against the revision it was drafted from.
+The first time an assistant works in a project that is not onboarded, Jensen tells it so. The assistant
+asks you questions in its own words, one at a time and drawn from your project, then you review its
+answers and it saves them.
 
-**Settings, AI, Project context** is where you work on it.
+A project counts as onboarded once its documents are saved, or once you finish the setup wizard.
+Until then, an assistant reads the code and tells you `jensen setup` is available. It never
+reports that the project has nothing in it.
 
-- **Generate with AI** or **Refresh with AI** to draft from what Jensen has indexed. *The draft
-  remains local and editable. Nothing is saved until you review it.*
+From then on the documents are versioned. A refresh applies against the revision it was drafted from.
+
+## Edit them
+
+Open **Settings, AI, Project context**.
+
+- **Generate with AI** or **Refresh with AI** drafts from what Jensen has indexed. The draft stays
+  local and editable. Nothing saves until you review it.
 - **Edit** any document by hand.
-- **Refresh preview** to see evidence-backed suggestions without writing anything.
-- **Apply selected** to take only the ones you agree with.
+- **Refresh preview** shows evidence backed suggestions without writing anything.
+- **Apply selected** takes only the ones you agree with.
 
-The preview step matters more than it looks. A contract that drifts silently is worse than no
-contract, and a contract regenerated wholesale loses the decisions you made deliberately.
+The preview matters. A contract that drifts unnoticed is worse than none, and one regenerated
+wholesale loses decisions you made on purpose.
 
 ## Why a README is not enough
 
-A README is written for a human arriving once. This is read by an assistant at the start of every
-session, and it is what stops it inventing a convention that has never been true here.
+A README is written for a person arriving once. An assistant reads project context at the start of
+every session, and it stops the assistant inventing a convention that was never true here.
 
-Because Jensen holds it, an assistant that ignores it gets corrected by the harness, and not by you
-noticing in review.
+Jensen holds the documents, so an assistant that ignores them is corrected by the harness, not by you
+catching it in review.
 
-## Onboarding
-
-The full setup flow, including this, is in
-[The guided wizard](../../start/turn-jensen-on/#the-guided-wizard).
-A project that was never onboarded returns no context rather than empty context, and an assistant is
-told to read the code directly and tell you `jensen setup` is available, instead of reporting that
-the project has nothing in it.
+See [Turn Jensen on](/start/turn-jensen-on/) for the whole setup flow.
