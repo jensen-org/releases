@@ -58,7 +58,7 @@ export default defineConfig({
       sidebar,
       description:
         'Documentation for Jensen, an AI-first IDE for large, complex codebases. Understand the codebase before you change it.',
-      favicon: '/favicon.svg',
+      favicon: '/favicon.png',
       logo: { src: './src/assets/jensen.png' },
       customCss: ['./src/styles/jensen.css'],
       components: { Hero: './src/components/Hero.astro' },
