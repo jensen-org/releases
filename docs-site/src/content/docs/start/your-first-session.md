@@ -13,10 +13,16 @@ It takes about fifteen minutes on a repository you know.
 You need a project that is open, indexed and trusted, with an assistant chosen. If anything is
 missing, see [Turn Jensen on](/start/turn-jensen-on/).
 
+Landing runs your checks when your [branch policy](/flow/branch-policy/) asks for them, and the default
+policy for a development branch does. Jensen reads them from a `check` target in your `Makefile`. With
+none, it refuses to land and tells you to add one. Add the target now, or relax the rule under
+**Settings, Workspace, Git** before you reach that step.
+
 ## Read the map
 
-Press `Cmd 1` for Sessions, or `Alt 1` on Linux and Windows. With nothing running, Jensen lays out the
-**Project graph** on the right and the **Project overview** below it.
+Press `Cmd 1` for Sessions, or `Alt 1` on Linux and Windows. With nothing running the page says
+**Nothing is running**. Choose **Open a pane**, then **Project graph** in the **Project** group. Add
+**Project overview** the same way if you want it. Once a session runs, Jensen opens both beside it.
 
 Click a folder to drill in, then click a file to open it. Every file and import you see was read from
 your source. Nothing was guessed. See [Honest by design](/start/honest-by-design/).

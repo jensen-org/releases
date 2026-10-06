@@ -24,13 +24,16 @@ later with `jensen setup --no-scan`.
 
 Jensen does neither on its own.
 
-- **Trust the project.** A new repository stays restricted until you approve it. You can browse and
-  edit it, but it cannot run project commands, local toolchains, debug adapters or plan acceptance
-  checks. See [Trust and permissions](/safety/trust-and-permissions/).
-- **Choose an assistant.** If only one is available, Jensen uses it. Otherwise it asks. See
+- **Trust the project.** The first time you open a project, Jensen asks **Trust {name}?** Until you
+  say yes, it stays restricted. You can browse and edit it, but it cannot run project commands, local
+  toolchains, debug adapters or plan acceptance checks. See
+  [Trust and permissions](/safety/trust-and-permissions/).
+- **Choose an assistant.** If only one is available, Jensen uses it. Otherwise it asks, in the **AI
+  connection** step of the setup wizard on the next page. See
   [Choosing an assistant](/assistant/choosing-an-assistant/).
 
-Both are settled in the setup wizard on the next page.
+Jensen also opens only projects inside your **Scope**, a list of folders you allow it to read. If a
+project will not open, check **Settings, System, Security, Scope**.
 
 ## Sandboxes
 

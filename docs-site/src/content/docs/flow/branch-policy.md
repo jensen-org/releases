@@ -13,7 +13,7 @@ Each environment names a branch and plays one role.
 | Environment | Role | Default branch |
 | --- | --- | --- |
 | **Production** | What ships. | `main` |
-| **Staging** | Where it is tried first. | Not set |
+| **Staging** | Where it is tried first. | None until you add one |
 | **Development** | Where finished work lands. | `develop`, if it exists |
 
 With no `develop` branch, development falls back to production, so a project with only `main` still

@@ -68,10 +68,11 @@ and `GEMINI.md` are removed on setup.
 You do not describe your machine. Setup looks, and each decision stays scoped to the project it ran
 in.
 
-- **It finds your assistants.** Claude Code, Codex, Gemini CLI, Antigravity, Hermes and OpenCode are
-  supported. Setup registers the context server with each one installed. It never installs one.
+- **It finds your assistants.** Claude Code, Codex and Gemini CLI get the context server and session
+  hooks. Antigravity gets a stop hook. Hermes and OpenCode run inside the app and need no wiring.
+  Setup never installs an assistant.
 - **It wires each assistant its own way.** Session hooks and the debrief command go into that
-  assistant's own configuration. Hermes and OpenCode run inside the app only.
+  assistant's own configuration.
 - **It reads language tooling from the repository.** See [Code](/app/code/).
 - **It reconciles, not overwrites.** Each step probes what exists first. Setup never replaces
   configuration you own or touches hooks and binaries it did not install.

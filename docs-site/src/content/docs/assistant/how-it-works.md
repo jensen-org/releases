@@ -50,8 +50,9 @@ On connect, three things arrive before the assistant asks for anything.
 2. **The rules for this project.** A short brief: which branches are protected, how to plan, which
    workflows exist, whether the project is onboarded, and what the project already knows. Anything
    longer sits behind a `guide` topic the assistant opens when it needs it.
-3. **A short tool list.** A handful of core tools, plus `find_tools` and `use_tool` to reach the rest.
-   See the [Assistant tool reference](/reference/assistant-tools/).
+3. **The tools.** An in-app chat gets a short core list. A terminal assistant gets every tool. Either
+   way, `find_tools` and `use_tool` reach the rest. See the
+   [Assistant tool reference](/reference/assistant-tools/).
 
 Setup also wires each assistant's session hooks. They let Jensen nudge recall before the first edit,
 keep the plan format, capture file versions as work proceeds, answer a plan while its session runs,

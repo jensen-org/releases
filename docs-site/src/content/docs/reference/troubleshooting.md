@@ -51,9 +51,10 @@ Refusals say what to do. The ones you will meet:
 
 - "Jensen cut a task branch from {branch} for this session." The agent wrote on a protected branch.
   Jensen made it a task branch and checkout, and the agent repeats the change there.
-- "Agents never delete, move or disable a branch, a worktree or the git guard." Jensen refused a
-  command. Do it yourself if you mean it.
-- "Jensen provisions every checkout itself." A runtime tried to create its own worktree.
+- "Jensen refused this command: agents never delete, move or disable" a branch, a worktree or the git
+  guard. Do it yourself if you mean it.
+- "it provisions every checkout itself, so a runtime never creates its own worktree." A runtime tried
+  to create one.
 - "production is only reached through a merge request." A plan targeted production.
 - "an agent session may not push here directly." The agent tried to push an environment branch.
 

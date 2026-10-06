@@ -11,8 +11,8 @@ Open **Settings, AI, Agent Hooks**.
 
 ## The list
 
-The header reads **Run a check or an assistant automatically when files change or you commit.** The
-master toggle **Built-in agent hooks** shows how many are active, such as **6 of 17 active**.
+The header reads **Run a check or an assistant automatically when files change or you commit.** The master toggle
+**Built-in agent hooks** shows how many are active, as **N of M active**.
 
 Hooks sit in four groups: **Plan lifecycle**, **Code quality**, **Delivery and integrations** and
 **Custom rules**. Each row shows a state: **Default**, **Customized**, **Custom**, **Paused** or

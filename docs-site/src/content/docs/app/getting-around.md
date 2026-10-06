@@ -51,8 +51,8 @@ Panes you can open from the menu, by group:
 Jensen also opens panes for you in context: a session, a specialist, a plan, a **Timeline**, an issue
 such as `#123`, a **Pipeline** and a canvas.
 
-On a new Sessions page, Jensen lays out your session on the left, the graph on the right and the
-overview below it. See [Project graph and overview](/app/project-graph/).
+When you open a session on a fresh Sessions page, Jensen lays it out on the left, with the graph on
+the right and the overview below it. See [Project graph and overview](/app/project-graph/).
 
 ## The keyboard map
 
