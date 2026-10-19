@@ -3,16 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <style>
-@font-face { font-family: 'Poppins'; font-weight: 500; src: url('../docs-site/src/fonts/poppins-500.woff2') format('woff2'); }
+@font-face { font-family: 'Geist'; font-weight: 100 900; src: url('../public/fonts/geist.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-weight: 100 900; src: url('../public/fonts/geist-mono.woff2') format('woff2'); }
-html, body { margin: 0; width: 1200px; height: 630px; background: #fbfbf9; }
-body { position: relative; background-image: url('og-art.png'); background-size: 1200px 630px; }
+html, body { margin: 0; width: 1200px; height: 630px; background: #fbfbf9; overflow: hidden; }
+body { position: relative; color: #111110; }
+.tile { position: absolute; left: 84px; top: 102px; width: 76px; height: 76px; border-radius: 20px; background: #111110; display: grid; place-items: center; }
+.tile img { width: 68%; height: auto; display: block; filter: invert(1); }
+.brand { position: absolute; left: 186px; top: 130px; font: 500 15px/22px 'Geist Mono', monospace; letter-spacing: 0.42em; }
+.headline { position: absolute; left: 84px; top: 218px; margin: 0; font: 500 76px/78px 'Geist', sans-serif; letter-spacing: -0.045em; }
+.rule { position: absolute; left: 84px; top: 472px; width: 96px; height: 1px; background: rgba(17, 17, 16, 0.08); }
 .line { position: absolute; left: 84px; top: 502px; display: flex; align-items: baseline; gap: 18px; white-space: nowrap; }
-.lead { font: 500 20px/1 'Poppins', sans-serif; letter-spacing: 0.14em; color: #56564f; }
+.lead { font: 500 20px/1 'Geist', sans-serif; letter-spacing: 0.14em; color: #56564f; }
 .tail { font: 400 16px/1 'Geist Mono', monospace; letter-spacing: 0.1em; color: #a8a8a0; }
+canvas { position: absolute; left: 710px; top: 75px; width: 480px; height: 480px; }
 </style>
 </head>
 <body>
+<span class="tile"><img src="../public/jensen.png" alt=""></span>
+<div class="brand">JENSEN</div>
+<h1 class="headline">An AI-first IDE<br>for large, complex<br>codebases</h1>
+<div class="rule"></div>
 <div class="line"><span class="lead">FREE, BRING YOUR OWN MODEL</span><span class="tail">MACOS AND LINUX</span></div>
+<canvas id="graph" width="960" height="960"></canvas>
+<script type="module">
+import { STILL_SECONDS, createGraph } from '/src/lib/graph.ts'
+import { drawGraph } from '/src/lib/draw.ts'
+
+const size = 480
+const canvas = document.getElementById('graph')
+const ctx = canvas.getContext('2d')
+ctx.scale(2, 2)
+drawGraph(ctx, createGraph(size), STILL_SECONDS)
+await document.fonts.ready
+window.ogReady = true
+</script>
 </body>
 </html>
